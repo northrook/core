@@ -1,0 +1,28 @@
+{
+  "name": "northrook/core",
+  "description": "Core support functions.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Northrook\\Core\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Martin",
+      "email": "mn@northrook.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.2",
+    "ext-mbstring": "*",
+    "symfony/filesystem": "^7.0",
+    "northrook/logger": "dev-main"
+  },
+  "require-dev": {
+    "symfony/var-dumper": "^7.0"
+  }
+}
