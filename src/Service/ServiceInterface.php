@@ -1,6 +1,6 @@
 <?php
 
-namespace Nortkrook\Core\Service;
+namespace Northrook\Core\Service;
 
 interface ServiceInterface
 {

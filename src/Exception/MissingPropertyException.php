@@ -2,11 +2,10 @@
 
 namespace Northrook\Core\Exception;
 
-use Northrook\Logger\Debug;
+use Northrook\Core\Debug\Backtrace;
 
 class MissingPropertyException extends \Exception
 {
-
     public readonly string $caller;
 
     public function __construct(
@@ -16,7 +15,7 @@ class MissingPropertyException extends \Exception
         ?\Throwable            $previous = null,
     ) {
 
-        $this->caller =Debug::backtrace()->getCaller();
+        $this->caller = Backtrace::get()->caller;
 
         $message ??= "Property '{$this->propertyName}' does not exist in '{$this->caller}'.";
 

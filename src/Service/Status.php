@@ -1,19 +1,16 @@
 <?php
 
-namespace Nortkrook\Core\Service;
+namespace Northrook\Core\Service;
 
 use JetBrains\PhpStorm\ExpectedValues;
-use Northrook\Logger\Debug;
-use Northrook\Logger\Log;
-use Northrook\Logger\Log\Level;
+use Northrook\Core\Debug\Backtrace;
 
 
 /**
- * @property string      $set
- * @property-read bool   $success
- * @property-read string $status
+ * @property-read string  $status
+ * @property-read bool    $success
+ * @property-read  string $message
  *
- * @property string      $message
  */
 class Status
 {
@@ -25,21 +22,29 @@ class Status
     public const NOTICE  = 'notice';
     public const INFO    = 'info';
 
-    private array  $actions = [];
-    public ?string $message = null;
+    private array $actions  = [];
+    private array $messages = [
+        'uninitialized' => null,
+        'success'       => null,
+        'error'         => null,
+        'warning'       => null,
+        'notice'        => null,
+        'info'          => null,
+    ];
 
     public readonly string $id;
 
     public function __construct(
+        array          $messages = [],
         ?string        $id = null,
         private string $status = 'uninitialized',
     ) {
-        $this->id = $id ?? Debug::backtrace()->getCaller();
+        $this->id = $id ?? Backtrace::get()->caller;
+        $this->setMessages( $messages );
     }
 
-
     /**
-     * * Status is considered as {@see Status::$success} if set as `success|notice|info`.
+     * {@see Status::$status} is considered as {@see Status::$success} if set as `success|notice|info`.
      *
      * @param string  $name
      *
@@ -49,50 +54,75 @@ class Status
         return match ( strtolower( $name ) ) {
             'success' => in_array( $name, [ Status::SUCCESS, Status::NOTICE, Status::INFO ], true ),
             'status'  => $this->status,
+            'message' => $this->getMessage( $this->status ),
             default   => false
         };
     }
 
-
     /**
-     * Update the {@see Status::$status} with {@see $set}.
+     * {@see Status::__set} is not supported.
      *
      * @param string  $name
-     * @param string  $value
+     * @param mixed   $value
      *
      * @return void
      */
-    public function __set(
-        string $name,
-        #[ExpectedValues( "success", "error", "warning", "notice", "info" )]
-        string $value,
-    ) : void {
-        $name = strtolower( $name );
-        if ( 'set' === $name ) {
-            if ( !in_array( $value, Status::STATUS, true ) ) {
-                Log::Warning(
-                    'Unexpected status {status} set in {id}.',
-                    [ 'id' => $this->id, 'status' => $value ],
-                );
-            }
-            $this->status = $value;
-        }
-        else {
-            Log::Error(
-                'Attempting to set {value} as unknown property {name}, in {id}.',
-                [ 'name' => $name, 'value' => $value, 'id' => $this->id ],
-            );
-        }
+    public function __set( string $name, mixed $value ) : void {
+        trigger_error( Status::class . '::__set() is not supported.', E_USER_NOTICE );
     }
 
-
+    /**
+     * Check if a given property is set.
+     *
+     * @param string  $name
+     *
+     * @return bool
+     */
     public function __isset( string $name ) : bool {
         return isset( $this->$name );
     }
 
-    public function setAction(
+    private function setMessages( array $messages ) : void {
+        $caller         = Backtrace::get()->getClass();
+        $this->messages = array_merge(
+            [
+                'uninitialized' => "Status for $caller is uninitialized",
+                'success'       => "$caller successful",
+                'error'         => "$caller halted due to an error",
+                'warning'       => "$caller completed with a warning",
+                'notice'        => null,
+                'info'          => null,
+            ], $messages,
+        );
+
+    }
+
+    private function getMessage(
+        ?string $for = null,
+    ) : ?string {
+        return $this->messages[ $for ?? $this->status ] ?? null;
+    }
+
+    /**
+     * Update the {@see Status::$status} with {@see $set}.
+     *
+     * @param string  $status
+     *
+     * @return Status
+     */
+    public function set(
+        #[ExpectedValues( self::STATUS )]
+        string $status,
+    ) : Status {
+        $this->status = $status;
+
+        return $this;
+    }
+
+
+    public function addAction(
         string $name,
-        #[ExpectedValues( "success", "error", "warning", "notice", "info" )]
+        #[ExpectedValues( self::STATUS )]
         string $status,
     ) : self {
         $this->actions[ $name ] = $status;
@@ -107,7 +137,7 @@ class Status
         return $this->actions[ $action ] ?? null;
     }
 
-    public function getReport( bool $asArray ) : string | array{
+    public function getReport( bool $asArray = false ) : string | array {
         $report = [];
 
         foreach ( $this->actions as $action => $status ) {

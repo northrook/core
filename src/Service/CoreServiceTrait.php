@@ -1,11 +1,11 @@
 <?php
 
-namespace Nortkrook\Core\Service;
+namespace Northrook\Core\Service;
 
 use Northrook\Core\Exception as Core;
 
 /**
- * @property Status $status
+ * @property ?Status $status
  */
 trait CoreServiceTrait
 {
@@ -17,16 +17,12 @@ trait CoreServiceTrait
     final public function getStatus() : Status {
 
         if ( !property_exists( $this, 'status' ) ) {
-            throw new Core\MissingPropertyException( Status::class );
+            throw new Core\MissingPropertyException( 'status' );
         }
 
-        if ( !isset( $this->status )) {
-            $this->status = new Status();
-        }
-
-        if ( !$this->status instanceof Status ) {
+        if ( !( $this->status ?? null ) instanceof Status ) {
             throw new Core\InvalidPropertyException(
-                $this->status::class,
+                $this->status ?? null,
                 Status::class,
             );
         }
