@@ -1,17 +1,16 @@
 <?php
 
-namespace Exceptions;
+namespace Northrook\Core\Exception;
 
 use Northrook\Logger\Debug;
 
-class InvalidPropertyException extends \Exception
+class MissingPropertyException extends \Exception
 {
 
     public readonly string $caller;
 
     public function __construct(
-        public readonly string $invalidProperty,
-        public readonly string $requiredProperty,
+        public readonly string $propertyName,
         ?string                $message = null,
         int                    $code = 0,
         ?\Throwable            $previous = null,
@@ -19,7 +18,7 @@ class InvalidPropertyException extends \Exception
 
         $this->caller =Debug::backtrace()->getCaller();
 
-        $message ??=  "Invalid property '{$this->invalidProperty}' in '{$this->caller}', should be '{$this->requiredProperty}'.";
+        $message ??= "Property '{$this->propertyName}' does not exist in '{$this->caller}'.";
 
         parent::__construct( $message, $code, $previous );
     }

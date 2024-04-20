@@ -1,5 +1,7 @@
 <?php
 
+namespace Nortkrook\Core\Service;
+
 use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Debug;
 use Northrook\Logger\Log;
