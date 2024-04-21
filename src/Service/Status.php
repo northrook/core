@@ -50,11 +50,12 @@ class Status
      *
      * @return bool|string
      */
-    public function __get( string $name ) : bool | string {
+    public function __get( string $name ) : bool | string | array {
         return match ( strtolower( $name ) ) {
             'success' => in_array( $name, [ Status::SUCCESS, Status::NOTICE, Status::INFO ], true ),
             'status'  => $this->status,
             'message' => $this->getMessage( $this->status ),
+            'actions' => $this->actions,
             default   => false
         };
     }
@@ -120,10 +121,10 @@ class Status
     }
 
 
-    public function addAction(
+    public function action(
         string $name,
         #[ExpectedValues( self::STATUS )]
-        string $status,
+        string $status = 'started',
     ) : self {
         $this->actions[ $name ] = $status;
         return $this;
@@ -141,11 +142,15 @@ class Status
         $report = [];
 
         foreach ( $this->actions as $action => $status ) {
-            $report[] = "<span class=\"action\">$action</span><span class=\"status {$status}\">$status</span>";
+            if ( str_contains( $action, '::' ) ) {
+                $action = trim( strrchr( $action, "\\" ), " \n\r\t\v\0\\" );
+            }
+            $class    = in_array( $status, Status::STATUS, true ) ? $status : 'notice';
+            $report[] = "<span class=\"action\">$action</span><span class=\"status {$class}\">$status</span>";
 
         }
 
-        return $asArray ? implode( '', $report ) : $report;
+        return $asArray ? $report : implode( '', $report );
     }
 
 }

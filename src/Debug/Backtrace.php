@@ -18,10 +18,6 @@ final class Backtrace
     private array          $backtrace;
     public readonly string $caller;
 
-    public function __invoke() : array {
-        return $this->backtrace;
-    }
-
     private function __construct(
         int  $limit = 0,
         ?int $depth = null,
@@ -33,14 +29,29 @@ final class Backtrace
         );
 
         $this->caller = $this->getCaller();
-
     }
 
+    public function __invoke() : array {
+        return $this->backtrace;
+    }
 
-    public function getCaller( ?int $key = null ) : string {
+    public function getCaller( int $key = 2 ) : string {
 
-        $backtrace = $key ? $this->backtrace[ $key ] : end( $this->backtrace );
-        return $backtrace[ 'class' ] . $backtrace[ 'type' ] . $backtrace[ 'function' ];
+        /** @var $backtrace array|string */
+        $backtrace = $this->backtrace[ $key ] ?? 'Unknown';
+
+        if ( is_array( $backtrace ) ) {
+
+            $caller = [
+                $backtrace[ 'class' ] ?? null,
+                $backtrace[ 'type' ] ?? null,
+                $backtrace[ 'function' ] ?? null,
+            ];
+
+            return implode( '', array_filter( $caller ) );
+        }
+
+        return $backtrace;
     }
 
     public function getLine( ?int $key = null ) : int {
