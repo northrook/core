@@ -2,7 +2,7 @@
 
 namespace Northrook\Core\Service;
 
-interface ServiceInterface
+interface ServiceStatusInterface
 {
     public function getStatus() : Status;
 }
