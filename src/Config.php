@@ -13,7 +13,7 @@ class Config
 {
     private static self       $instance;
     protected readonly string $cacheDir;
-    protected array $pools = [];
+    protected array           $pools = [];
     public readonly string    $projectDir;
     public readonly string    $publicDir;
 
@@ -22,8 +22,8 @@ class Config
         ?string $publicDir = null,
         ?string $cacheDir = null,
     ) {
-        $this->projectDir = Config::normalizePath( $projectDir ?? $this->autoRootDir() );
-        $this->publicDir  = Config::normalizePath( $publicDir ?? $this->autoRootDir( 'public' ) );
+        $this->projectDir = $this->dir( $projectDir ?? $this->autoRootDir() );
+        $this->publicDir  = $this->dir( $publicDir ?? $this->autoRootDir( 'public' ) );
         $this->cacheDir   = $this->dir( $cacheDir ?? $this->autoRootDir( 'var/cache/core' ), '/config' );
     }
 

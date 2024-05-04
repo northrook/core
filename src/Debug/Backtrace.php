@@ -54,18 +54,18 @@ final class Backtrace
         return $backtrace;
     }
 
-    public function getLine( ?int $key = null ) : int {
-        $backtrace = $key ? $this->backtrace[ $key ] : end( $this->backtrace );
+    public function getLine( int $key = 2 ) : int {
+        $backtrace = $this->backtrace[ $key ];
         return $backtrace[ 'line' ];
     }
 
-    public function getFile( ?int $key = null ) : string {
-        $backtrace = $key ? $this->backtrace[ $key ] : end( $this->backtrace );
+    public function getFile( int $key = 2 ) : string {
+        $backtrace = $this->backtrace[ $key ];
         return $backtrace[ 'file' ];
     }
 
-    public function getClass( ?int $key = null ) : string {
-        $backtrace = $key ? $this->backtrace[ $key ] : end( $this->backtrace );
+    public function getClass( int $key = 2 ) : string {
+        $backtrace = $this->backtrace[ $key ];
         return $backtrace[ 'class' ];
     }
 
