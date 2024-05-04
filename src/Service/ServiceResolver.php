@@ -3,6 +3,7 @@
 namespace Northrook\Core\Service;
 
 use Closure;
+use Northrook\Core\Get\Reflection;
 use Northrook\Logger\Log;
 
 /**
@@ -27,8 +28,12 @@ use Northrook\Logger\Log;
  */
 abstract class ServiceResolver implements ServiceResolverInterface
 {
-    /** @var array<string, object|Closure> */
-    private array $serviceMap = [];
+
+    /** @var array<class-string, object> */
+    private static array $services = [];
+
+    /** @var array<string, class-string> */
+    private static array $serviceMap = [];
 
     /**
      * @param array<string, object|Closure>  $services
@@ -39,21 +44,29 @@ abstract class ServiceResolver implements ServiceResolverInterface
 
         foreach ( $services as $property => $service ) {
 
-            if ( !is_string( $property ) || !is_object( $service ) ) {
-                Log::Error(
-                    'Eager service {service} does not have a matching {propertyName} in {class}',
-                    [
-                        'service'      => $service,
-                        'propertyName' => $property,
-                        'class'        => $this::class,
-                    ],
-                );
-                $this->serviceMap[ $property ] = null;
+            if ( false === $this->propertyNameIsString( $property ) ) {
+                continue;
+            }
+
+            if ( $service === null ) {
+                ServiceResolver::$serviceMap[ $property ] = null;
+                continue;
+            }
+
+            if ( !is_object( $service ) ) {
                 continue;
             }
 
             if ( $service instanceof Closure ) {
-                $this->serviceMap[ $property ] = $service;
+
+                $serviceId = $this->getServiceId( $service );
+
+                ServiceResolver::$serviceMap[ $property ] = $serviceId;
+
+                if ( $serviceId ) {
+                    ServiceResolver::$services[ $serviceId ] = $service;
+                }
+
                 continue;
             }
 
@@ -69,7 +82,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
                         'class'        => get_class( $service ),
                     ],
                 );
-                $this->serviceMap[ $property ] = null;
+                ServiceResolver::$serviceMap[ $property ] = null;
             }
         }
     }
@@ -81,22 +94,23 @@ abstract class ServiceResolver implements ServiceResolverInterface
      */
     final public function getMappedService( string $service ) : ?object {
 
-        $get = $this->serviceMap[ $service ] ?? null;
+        $serviceId = ServiceResolver::$serviceMap[ $service ] ?? null;
 
-        if ( !$get ) {
+        if ( !$serviceId ) {
             Log::Error(
-                'Attempted to access unmapped service {service}.',
-                [ 'service' => $service, 'serviceMap' => $this->serviceMap ],
+                'Attempted to access unmapped service {serviceId}.',
+                [ 'serviceId' => $serviceId, 'services' => ServiceResolver::$serviceMap ],
             );
             return null;
         }
 
-        if ( $get instanceof Closure ) {
-            $this->serviceMap[ $service ] = ( $get )();
+        $mappedService = ServiceResolver::$services[ $serviceId ] ?? null;
+
+        if ( $mappedService instanceof Closure ) {
+            ServiceResolver::$services[ $serviceId ] = ( $mappedService )();
         }
 
-        /** @var ?object */
-        return $this->serviceMap[ $service ] ?? null;
+        return ServiceResolver::$services[ $serviceId ] ?? null;
     }
 
     /**
@@ -107,7 +121,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
      * @return bool
      */
     final public function has( string $service ) : bool {
-        return array_key_exists( $service, $this->serviceMap );
+        return array_key_exists( $service, ServiceResolver::$serviceMap );
     }
 
     /**
@@ -121,10 +135,43 @@ abstract class ServiceResolver implements ServiceResolverInterface
 
         if ( $instantiated ) {
             return count(
-                array_filter( $this->serviceMap, static fn ( $service ) => $service instanceof Closure ),
+                array_filter( ServiceResolver::$services, static fn ( $service ) => $service instanceof Closure ),
             );
         }
 
-        return count( $this->serviceMap );
+        return count( ServiceResolver::$serviceMap );
     }
+
+    public static function getServiceMap() : array {
+        return [
+            'registered'   => count( ServiceResolver::$serviceMap ),
+            'instantiated' => count(
+                array_filter( ServiceResolver::$services, static fn ( $service ) => $service instanceof Closure ),
+            ),
+            'map'          => ServiceResolver::$serviceMap,
+            'services'     => ServiceResolver::$services,
+        ];
+    }
+
+    private function getServiceId( Closure $service ) : ?string {
+
+        $get = Reflection::getFunction( $service );
+
+        return ( $get?->getAttributes()[ 0 ] ?? null )?->getArguments()[ 'name' ] ?? null;
+    }
+
+    private function propertyNameIsString( mixed $property ) : bool {
+
+        if ( is_string( $property ) ) {
+            return true;
+        }
+
+        Log::Error(
+            'Eager service {propertyName} does not have a matching propertyName in {class}',
+            [ 'propertyName' => $property, 'class' => $this::class ],
+        );
+
+        return false;
+    }
+
 }
