@@ -110,6 +110,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
             ServiceResolver::$services[ $serviceId ] = ( $mappedService )();
         }
 
+        /** @var $serviceId */
         return ServiceResolver::$services[ $serviceId ] ?? null;
     }
 
@@ -152,12 +153,18 @@ abstract class ServiceResolver implements ServiceResolverInterface
         ];
     }
 
+    /**
+     * @param Closure  $service
+     *
+     * @return ?class-string
+     */
     private function getServiceId( Closure $service ) : ?string {
 
         $get = Reflection::getFunction( $service );
 
-        return ( $get?->getAttributes()[ 0 ] ?? null )?->getArguments()[ 'name' ] ?? null;
+        return ( $get?->getAttributes()[ 0 ] ?? null )?->getArguments()[ 'class' ] ?? null;
     }
+
 
     private function propertyNameIsString( mixed $property ) : bool {
 
