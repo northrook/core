@@ -31,34 +31,11 @@ abstract class ServiceResolver implements ServiceResolverInterface
     private array $serviceMap = [];
 
     /**
-     * @param string  $service  The property name to retrieve.
-     *
-     * @return ?object
-     */
-    public function __get( string $service ) : ?object {
-        return $this->getMappedService( $service );
-    }
-
-    /** {@see ServiceResolver} does not allow dynamic properties. */
-    public function __set( string $name, $service ) : void {}
-
-    /**
-     * Check if a service is present in the {@see serviceMap}.
-     *
-     * @param string  $service
-     *
-     * @return bool
-     */
-    public function __isset( string $service ) : bool {
-        return $this->has( $service );
-    }
-
-    /**
      * @param array<string, object|Closure>  $services
      *
      * @return void
      */
-    protected function setMappedService( array $services ) : void {
+    final protected function setMappedService( array $services ) : void {
 
         foreach ( $services as $property => $service ) {
 
