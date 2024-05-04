@@ -33,7 +33,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
     private static array $services = [];
 
     /** @var array<string, class-string> */
-    private static array $serviceMap = [];
+    private array $serviceMap = [];
 
     /**
      * @param array<string, object|Closure>  $services
@@ -49,7 +49,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
             }
 
             if ( $service === null ) {
-                ServiceResolver::$serviceMap[ $property ] = null;
+                $this->serviceMap[ $property ] = null;
                 continue;
             }
 
@@ -61,7 +61,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
 
                 $serviceId = $this->getServiceId( $service );
 
-                ServiceResolver::$serviceMap[ $property ] = $serviceId;
+                $this->serviceMap[ $property ] = $serviceId;
 
                 if ( $serviceId ) {
                     ServiceResolver::$services[ $serviceId ] = $service;
@@ -82,7 +82,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
                         'class'        => get_class( $service ),
                     ],
                 );
-                ServiceResolver::$serviceMap[ $property ] = null;
+                $this->serviceMap[ $property ] = null;
             }
         }
     }
@@ -94,12 +94,12 @@ abstract class ServiceResolver implements ServiceResolverInterface
      */
     final public function getMappedService( string $service ) : ?object {
 
-        $serviceId = ServiceResolver::$serviceMap[ $service ] ?? null;
+        $serviceId = $this->serviceMap[ $service ] ?? null;
 
         if ( !$serviceId ) {
             Log::Error(
                 'Attempted to access unmapped service {serviceId}.',
-                [ 'serviceId' => $serviceId, 'services' => ServiceResolver::$serviceMap ],
+                [ 'serviceId' => $serviceId, 'services' => $this->serviceMap ],
             );
             return null;
         }
@@ -121,7 +121,7 @@ abstract class ServiceResolver implements ServiceResolverInterface
      * @return bool
      */
     final public function has( string $service ) : bool {
-        return array_key_exists( $service, ServiceResolver::$serviceMap );
+        return array_key_exists( $service, $this->serviceMap );
     }
 
     /**
@@ -139,17 +139,16 @@ abstract class ServiceResolver implements ServiceResolverInterface
             );
         }
 
-        return count( ServiceResolver::$serviceMap );
+        return count( $this->serviceMap );
     }
 
     public static function getServiceMap() : array {
         return [
-            'registered'   => count( ServiceResolver::$serviceMap ),
+            'registered'   => count( ServiceResolver::$services ),
             'instantiated' => count(
                 array_filter( ServiceResolver::$services, static fn ( $service ) => $service instanceof Closure ),
             ),
-            'map'          => ServiceResolver::$serviceMap,
-            'services'     => ServiceResolver::$services,
+            'services'     => array_keys( ServiceResolver::$services ),
         ];
     }
 
