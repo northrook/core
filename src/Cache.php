@@ -1,10 +1,66 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Core;
 
+/**
+ * # A simple cache store.
+ *
+ */
 final class Cache
 {
     private static array $objectCache = [];
+
+    /**
+     * # Clear a given cache key.
+     *
+     * - Passing `all` will clear all cache keys.
+     * - Passing a string will clear the respective cache value.
+     *
+     * @param string  $key  = ['all'][$any]
+     *
+     * @return bool  True if the cache was cleared, false otherwise.
+     */
+    public static function clear( string $key ) : bool {
+
+        if ( $key === 'all' ) {
+            $empty              = empty( Cache::$objectCache );
+            Cache::$objectCache = [];
+            return $empty;
+        }
+
+        if ( isset( Cache::$objectCache[ $key ] ) ) {
+            unset( Cache::$objectCache[ $key ] );
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * # Get the current cache store.
+     *
+     *  ⚠️ `$provideObjects` Returns full objects. This these can be massive.
+     *
+     * @param bool  $provideObjects  Full objects, instead of className.
+     *
+     * @return array
+     */
+    public static function getCacheStore( bool $provideObjects = false ) : array {
+
+        if ( $provideObjects ) {
+            return Cache::$objectCache;
+        }
+
+        $store = [];
+
+        foreach ( Cache::$objectCache as $key => $value ) {
+            $store[ $key ] = is_object( $value ) ? get_class( $value ) : $value;
+        }
+
+        return $store;
+    }
 
     public static function __callStatic( string $name, array $arguments ) {
         return match ( $name ) {

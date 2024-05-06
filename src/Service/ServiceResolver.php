@@ -92,30 +92,36 @@ abstract class ServiceResolver implements ServiceResolverInterface
     }
 
     /**
-     * @param string  $service
+     * @template Service of object
+     * @param ?string                          $service
+     * @param ?string | class-string<Service>  $className
      *
-     * @return ?object
+     * @return ?object Object of type $className
      */
-    final public function getMappedService( string $service ) : ?object {
+    final public function getMappedService( ?string $service = null, ?string $className = null ) : ?object {
 
-        $serviceId = $this->serviceMap[ $service ] ?? null;
+        $className = $service ? $this->serviceMap[ $service ] ?? null : $className;
 
-        if ( !$serviceId ) {
+        if ( !$className ) {
+            return null;
+        }
+
+        $mappedService = ServiceResolver::$services[ $className ] ?? null;
+
+        if ( !$mappedService ) {
             Log::Error(
                 'Attempted to access unmapped service {serviceId}.',
-                [ 'serviceId' => $serviceId, 'services' => $this->serviceMap ],
+                [ 'serviceId' => $className, 'services' => $this->serviceMap ],
             );
             return null;
         }
 
-        $mappedService = ServiceResolver::$services[ $serviceId ] ?? null;
 
         if ( $mappedService instanceof Closure ) {
-            ServiceResolver::$services[ $serviceId ] = ( $mappedService )();
+            ServiceResolver::$services[ $className ] = ( $mappedService )();
         }
 
-        /** @var $serviceId */
-        return ServiceResolver::$services[ $serviceId ] ?? null;
+        return ServiceResolver::$services[ $className ] ?? null;
     }
 
     /**
