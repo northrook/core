@@ -67,6 +67,10 @@ final class Cache
             'get' => ( new Cache() )->get( $arguments[ 0 ], true ),
         };
     }
+    
+    public function has( string $key, bool $global = false ) : bool {
+        return isset( Cache::$objectCache[ $this->key( $key, $global ) ] );
+    }
 
     public function get( string $key, bool $global = false ) : mixed {
         return Cache::$objectCache[ $this->key( $key, $global ) ];
