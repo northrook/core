@@ -18,7 +18,7 @@ use Northrook\Logger\Log;
  * Services wrapped as {@see Closure}s will be added to the {@see serviceMap},
  * and resolved when the service is first accessed.
  *
- * ## Eager:
+ * ## Runtime:
  * Injected services will be assigned to their respective properties if they exist,
  * otherwise they will be added to the {@see serviceMap}, but not lazily resolved.
  *
@@ -37,10 +37,11 @@ abstract class ServiceResolver implements ServiceResolverInterface
 
     /**
      * @param array<string, object|Closure>  $services
+     * @param bool                           $logErrors
      *
      * @return void
      */
-    final protected function setMappedService( array $services ) : void {
+    final protected function setMappedService( array $services, bool $logErrors = true ) : void {
 
         foreach ( $services as $property => $service ) {
 
@@ -72,18 +73,21 @@ abstract class ServiceResolver implements ServiceResolverInterface
 
             if ( property_exists( $service, $property ) ) {
                 $this->{$property} = $service;
+                continue;
             }
-            else {
+
+            if ( $logErrors ) {
                 Log::Error(
-                    'Eager service {service} does not have a matching {propertyName} in {class}',
+                    'Injected service {service} does not have a matching {propertyName} in {class}',
                     [
                         'service'      => $service,
                         'propertyName' => $property,
                         'class'        => get_class( $service ),
                     ],
                 );
-                $this->serviceMap[ $property ] = null;
             }
+
+            $this->serviceMap[ $property ] = null;
         }
     }
 
