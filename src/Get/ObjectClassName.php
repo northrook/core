@@ -12,7 +12,7 @@ trait ObjectClassName
      *
      * @return string
      */
-    protected function componentClassName() : string {
+    protected function getObjectClassName() : string {
         return substr( $this::class, strrpos( $this::class, '\\' ) + 1 );
     }
 }
