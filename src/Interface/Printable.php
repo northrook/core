@@ -2,18 +2,26 @@
 
 namespace Northrook\Core\Interface;
 
-use Northrook\Logger\Log;
-
-interface Printable
+interface Printable extends \Stringable
 {
     /**
      * Prints the resulting HTML, or null if the element is not printable.
      *
      * - Must handle all parsing, optimization, escaping, and encoding.
-     * - Must return null if the element is not printable.
-     * - Null returns must {@see Log} a warning with actionable information.
      *
-     * @return ?string
+     *  ```
+     *  // example
+     *
+     *  public function __toString() : string {
+     *      return trim( $this->build() )
+     * }
+     *
+     *  public function print() : string {
+     *      return $this->__toString();
+     *  }
+     *  ```
+     *
+     * @return string
      */
-    public function print() : ?string;
+    public function print() : string;
 }
