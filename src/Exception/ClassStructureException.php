@@ -4,12 +4,12 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Exception;
 
-use Exception;
+use LogicException;
 
 /**
  * The exception occurred during Component compilation.
  */
-class ClassStructureException extends Exception
+class ClassStructureException extends LogicException
 {
 
     /**
