@@ -5,15 +5,27 @@ namespace Northrook\Core\Get;
 trait ClassNameMethods
 {
 
-    protected function getExtendingClasses( ?string $parent ) : array {
+    protected function getExtendingClasses(
+        bool $fullClassName = false,
+        bool $includeSelf = true,
+        bool $includeInterface = true,
+    ) : array {
 
-        $classes = get_declared_classes();
+        $classes = $includeSelf ? [ $this::class ] : [];
 
-        if ( $parent ) {
-            return array_filter( $classes, static fn ( $class ) => is_subclass_of( $class, $parent ) );
+        $classes += class_parents( $this );
+
+        if ( $includeInterface ) {
+            $classes += class_implements( $this );
         }
 
-        return array_filter( $classes, static fn ( $class ) => is_subclass_of( $class, self::class ) );
+        $classes = array_values( $classes );
+
+        if ( $fullClassName ) {
+            return $classes;
+        }
+
+        return array_map( static fn ( $class ) => substr( $class, strrpos( $class, '\\' ) + 1 ), $classes );
     }
 
     /**
