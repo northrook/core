@@ -2,7 +2,7 @@
 
 namespace Northrook\Core\Get;
 
-class ClassNameMethods
+trait ClassNameMethods
 {
 
     protected function getExtendingClasses( ?string $parent ) : array {
