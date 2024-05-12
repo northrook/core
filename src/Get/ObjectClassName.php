@@ -2,6 +2,9 @@
 
 namespace Northrook\Core\Get;
 
+use JetBrains\PhpStorm\Deprecated;
+
+#[Deprecated( 'Use ClassNameMethods instead', \Northrook\Core\Get\ClassNameMethods::class )]
 trait ObjectClassName
 {
 
