@@ -4,7 +4,7 @@ namespace Northrook\Core\Exception;
 
 use Northrook\Core\Debug\Backtrace;
 
-class UninitializedPropertyException extends \Exception
+class UninitializedPropertyException extends \LogicException
 {
 
     public readonly string  $caller;
