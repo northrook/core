@@ -20,7 +20,8 @@
     "php": ">=8.2",
     "ext-mbstring": "*",
     "symfony/filesystem": "^7.0",
-    "northrook/logger": "dev-main"
+    "northrook/logger": "dev-main",
+    "symfony/cache": "^7.0"
   },
   "require-dev": {
     "symfony/var-dumper": "^7.0",

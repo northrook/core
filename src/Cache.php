@@ -4,13 +4,45 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
+use Northrook\Core\Cache\StaticArrayCache;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+
 /**
  * # A simple cache store.
  *
  */
 final class Cache
 {
+    private static array $config = [
+        'initialized' => false,
+        'cacheDir'    => null,
+    ];
+
     private static array $objectCache = [];
+
+    public static function config(
+        string $cacheDir,
+    ) : void {
+
+        if ( Cache::$config[ 'initialized' ] ) {
+            throw new \LogicException( 'Cache is already configured.' );
+        }
+
+        Cache::$config = [
+            'initialized' => true,
+            'cacheDir'    => $cacheDir,
+        ];
+    }
+
+    public static function staticArrayCache(
+        string $file,
+    ) : StaticArrayCache {
+        return new StaticArrayCache(
+            $file,
+            new FilesystemAdapter(),
+        );
+    }
+
 
     /**
      * # Clear a given cache key.
