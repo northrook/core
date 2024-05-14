@@ -67,7 +67,19 @@ final class Cache
             'get' => ( new Cache() )->get( $arguments[ 0 ], true ),
         };
     }
-    
+
+    public function set( string $key, mixed $value, bool $global = false, bool $override = false ) : bool {
+
+        $key = $global ? $key : $key . ':' . spl_object_id( $this );
+
+        if ( true === $override || !isset( Cache::$objectCache[ $key ] ) ) {
+            Cache::$objectCache[ $key ] = $value;
+            return true;
+        }
+
+        return false;
+    }
+
     public function has( string $key, bool $global = false ) : bool {
         return isset( Cache::$objectCache[ $this->key( $key, $global ) ] );
     }
