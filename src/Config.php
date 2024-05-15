@@ -9,6 +9,8 @@ namespace Northrook\Core;
 // has %project.dir% var based on __DIR__ ~/src/__FILE or ~/vendor/northrook/core/__FILE
 
 
+use Northrook\Core\Type\PathType;
+
 class Config
 {
     private static self       $instance;
@@ -40,55 +42,19 @@ class Config
     }
 
     protected function dir( string $path, ?string $append = null ) : string {
-        return Config::normalizePath( $path . DIRECTORY_SEPARATOR . $append );
+        return PathType::normalize( $path . DIRECTORY_SEPARATOR . $append );
     }
 
     private function autoRootDir( ?string $append = null ) : string {
 
-        $composerDir = Config::normalizePath( '/vendor/' . __NAMESPACE__ );
+        $composerDir = PathType::normalize( '/vendor/' . __NAMESPACE__ );
         $vendorDir   = strstr( __DIR__, $composerDir, true );
 
         if ( !$vendorDir ) {
             $vendorDir = strstr( __FILE__, 'src' . DIRECTORY_SEPARATOR . 'Config.php', true );
         }
 
-        return Config::normalizePath( $vendorDir . $append );
-    }
-
-    /**
-     * @param string  $string
-     *
-     * @return string
-     */
-    protected static function normalizePath( string $string ) : string {
-
-        $string = mb_strtolower( strtr( $string, "\\", "/" ) );
-
-        if ( str_contains( $string, '/' ) === false ) {
-            return $string;
-        }
-
-        $path = [];
-
-        foreach ( array_filter( explode( '/', $string ) ) as $part ) {
-            if ( $part === '..' && $path && end( $path ) !== '..' ) {
-                array_pop( $path );
-            }
-            elseif ( $part !== '.' ) {
-                $path[] = trim( $part );
-            }
-        }
-
-        $path = implode(
-            separator : DIRECTORY_SEPARATOR,
-            array     : $path,
-        );
-
-        if ( false === isset( pathinfo( $path )[ 'extension' ] ) ) {
-            $path .= DIRECTORY_SEPARATOR;
-        }
-
-        return $path;
+        return PathType::normalize( $vendorDir . $append );
     }
 
 }
