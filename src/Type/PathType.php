@@ -8,6 +8,7 @@ use Northrook\Core\Interface\Printable;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 /**
+ * @property string  $value
  * @property string  $filename
  * @property ?string $extension
  * @property bool    $exists
@@ -44,6 +45,7 @@ class PathType implements Printable
 
     public function __get( string $name ) {
         return match ( $name ) {
+            'value'        => $this->value,
             'filename'     => pathinfo( $this->value, PATHINFO_FILENAME ),
             'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
             'exists'       => file_exists( $this->value ),
