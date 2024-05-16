@@ -15,19 +15,18 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
  * @property bool    $isDir
  * @property int     $lastModified
  */
-class PathType implements Printable
+class PathType extends Type implements Printable
 {
-    use ValueTypeTrait;
-
-
     /**
-     * @param string  $value
-     * @param bool    $strict  Strict mode will throw an exception if the path does not exist.
+     * @param string | PathType  $value   Passing a {@see PathType} will extract its value.
+     * @param bool               $strict  Strict mode will throw an exception if the path does not exist.
      */
     public function __construct(
-        private string        $value,
-        private readonly bool $strict = false,
-    ) {}
+        protected string | PathType $value,
+        private readonly bool       $strict = false,
+    ) {
+        $this->value = $value instanceof PathType ? $value->value : $value;
+    }
 
     public function append( string $string ) : PathType {
         $this->value .= $string;
