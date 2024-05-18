@@ -71,22 +71,28 @@ class PathType extends Type implements Printable
     /**
      * Normalise a `string`, assuming it is a `path`.
      *
-     * * Removes repeated slashes.
-     * * Normalises slashes to system separator.
-     * * Prevents backtracking.
-     * * Optional trailing slash for directories.
-     * * No validation is performed.
+     * - Removes repeated slashes.
+     * - Normalises slashes to system separator.
+     * - Prevents backtracking.
+     * - Optional trailing slash for directories.
+     * - No validation is performed.
      *
-     * @param string  $string
-     * @param bool    $trailingSlash
+     * @param string   $string         The string to normalize.
+     * @param ?string  $append         Optional appended string to append.
+     * @param bool     $trailingSlash  Whether to append a trailing slash to the path.
      *
-     * @return string
+     * @return string  The normalized path.
      */
-    public static function normalize( string $string, bool $trailingSlash = true ) : string {
+    public static function normalize( string $string, ?string $append = null, bool $trailingSlash = true ) : string {
+
+        if ( $append ) {
+            $string .= "/$append";
+        }
 
         $string = mb_strtolower( strtr( $string, "\\", "/" ) );
 
         if ( str_contains( $string, '/' ) ) {
+
 
             $path = [];
 
