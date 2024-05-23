@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Northrook\Core\Type;
 
 use Northrook\Core\Interface\Printable;
+use Northrook\Core\Type;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 /**
@@ -56,20 +57,6 @@ class PathType extends Type implements Printable
             'lastModified' => filemtime( $this->value ),
             default        => null,
         };
-    }
-
-    /**
-     * {@see PathType} does not allow dynamic properties.
-     *
-     * @param string  $name
-     * @param mixed   $value
-     *
-     * @return void
-     */
-    public function __set( string $name, mixed $value ) {}
-
-    public function __isset( string $name ) : bool {
-        return isset( $this->{$name} );
     }
 
     /**
