@@ -45,7 +45,7 @@ final class Path extends Type
             'type'         => $this->type,
             'filename'     => pathinfo( $this->value, PATHINFO_FILENAME ),
             'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
-            'exists'       => file_exists( $this->value ),
+            'exists'       => $this->validate(),
             'isValid'      => $this->validate(),
             'isUrl'        => Path::isUrl( $this->value ),
             'isDir'        => is_dir( $this->value ),
@@ -57,20 +57,12 @@ final class Path extends Type
     }
 
     private function validate() : bool {
-        $this->value = Path::normalize( $this->value );
-        $this->type  = $this->getType();
 
-        if ( !$this->exists ) {
-
-            $this->isValid = false;
-
-            if ( $this->strict ) {
-                throw new FileNotFoundException(
-                    message : 'The path does not exist. Please verify the filename and try again.',
-                    path    : $this->value,
-                );
-            }
+        if ( isset( $this->isValid ) ) {
+            return $this->isValid;
         }
+
+        $this->type = $this->getType();
 
         if ( $this->type === 'unknown' ) {
 
@@ -88,13 +80,24 @@ final class Path extends Type
         if ( $this->type === 'url' ) {
             $headers = get_headers( $this->value, 1 );
 
+
             if ( false === $headers || false === str_contains( $headers[ 0 ], '200' ) ) {
                 return $this->isValid = false;
             }
-        }
-        
-        if ( $this->exists ) {
+
             return $this->isValid = true;
+        }
+
+        if ( file_exists( $this->value ) ) {
+            $this->value = Path::normalize( $this->value );
+            return $this->isValid = true;
+        }
+
+        if ( $this->strict ) {
+            throw new FileNotFoundException(
+                message : "The $this->type $this->value does not exist. Please verify the filename and try again.",
+                path    : $this->value,
+            );
         }
 
         return $this->isValid = false;
