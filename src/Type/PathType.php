@@ -52,6 +52,7 @@ class PathType extends Type implements Printable
             'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
             'exists'       => file_exists( $this->value ),
             'isDir'        => is_dir( $this->value ),
+            'isFile'       => is_file( $this->value ),
             'isWritable'   => is_writable( $this->value ),
             'isReadable'   => is_readable( $this->value ),
             'lastModified' => filemtime( $this->value ),
