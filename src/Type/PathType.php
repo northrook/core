@@ -13,6 +13,8 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
  * @property ?string $extension
  * @property bool    $exists
  * @property bool    $isDir
+ * @property bool    $isFile
+ * @property bool    $isWritable
  * @property int     $lastModified
  */
 class PathType extends Type implements Printable
@@ -49,6 +51,8 @@ class PathType extends Type implements Printable
             'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
             'exists'       => file_exists( $this->value ),
             'isDir'        => is_dir( $this->value ),
+            'isWritable'   => is_writable( $this->value ),
+            'isReadable'   => is_readable( $this->value ),
             'lastModified' => filemtime( $this->value ),
             default        => null,
         };
