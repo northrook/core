@@ -10,7 +10,7 @@ namespace Northrook\Core;
  * @link    https://github.com/northrook/core
  * @todo    Provide link to documentation
  */
-abstract class Type
+abstract class Type implements \Stringable
 {
 
     abstract public function __get( string $name );
