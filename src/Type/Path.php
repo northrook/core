@@ -2,6 +2,7 @@
 
 namespace Northrook\Core\Type;
 
+use Northrook\Core\Interface\Validated;
 use Northrook\Core\Type;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
@@ -17,7 +18,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
  * @property bool    $isWritable
  * @property int     $lastModified
  */
-final class Path extends Type
+final class Path extends Type implements Validated
 {
     private string $value;
     private bool   $isValid;
