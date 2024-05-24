@@ -38,15 +38,16 @@ final class Path extends Type implements Validated
 
     public function __get( string $name ) {
         return match ( $name ) {
-            'value'             => $this->value,
-            'filename'          => pathinfo( $this->value, PATHINFO_FILENAME ),
-            'extension'         => pathinfo( $this->value, PATHINFO_EXTENSION ),
-            'exists', 'isValid' => $this->validate(),
-            'isDir'             => is_dir( $this->value ),
-            'isFile'            => is_file( $this->value ),
-            'isWritable'        => is_writable( $this->value ),
-            'isReadable'        => is_readable( $this->value ),
-            'lastModified'      => filemtime( $this->value ),
+            'value'        => $this->value,
+            'filename'     => pathinfo( $this->value, PATHINFO_FILENAME ),
+            'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
+            'exists'       => file_exists( $this->value ),
+            'isValid'      => $this->validate(),
+            'isDir'        => is_dir( $this->value ),
+            'isFile'       => is_file( $this->value ),
+            'isWritable'   => is_writable( $this->value ),
+            'isReadable'   => is_readable( $this->value ),
+            'lastModified' => filemtime( $this->value ),
         };
     }
 

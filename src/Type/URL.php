@@ -8,6 +8,10 @@ use Northrook\Core\Type;
 
 /**
  * @property string $value
+ * @property string $scheme
+ * @property string $filename
+ * @property string $hostname
+ * @property string $path
  * @property bool   $exists
  * @property bool   $isValid
  * @property bool   $isExternal
@@ -48,7 +52,8 @@ final class URL extends Type implements Validated
             'isValid'    => $this->validate(),
             'isExternal' => $this->isUrlExternal(),
             'scheme'     => $this->getUrlParts( 'scheme' ),
-            'host'       => $this->getUrlParts( 'host' ),
+            'hostname'   => $this->getUrlParts( 'host' ),
+            'filename'   => $this->getUrlParts( 'filename' ),
             'path'       => $this->getUrlParts( 'path' ),
             default      => null,
         };
@@ -59,7 +64,6 @@ final class URL extends Type implements Validated
         if ( isset( $this->isValid ) ) {
             return $this->isValid;
         }
-
         // Validate defined scheme
         if ( $this->match_scheme && !str_starts_with( $this->value, $this->match_scheme . '://' ) ) {
             return false;
@@ -93,7 +97,7 @@ final class URL extends Type implements Validated
         }
 
         if ( str_contains( $this->headers[ 0 ], '200' ) ) {
-            $this->parts = parse_url( $this->value );
+            $this->getUrlParts();
             return true;
         }
 
@@ -102,7 +106,24 @@ final class URL extends Type implements Validated
 
 
     private function getUrlParts( ?string $get = null ) : null | string | array {
-        $this->parts ??= parse_url( $this->value );
+
+        if ( !isset( $this->parts ) ) {
+            $url               = parse_url( $this->value );
+            $url[ 'filename' ] = trim( strrchr( $url[ 'path' ], '/' ), " \n\r\t\v\0/" );
+
+            if ( str_contains( $url[ 'path' ], '@' ) ) {
+                $url[ 'version' ] = strstr(
+                    substr(
+                        $url[ 'path' ],
+                        strrpos( $url[ 'path' ], '@' ),
+                    ), '/', true,
+                );
+            }
+
+            $this->parts = $url;
+
+        }
+
 
         if ( $get ) {
             return $this->parts[ $get ] ?? null;
