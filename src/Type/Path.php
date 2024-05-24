@@ -2,14 +2,11 @@
 
 namespace Northrook\Core\Type;
 
-use Northrook\Core\Exception\FileTypeException;
 use Northrook\Core\Type;
-use Northrook\Logger\Log;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
 /**
  * @property string  $value
- * @property string  $type
  * @property string  $filename
  * @property ?string $extension
  * @property bool    $exists
@@ -22,7 +19,6 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
  */
 final class Path extends Type
 {
-    private string $type; // 'file' | 'dir' | 'url
     private string $value;
     private bool   $isValid;
 
@@ -41,86 +37,40 @@ final class Path extends Type
 
     public function __get( string $name ) {
         return match ( $name ) {
-            'value'        => $this->value,
-            'type'         => $this->type,
-            'filename'     => pathinfo( $this->value, PATHINFO_FILENAME ),
-            'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
-            'exists'       => $this->validate(),
-            'isValid'      => $this->validate(),
-            'isUrl'        => Path::isUrl( $this->value ),
-            'isDir'        => is_dir( $this->value ),
-            'isFile'       => is_file( $this->value ),
-            'isWritable'   => is_writable( $this->value ),
-            'isReadable'   => is_readable( $this->value ),
-            'lastModified' => filemtime( $this->value ),
+            'value'             => $this->value,
+            'filename'          => pathinfo( $this->value, PATHINFO_FILENAME ),
+            'extension'         => pathinfo( $this->value, PATHINFO_EXTENSION ),
+            'exists', 'isValid' => $this->validate(),
+            'isDir'             => is_dir( $this->value ),
+            'isFile'            => is_file( $this->value ),
+            'isWritable'        => is_writable( $this->value ),
+            'isReadable'        => is_readable( $this->value ),
+            'lastModified'      => filemtime( $this->value ),
         };
     }
 
-    private function validate() : bool {
+    public function append( string $string, bool $trailingSlash = true ) : Path {
+        $this->value = Path::normalize( $this->value, $string, $trailingSlash );
+        return $this;
+    }
+
+    public function validate() : bool {
 
         if ( isset( $this->isValid ) ) {
             return $this->isValid;
         }
 
-        $this->type = $this->getType();
+        $this->value = Path::normalize( $this->value );
 
-        if ( $this->type === 'unknown' ) {
-
+        if ( $this->strict && !file_exists( $this->value ) ) {
             $this->isValid = false;
-
-            if ( $this->strict ) {
-                throw new FileTypeException(
-                    message : 'The path is not a file or directory.',
-                    path    : $this->value,
-                );
-            }
-        }
-
-
-        if ( $this->type === 'url' ) {
-            $headers = get_headers( $this->value, 1 );
-
-
-            if ( false === $headers || false === str_contains( $headers[ 0 ], '200' ) ) {
-                return $this->isValid = false;
-            }
-
-            return $this->isValid = true;
-        }
-
-        if ( file_exists( $this->value ) ) {
-            $this->value = Path::normalize( $this->value );
-            return $this->isValid = true;
-        }
-
-        if ( $this->strict ) {
             throw new FileNotFoundException(
                 message : "The $this->type $this->value does not exist. Please verify the filename and try again.",
                 path    : $this->value,
             );
         }
 
-        return $this->isValid = false;
-    }
-
-    private function getType() : string {
-
-        if ( Path::isUrl( $this->value ) ) {
-            return 'url';
-        }
-        if ( is_dir( $this->value ) ) {
-            return 'dir';
-        }
-        if ( is_file( $this->value ) ) {
-            return 'file';
-        }
-
-        Log::Error(
-            'Could not determine Path type for {path}. Returned string {return}.',
-            [ 'path' => $this->value, 'return' => 'unknown' ],
-        );
-
-        return 'unknown';
+        return $this->isValid = true;
     }
 
     /**
