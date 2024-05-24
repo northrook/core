@@ -35,13 +35,17 @@ final class Id extends Type
         $this->value = Id::normalize( !$value ? Id::generate() : $value );
     }
 
+    public function __toString() : string {
+        return $this->value;
+    }
+
     public function __get( string $name ) : ?string {
         return match ( $name ) {
             'value' => $this->value,
             default => null,
         };
     }
-    
+
     public static function normalize(
         ?string $string,
         ?string $separator = '-', // '-' | '_'
