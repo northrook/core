@@ -15,14 +15,16 @@ use Northrook\Core\Type;
 final class URL extends Type implements Validated
 {
     private string                 $value;
+    private readonly array         $parts;
     private readonly array | false $headers;
     private ?bool                  $isExternal = null;
     private bool                   $isValid;
 
+
     public function __construct(
         string | URL             $value,
-        private readonly ?string $scheme = 'https',
-        private readonly ?string $host = null,
+        private readonly ?string $match_scheme = 'https',
+        private readonly ?string $match_hostname = null,
         private readonly bool    $strict = false,
     ) {
         $this->value = $value instanceof URL ? $value->value : $value;
@@ -45,6 +47,9 @@ final class URL extends Type implements Validated
             'exists'     => $this->getUrlStatus(),
             'isValid'    => $this->validate(),
             'isExternal' => $this->isUrlExternal(),
+            'scheme'     => $this->getUrlParts( 'scheme' ),
+            'host'       => $this->getUrlParts( 'host' ),
+            'path'       => $this->getUrlParts( 'path' ),
             default      => null,
         };
     }
@@ -56,7 +61,7 @@ final class URL extends Type implements Validated
         }
 
         // Validate defined scheme
-        if ( $this->scheme && !str_starts_with( $this->value, $this->scheme . '://' ) ) {
+        if ( $this->match_scheme && !str_starts_with( $this->value, $this->match_scheme . '://' ) ) {
             return false;
         }
 
@@ -64,6 +69,7 @@ final class URL extends Type implements Validated
         if ( !( str_contains( $this->value, "//" ) && str_contains( $this->value, '.' ) ) ) {
             return false;
         };
+
 
         $url = filter_var( $this->value, FILTER_VALIDATE_URL );
 
@@ -74,16 +80,6 @@ final class URL extends Type implements Validated
         $this->value = $url;
 
         $this->isUrlExternal();
-
-        if ( $this->isExternal ) {
-            $headers = get_headers( $this->value, 1 );
-
-            if ( false === $headers || false === str_contains( $headers[ 0 ], '200' ) ) {
-                return $this->isValid = false;
-            }
-
-            return $this->isValid = true;
-        }
 
         return $this->isValid = $this->getUrlStatus();
     }
@@ -97,10 +93,22 @@ final class URL extends Type implements Validated
         }
 
         if ( str_contains( $this->headers[ 0 ], '200' ) ) {
+            $this->parts = parse_url( $this->value );
             return true;
         }
 
         return false;
+    }
+
+
+    private function getUrlParts( ?string $get = null ) : null | string | array {
+        $this->parts ??= parse_url( $this->value );
+
+        if ( $get ) {
+            return $this->parts[ $get ] ?? null;
+        }
+
+        return $this->parts;
     }
 
 
@@ -110,13 +118,14 @@ final class URL extends Type implements Validated
             return $this->isExternal;
         }
 
-        if ( null === $this->host ) {
+        if ( null === $this->match_hostname ) {
             return null;
         }
 
-        $host = parse_url( $this->host, PHP_URL_HOST );
+        $host = parse_url( $this->match_hostname, PHP_URL_HOST );
         $url  = parse_url( $this->value, PHP_URL_PATH );
 
+        dump( $host, $url );
         if ( !$host || !$url ) {
             return null;
         }
