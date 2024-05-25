@@ -15,6 +15,14 @@ final class Minify
             removeNewlines : true,
         );
 
-        return str_replace( ' :', ':', $css );;
+        return str_replace( ' :', ':', $css );
+    }
+
+    public static function scripts( string $js ) : string {
+        return Trim::whitespace(
+            string         : Trim::comments( $js, single : true ),
+            removeTabs     : true,
+            removeNewlines : true,
+        );
     }
 }
