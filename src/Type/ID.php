@@ -12,27 +12,27 @@ use Random\RandomException;
  * @author  Martin Nielsen <mn@northrook.com>
  *
  */
-final class Id extends Type
+final class ID extends Type
 {
 
     private string $value;
 
     /**
      *
-     * - Passing an {@see Id} will extract its value.
-     * - Passing a string will validate it and convert it to an {@see Id}.
-     * - Passing null will create a new {@see Id}.
+     * - Passing an {@see ID} will extract its value.
+     * - Passing a string will validate it and convert it to an {@see ID}.
+     * - Passing null will create a new {@see ID}.
      *
-     * @param null|string|Id  $value
+     * @param null|string|ID  $value
      */
     public function __construct(
-        null | string | Id $value = null,
+        null | string | ID $value = null,
     ) {
-        if ( $value instanceof Id ) {
+        if ( $value instanceof ID ) {
             $value = $value->value;
         }
 
-        $this->value = Id::normalize( !$value ? Id::generate() : $value );
+        $this->value = ID::normalize( !$value ? ID::generate() : $value );
     }
 
     public function __toString() : string {

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Type;
 
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Core\Interface\Printable;
 use Northrook\Core\Type;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
@@ -18,6 +19,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
  * @property bool    $isWritable
  * @property int     $lastModified
  */
+#[Deprecated( 'Use Path instead', Path::class )]
 class PathType extends Type implements Printable
 {
     /**

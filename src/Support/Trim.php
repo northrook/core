@@ -7,8 +7,9 @@ namespace Northrook\Core\Support;
  *
  * @author  Martin Nielsen <mn@northrook.com>
  */
-class Trim
+final class Trim
 {
+
     /**
      * Regex patterns for removing comments from a string.
      *
@@ -17,19 +18,20 @@ class Trim
      */
     public const COMMENTS = [
         'php'    => '#^\h*?/\*\*.*?\*/\R#ms',  // PHP block comments
+        'css'    => '#^\h*?/\*.*?\*/\R#ms',    // CSS block comments
         'single' => '#^\h*?//.+?\R#m',         // Single line comments
         'html'   => '#^\h*?<!--.*?-->\R#ms',   // HTML comments
         'latte'  => '#^\h*?{\*.*?\*}\R#ms',    // Latte comments
         'twig'   => '/^\h*?{#.*?#}\R/ms',      // Twig comments
         'blade'  => '#^\h*?{{--.*?--}}\R#ms',  // Blade comments
     ];
-
-
+    
     /**
      * Remove comments from a string.
      *
      * Supports:
      * - PHP docblock comments
+     * - CSS block comments
      * - Single line comments `// ...`
      * - HTML comments `<!-- ... -->`
      * - Latte comments `{* ... *}`
@@ -43,6 +45,7 @@ class Trim
      *
      * @param ?string  $string  The string to trim comments from
      * @param ?bool    $php     true
+     * @param ?bool    $css     true
      * @param ?bool    $single  true
      * @param ?bool    $html    true
      * @param ?bool    $latte   true
@@ -54,6 +57,7 @@ class Trim
     public static function comments(
         ?string $string,
         ?bool   $php = null,
+        ?bool   $css = null,
         ?bool   $single = null,
         ?bool   $html = null,
         ?bool   $latte = null,
