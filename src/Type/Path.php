@@ -2,7 +2,9 @@
 
 namespace Northrook\Core\Type;
 
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Core\Interface\Validated;
+use Northrook\Core\Support\Normalize;
 use Northrook\Core\Type;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 
@@ -107,42 +109,8 @@ final class Path extends Type implements Validated
      *
      * @return string  The normalized path.
      */
+    #[Deprecated( 'Use Normalize::path() instead.', Normalize::class )]
     public static function normalize( string $string, ?string $append = null, bool $trailingSlash = true ) : string {
-
-        if ( $append ) {
-            $string .= "/$append";
-        }
-
-        $string = mb_strtolower( strtr( $string, "\\", "/" ) );
-
-        if ( str_contains( $string, '/' ) ) {
-
-
-            $path = [];
-
-            foreach ( array_filter( explode( '/', $string ) ) as $part ) {
-                if ( $part === '..' && $path && end( $path ) !== '..' ) {
-                    array_pop( $path );
-                }
-                elseif ( $part !== '.' ) {
-                    $path[] = trim( $part );
-                }
-            }
-
-            $path = implode(
-                separator : DIRECTORY_SEPARATOR,
-                array     : $path,
-            );
-        }
-        else {
-            $path = $string;
-        }
-
-        // If the string contains a valid extension, return it as-is
-        if ( isset( pathinfo( $path )[ 'extension' ] ) && !str_contains( pathinfo( $path )[ 'extension' ], '%' ) ) {
-            return $path;
-        }
-
-        return $trailingSlash ? $path . DIRECTORY_SEPARATOR : $path;
+        return Normalize::path( $string, $append, $trailingSlash );
     }
 }

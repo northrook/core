@@ -146,7 +146,6 @@ final class URL extends Type implements Validated
         $host = parse_url( $this->match_hostname, PHP_URL_HOST );
         $url  = parse_url( $this->value, PHP_URL_PATH );
 
-        dump( $host, $url );
         if ( !$host || !$url ) {
             return null;
         }
