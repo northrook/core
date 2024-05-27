@@ -6,7 +6,6 @@
   "autoload": {
     "psr-4": {
       "Northrook\\Core\\": "src/",
-      "Type\\": "Type/"
     }
   },
   "authors": [

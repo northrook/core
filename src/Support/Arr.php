@@ -8,6 +8,15 @@ final class Arr
 
     // -- STATIC METHODS ----------------------------------------------------------------------------
 
+    public static function unique( array $array, bool $caseSensitive = false ) : array {
+
+        if ( !$caseSensitive ) {
+            $array = array_map( "strtolower", $array );
+        }
+
+        return array_flip( array_flip( $array ) );
+    }
+
     /**
      * Get a boolean option from an array of options.
      *

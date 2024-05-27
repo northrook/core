@@ -7,7 +7,7 @@ use Northrook\Core\Type\Path;
 
 final class Str
 {
-
+    
     #[Pure]
     public static function sanitize( ?string $string, bool $stripTags = false ) : string {
         if ( $stripTags ) {

@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Core\Type;
 
 use JetBrains\PhpStorm\Deprecated;
