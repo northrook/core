@@ -5,7 +5,8 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Northrook\\Core\\": "src/"
+      "Northrook\\Core\\": "src/",
+      "Type\\": "Type/"
     }
   },
   "authors": [
