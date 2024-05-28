@@ -4,24 +4,36 @@ namespace Northrook\Core\Interface;
 
 interface Printable extends \Stringable
 {
+
     /**
-     * Prints the resulting HTML, or null if the element is not printable.
+     * Prepare a string of HTML for front-end use.
      *
-     * - Must handle all parsing, optimization, escaping, and encoding.
+     * Must handle all parsing, optimization, escaping, and encoding.
      *
-     *  ```
-     *  // example
-     *
-     *  public function __toString() : string {
-     *      return trim( $this->build() )
-     * }
-     *
-     *  public function print() : string {
-     *      return $this->__toString();
-     *  }
-     *  ```
+     * Strings returned will be regarded as safe for front-end use.
      *
      * @return string
      */
-    public function print() : string;
+    public function __toString() : string;
+
+    /**
+     * Echo the resulting HTML, or nothing if the element does not pass validation.
+     *
+     * ⚠️ Must handle all parsing, optimization, escaping, and encoding.
+     *
+     *  ```
+     * // escape strings, optimize, etc
+     * public function __toString() : string {
+     *    return trim( $this->build() )
+     * }
+     *
+     * // print the resulting HTML
+     * public function print() : void {
+     *    return $this->__toString();
+     * }
+     *  ```
+     *
+     * @return void
+     */
+    public function print() : void;
 }
