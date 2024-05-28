@@ -2,12 +2,38 @@
 
 namespace Northrook\Core\Support;
 
+use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
 use Northrook\Core\Type\Path;
 
 final class Str
 {
-    
+
+    public static function key(
+        string  $string,
+        string  $separator = '-',
+        #[ExpectedValues( values : [
+            null,
+            'strtoupper',
+            'strtolower',
+            // 'camel',
+            // 'snake'
+        ] )]
+        ?string $case = 'strtolower',
+    ) : string {
+
+        $string = preg_replace( '/[^A-Za-z0-9_-]/', $separator, $string );
+        $string = implode( $separator, array_filter( explode( $separator, $string ) ) );
+
+        return match ( $case ) {
+            'strtoupper' => strtoupper( $string ),
+            'strtolower' => strtolower( $string ),
+            // 'camel'      => Str::camel( $string ),
+            // 'snake'      => Str::snake( $string ),
+            default      => $string,
+        };
+    }
+
     #[Pure]
     public static function sanitize( ?string $string, bool $stripTags = false ) : string {
         if ( $stripTags ) {

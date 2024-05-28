@@ -32,8 +32,6 @@ interface Printable extends \Stringable
      *    return $this->__toString();
      * }
      *  ```
-     *
-     * @return void
      */
     public function print() : void;
 }

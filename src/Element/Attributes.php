@@ -30,7 +30,7 @@ final class Attributes
         return $styles;
     }
 
-    public static function from( array $content, bool $raw = false ) : array {
+    public static function from( array $content, bool $string = false, bool $raw = false ) : string | array {
 
         $attributes = [];
 
@@ -71,6 +71,8 @@ final class Attributes
             $attributes[ $attribute ] = ( null === $value ) ? $attribute : "$attribute=\"$value\"";
         }
 
-        return $raw ? $attributes : Sort::elementAttributes( $attributes );
+        $attributes = $raw ? $attributes : Sort::elementAttributes( $attributes );
+
+        return $string ? implode( ' ', $attributes ) : $attributes;
     }
 }
