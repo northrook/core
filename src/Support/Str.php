@@ -8,8 +8,7 @@ use Northrook\Core\Type\Path;
 
 final class Str
 {
-
-
+    
     /**
      * @param string[]     $string
      * @param string       $separator
@@ -32,7 +31,7 @@ final class Str
 
         $string = is_array( $string ) ? implode( $separator, $string ) : $string;
 
-        $string = preg_replace( '/[^A-Za-z0-9_-]/', $separator, $string );
+        $string = preg_replace( "/[^A-Za-z0-9$separator]/", $separator, $string );
         $string = implode( $separator, array_filter( explode( $separator, $string ) ) );
 
         return match ( $case ) {

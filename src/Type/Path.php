@@ -43,7 +43,7 @@ final class Path extends Type implements Validated
     public function __get( string $name ) {
         return match ( $name ) {
             'value'        => $this->value,
-            'filename'     => pathinfo( $this->value, PATHINFO_FILENAME ),
+            'filename'     => pathinfo( $this->value, PATHINFO_BASENAME ),
             'extension'    => pathinfo( $this->value, PATHINFO_EXTENSION ),
             'exists'       => file_exists( $this->value ),
             'isValid'      => $this->validate(),
