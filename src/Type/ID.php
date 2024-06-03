@@ -2,6 +2,7 @@
 
 namespace Northrook\Core\Type;
 
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Core\Type;
 use Northrook\Logger\Log;
 use Random\RandomException;
@@ -12,6 +13,7 @@ use Random\RandomException;
  * @author  Martin Nielsen <mn@northrook.com>
  *
  */
+#[Deprecated( reason : 'Use Northrook\Type\ID instead' )]
 final class ID extends Type
 {
 
