@@ -8,13 +8,18 @@ namespace Northrook\Core\Service;
  */
 trait ServiceResolverTrait
 {
-    
+
     /**
      * @param string  $service  The property name to retrieve.
      *
      * @return ?object
      */
     public function __get( string $service ) : ?object {
+        trigger_deprecation(
+            $this::class,
+            '1.0.0',
+            __METHOD__ . ' is no longer supported',
+        );
         return $this->getMappedService( $service );
     }
 

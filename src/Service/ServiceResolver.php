@@ -3,7 +3,6 @@
 namespace Northrook\Core\Service;
 
 use Closure;
-use Northrook\Core\Get\Reflection;
 use Northrook\Logger\Log;
 
 /**
@@ -42,6 +41,12 @@ abstract class ServiceResolver implements ServiceResolverInterface
      * @return void
      */
     final protected function setMappedService( array $services, bool $logErrors = true ) : void {
+
+        trigger_deprecation(
+            ServiceResolver::class,
+            '1.0.0',
+            'Northrook\Core\Service\ServiceResolver::setMappedService() is deprecated. Use Facades and Dependency Injection instead.',
+        );
 
         foreach ( $services as $property => $service ) {
 

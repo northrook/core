@@ -23,6 +23,7 @@
     "northrook/logger": "dev-main"
   },
   "require-dev": {
+    "symfony/deprecation-contracts": "@stable",
     "symfony/var-dumper": "^7.0",
     "symfony/error-handler": "^7.0"
   }

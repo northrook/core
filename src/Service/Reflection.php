@@ -1,6 +1,6 @@
 <?php
 
-namespace Northrook\Core\Get;
+namespace Northrook\Core\Service;
 
 use Closure;
 use ReflectionClass;
@@ -20,6 +20,11 @@ final class Reflection
      * @return ?ReflectionFunction
      */
     public static function getFunction( Closure | string $class ) : ?ReflectionFunction {
+        trigger_deprecation(
+            Reflection::class,
+            '1.0.0',
+            __METHOD__ . ' is no longer supported',
+        );
         try {
             return new ReflectionFunction( $class );
         }
@@ -38,6 +43,11 @@ final class Reflection
      * @return ?ReflectionClass
      */
     public static function getClass( string | object $object ) : ?ReflectionClass {
+        trigger_deprecation(
+            Reflection::class,
+            '1.0.0',
+            __METHOD__ . ' is no longer supported',
+        );
         try {
             return new ReflectionClass( $object );
         }
@@ -47,6 +57,11 @@ final class Reflection
     }
 
     public static function getMethod( string $class, string $method ) : ?ReflectionMethod {
+        trigger_deprecation(
+            Reflection::class,
+            '1.0.0',
+            __METHOD__ . ' is no longer supported',
+        );
         try {
             return new ReflectionMethod( $class, $method );
         }
@@ -56,6 +71,11 @@ final class Reflection
     }
 
     public static function getProperty( string $class, string $property ) : ?ReflectionProperty {
+        trigger_deprecation(
+            Reflection::class,
+            '1.0.0',
+            __METHOD__ . ' is no longer supported',
+        );
         try {
             return new ReflectionProperty( $class, $property );
         }
