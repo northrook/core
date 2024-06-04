@@ -3,7 +3,7 @@
 namespace Northrook\Core\Element;
 
 use Northrook\Core\Support\Arr;
-use Northrook\Core\Support\Sort;
+use Northrook\Support\Sort;
 
 final class Attributes
 {
