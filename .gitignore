@@ -11,6 +11,8 @@
 # Build data
 .env
 *.lock
+/src/Type.php
+/src/Type/*
 /public/
 /var/
 /build/
