@@ -54,6 +54,16 @@ final class Status
         private readonly mixed $value = null,
     ) {}
 
+    public function __get( string $property ) : string | array | bool | null {
+        return match ( $property ) {
+            'step'      => $this->status,                 // Get the current step
+            'steps'     => $this->steps,                  // Get all steps
+            'value'     => $this->value,                  // Get the value, if any
+            'completed' => $this->status === 'completed', // Check if the process is completed
+            default     => null
+        };
+    }
+
     public function step( string $name, ?string $message = null ) : Step {
 
         $this->status = $name;
@@ -121,16 +131,6 @@ final class Status
 
 
         return $this;
-    }
-
-    public function __get( string $property ) : string | array | bool | null {
-        return match ( $property ) {
-            'step'      => $this->status,                 // Get the current step
-            'steps'     => $this->steps,                  // Get all steps
-            'value'     => $this->value,                  // Get the value, if any
-            'completed' => $this->status === 'completed', // Check if the process is completed
-            default     => null
-        };
     }
 
 }
