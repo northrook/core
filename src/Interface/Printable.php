@@ -5,13 +5,16 @@ namespace Northrook\Core\Interface;
 /**
  * @template htmlString of string
  */
-interface Printable
+interface Printable extends \Stringable
 {
+
 
     /**
      * Prepare a string of HTML for front-end use.
      *
      * Must handle all parsing, optimization, escaping, and encoding.
+     *
+     * This is expected to  use `__toString()` to return the string, but is not required to.
      *
      * Strings returned will be regarded as safe for front-end use.
      *
