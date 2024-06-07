@@ -2,7 +2,7 @@
 
 namespace Northrook\Core\Interface;
 
-interface Printable extends \Stringable
+interface Printable
 {
 
     /**
@@ -14,7 +14,7 @@ interface Printable extends \Stringable
      *
      * @return string
      */
-    public function __toString() : string;
+    public function toString() : string;
 
     /**
      * Echo the resulting HTML, or nothing if the element does not pass validation.
