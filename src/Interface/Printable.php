@@ -2,6 +2,9 @@
 
 namespace Northrook\Core\Interface;
 
+/**
+ * @template htmlString of string
+ */
 interface Printable
 {
 
@@ -12,9 +15,9 @@ interface Printable
      *
      * Strings returned will be regarded as safe for front-end use.
      *
-     * @return string
+     * @return ?string<htmlString>
      */
-    public function toString() : string;
+    public function toString() : ?string;
 
     /**
      * Echo the resulting HTML, or nothing if the element does not pass validation.
