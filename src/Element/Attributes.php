@@ -10,6 +10,8 @@ final class Attributes
 
     public static function classes( string | array $classes ) : array {
 
+        trigger_error( 'The classes() method is deprecated. Use the class() method instead.', E_USER_DEPRECATED );
+
         if ( !is_array( $classes ) ) {
             $classes = array_filter( explode( ' ', $classes ) );
         }
@@ -18,6 +20,8 @@ final class Attributes
     }
 
     public static function inlineStyles( string | array $styles ) : array {
+
+        trigger_error( 'The inlineStyles() method is deprecated. Use the style() method instead.', E_USER_DEPRECATED );
 
         if ( !is_array( $styles ) ) {
             $styles = explode( ';', $styles );
@@ -31,6 +35,10 @@ final class Attributes
     }
 
     public static function from( array $content, bool $string = false, bool $raw = false ) : string | array {
+
+        trigger_error(
+            'The from() method is deprecated. Use the Northrook\Element\Content instead.', E_USER_DEPRECATED,
+        );
 
         $attributes = [];
 
