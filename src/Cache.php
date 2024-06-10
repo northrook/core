@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Northrook\Core;
 
 // TODO : Add option to use a Symfony CacheAdapter
-use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Log;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -55,24 +54,23 @@ final class Cache
      * - Throw a {@see LogicException}.
      * - Ignore the error.
      *
-     * @param string                 $cacheKey        The cache key
-     * @param string                 $cachePath       The cache path
-     * @param null|AdapterInterface  $adapter         The adapter to use, defaults to a {@see PhpFilesAdapter} if not provided
-     * @param int                    $cacheTtl        The cache TTL in seconds, defaults to a day
-     * @param string                 $onOPcacheError  How to handle errors
+     * @param ?AdapterInterface               $adapter            The adapter to use, defaults to a {@see PhpFilesAdapter} if not provided
+     * @param ?string                         $fallbackCacheKey   The cache key
+     * @param int                             $fallbackCacheTtl   The cache TTL in seconds, defaults to a day
+     * @param ?string                         $fallbackCachePath  The cache path
+     * @param string{'ignore'|'log'|'throw'}  $onOPcacheError     How to handle errors
      *
      * @return AdapterInterface
      */
     public static function assignAdapterInterface(
         ?AdapterInterface $adapter = null,
-        ?string           $cacheKey = null,
-        ?string           $cachePath = null,
-        int               $cacheTtl = Cache::TTL_DAY,
-        #[ExpectedValues( values : [ 'ignore', 'log', 'throw' ] )]
+        ?string           $fallbackCacheKey = null,
+        int               $fallbackCacheTtl = Cache::TTL_DAY,
+        ?string           $fallbackCachePath = null,
         string            $onOPcacheError = 'log',
     ) : AdapterInterface {
         try {
-            $cache ??= new PhpFilesAdapter( $cacheKey, $cacheTtl, $cachePath );
+            $adapter ??= new PhpFilesAdapter( $fallbackCacheKey, $fallbackCacheTtl, $fallbackCachePath );
         }
         catch ( CacheException $exception ) {
             if ( $onOPcacheError === 'log' ) {
@@ -93,7 +91,7 @@ final class Cache
             }
         }
 
-        return $cache ?? new FilesystemAdapter();
+        return $adapter ?? new FilesystemAdapter();
     }
 
     /**
