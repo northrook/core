@@ -42,10 +42,31 @@ final class Cache
      */
     private array $objectCache = [];
 
+
+    /**
+     * Will assign the provided {@see AdapterInterface} to the asset cache.
+     *
+     * If no adapter is provided, a {@see PhpFilesAdapter} will be used.
+     * The PhpFilesAdapter requires the PHP extension OPcache to be installed and activated.
+     *
+     * If OPcache is not available, `$onOPcacheError` will be used to eiter:
+     * - Fall back to a {@see FilesystemAdapter}.
+     *    - With or without an {@see Log::Error} message.
+     * - Throw a {@see LogicException}.
+     * - Ignore the error.
+     *
+     * @param string                 $cacheKey        The cache key
+     * @param string                 $cachePath       The cache path
+     * @param null|AdapterInterface  $adapter         The adapter to use, defaults to a {@see PhpFilesAdapter} if not provided
+     * @param int                    $cacheTtl        The cache TTL in seconds, defaults to a day
+     * @param string                 $onOPcacheError  How to handle errors
+     *
+     * @return AdapterInterface
+     */
     public static function assignAdapterInterface(
-        string            $cacheKey,
-        string            $cachePath,
         ?AdapterInterface $adapter = null,
+        ?string           $cacheKey = null,
+        ?string           $cachePath = null,
         int               $cacheTtl = Cache::TTL_DAY,
         #[ExpectedValues( values : [ 'ignore', 'log', 'throw' ] )]
         string            $onOPcacheError = 'log',
