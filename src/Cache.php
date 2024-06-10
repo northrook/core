@@ -5,6 +5,12 @@ declare( strict_types = 1 );
 namespace Northrook\Core;
 
 // TODO : Add option to use a Symfony CacheAdapter
+use JetBrains\PhpStorm\ExpectedValues;
+use Northrook\Logger\Log;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
+use Symfony\Component\Cache\Exception\CacheException;
 
 /**
  * # A simple cache store.
@@ -12,6 +18,13 @@ namespace Northrook\Core;
  */
 final class Cache
 {
+    public const TTL_MINUTE  = 60;
+    public const TTL_HOUR    = 3600;
+    public const TTL_HOUR_4  = 14400;
+    public const TTL_HOUR_8  = 28800;
+    public const TTL_HOUR_12 = 43200;
+    public const TTL_DAY     = 86400;
+
     private static array $meta = [];
 
     /**
@@ -28,6 +41,39 @@ final class Cache
      * Cache store for a single instance.
      */
     private array $objectCache = [];
+
+    public static function assignAdapterInterface(
+        string            $cacheKey,
+        string            $cachePath,
+        ?AdapterInterface $adapter = null,
+        int               $cacheTtl = Cache::TTL_DAY,
+        #[ExpectedValues( values : [ 'ignore', 'log', 'throw' ] )]
+        string            $onOPcacheError = 'log',
+    ) : AdapterInterface {
+        try {
+            $cache ??= new PhpFilesAdapter( $cacheKey, $cacheTtl, $cachePath );
+        }
+        catch ( CacheException $exception ) {
+            if ( $onOPcacheError === 'log' ) {
+                Log::Error(
+                    'Could not assign {adapter}, {requirement} not available. Ensure the {requirement} PHP extension is installed and activated.',
+                    [
+                        'adapter'     => 'PhpFilesAdapter',
+                        'requirement' => 'OPcache',
+                    ],
+                );
+            }
+            elseif ( $onOPcacheError === 'throw' ) {
+                throw new \LogicException(
+                    message  : 'Could not assign PhpFilesAdapter, OPcache is not available. Ensure the PHP extension is installed and activated.',
+                    code     : 510,
+                    previous : $exception,
+                );
+            }
+        }
+
+        return $cache ?? new FilesystemAdapter();
+    }
 
     /**
      * Cache a callback result.
