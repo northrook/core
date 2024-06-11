@@ -12,6 +12,8 @@
 .env
 *.lock
 /src/Type.php
+/src/Config.php
+/src/Settings.php
 /src/Type/*
 /public/
 /var/

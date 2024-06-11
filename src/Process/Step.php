@@ -4,12 +4,15 @@ namespace Northrook\Core\Process;
 
 use Northrook\Core\Attribute\ExitPoint;
 use Northrook\Core\Trait\PropertyAccessor;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
  * @template Timestamp of int
  * @template Milliseconds of float
  *
- * @property-read bool $completed
+ * @property-read string $status
+ * @property-read string $message
+ * @property-read bool   $completed
  *
  * A simple result object.
  */
@@ -17,31 +20,45 @@ final class Step
 {
     use PropertyAccessor;
 
-    /** @var int<Timestamp> */
-    private readonly int $timestamp;
-
     private ?bool $completed = null;
 
     /** @var array<string,array{time:int<Timestamp>,message:string}> */
-    private array $messages = [];
-
-    public readonly string  $name;
-    public readonly ?string $message;
-    public readonly string  $status; // success | error | warning | notice | info
+    private array           $messages = [];
+    private readonly string $status;
 
     /** @var float<Milliseconds> Total time in milliseconds */
-    public readonly float $completedMs;
+    private readonly float $completedMs;
 
+    public readonly string $name;
+
+    /**
+     * @param string               $name
+     * @param null|string          $message
+     * @param Stopwatch            $stopwatch
+     * @param string|class-string  $section
+     */
     public function __construct(
-        string  $name,
-        ?string $message = null,
+        string                     $name,
+        ?string                    $message,
+        private readonly Stopwatch $stopwatch,
+        private readonly string    $section,
     ) {
-        $this->name      = $name;
-        $this->timestamp = (int) hrtime( true );
+        $this->name = $name;
+        $this->stopwatch->start( $name, $this->section );
+
+        if ( $message ) {
+            $this->message( $message );
+        }
     }
 
-    public function __get( string $property ) : bool | string {
-        return $this->$property;
+    public function __get( string $property ) : null | bool | string | float {
+        return match ( $property ) {
+            'status'      => $this->status ?? "$this->name is not yet completed",
+            'completed'   => $this->completed ?? false,
+            'message'     => end( $this->messages )[ 'message' ] ?? null,
+            'completedMs' => $this->completedMs ?? null,
+            default       => false
+        };
     }
 
     /**
@@ -54,8 +71,9 @@ final class Step
      * @return self
      */
     public function message( string $string ) : self {
+        $period           = $this->stopwatch->lap( $this->name )->getPeriods();
         $this->messages[] = [
-            'time'    => $this->timestamp(),
+            'time'    => end( $period ),
             'message' => $string,
         ];
         return $this;
@@ -64,7 +82,7 @@ final class Step
     /**
      * End the step and set the message.
      *
-     * @param ?string      $status  = Status::LEVEL[ $any ]
+     * @param ?string      $status  = [ 'success', 'error', 'warning', 'notice', 'info' ][ $any ]
      * @param null|string  $message
      *
      * @return self
@@ -76,20 +94,9 @@ final class Step
             return $this;
         }
 
-        $this->completed   = $status === 'success';
+        $this->completed   = $status ??= 'success';
         $this->status      = $status;
-        $this->message     = $message ?? end( $this->messages )[ 'message' ] ?: null;
-        $this->completedMs = $this->timestamp();
+        $this->completedMs = $this->stopwatch->stop( $this->name )->getDuration();
         return $this;
-    }
-
-    /**
-     * Get the total time since Step was initialized in milliseconds.
-     *
-     * @return float<Milliseconds>
-     */
-    private function timestamp() : float {
-        $timestamp = hrtime( true ) - $this->timestamp;
-        return ltrim( number_format( $timestamp / 1_000_000, 3 ), '0' );
     }
 }

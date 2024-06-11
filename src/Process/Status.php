@@ -6,6 +6,7 @@ namespace Northrook\Core\Process;
 
 use Northrook\Core\Attribute\ExitPoint;
 use Northrook\Core\Trait\PropertyAccessor;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
  * A simple result object.
@@ -23,10 +24,6 @@ final class Status
 {
     use PropertyAccessor;
 
-    private const STATUS = [ 'uninitialized', 'processing', 'completed' ];
-
-    public const LEVEL = [ 'success', 'error', 'warning', 'notice', 'info' ];
-
     public const SUCCESS = 'success';
     public const ERROR   = 'error';
     public const WARNING = 'warning';
@@ -43,16 +40,30 @@ final class Status
         'error'   => [],
         'warning' => [],
         'notice'  => [],
-        'infos'   => [],
+        'info'    => [],
     ];
 
+
     /**
-     * @param string|class-string  $service
+     * @param null|string|class-string  $name           Provide a name for the instance, or null to guess from the caller
+     * @param ?Stopwatch                $stopwatch      Pass in a Stopwatch to use, or null to instantiate a new one
+     * @param bool                      $morePrecision  Only applies to self-instantiated {@see Stopwatch}
      */
     public function __construct(
-        public readonly string $service,
-        private readonly mixed $value = null,
-    ) {}
+        private ?string    $name = null,
+        private ?Stopwatch $stopwatch = null,
+        bool               $morePrecision = false,
+    ) {
+        // Use provided name, or guess the name from the caller
+        $this->name ??= debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ]
+                        ?? throw new \LogicException( 'No name provided for ' . Status::class . ' instance.' );
+
+        // Use provided stopwatch, or create a new one
+        $this->stopwatch ??= new Stopwatch( $morePrecision );
+
+        // Open a new section, to be closed in the report
+        $this->stopwatch->openSection();
+    }
 
     public function __get( string $property ) : string | array | bool | null {
         return match ( $property ) {
@@ -68,11 +79,7 @@ final class Status
 
         $this->status = $name;
 
-        $step = $this->steps[ $name ] ?? new Step( $name );
-
-        if ( $message ) {
-            $step->message( $message );
-        }
+        $step = $this->steps[ $name ] ?? new Step( $name, $message, $this->stopwatch, $this->name );
 
         return $this->steps[ $name ] = $step;
     }
@@ -87,21 +94,15 @@ final class Status
     #[ExitPoint]
     public function report() : self {
 
-        $status = null;
 
         foreach ( $this->steps as $step ) {
-            $status = ( $step->end( 'success' ) )->status;
+            $this->status = ( $step->end() )->status;
 
-            if ( $status === 'success' ) {
+            if ( $this->status === 'success' ) {
                 continue;
             }
 
-            $this->report[ $status ][ $step->name ] = $step;
-
-
-            // if ( !( $step->end( 'success' ) )->completed ) {
-            //     $this->status = $step->status;
-            // };
+            $this->report[ $this->status ][ $step->name ] = $step;
         }
 
         $report = [
@@ -110,26 +111,30 @@ final class Status
             'notice'  => count( $this->report[ 'notice' ] ),
         ];
 
+
+        echo '<pre>';
+        echo 'Report:' . PHP_EOL;
         foreach ( $report as $level => $count ) {
             if ( $count === 0 ) {
                 unset( $report[ $level ] );
                 continue;
             }
             $report[ $level ] = $count === 1 ? "$count $level" : "$count {$level}s";
+            echo $level . ':' . $report[ $level ] . PHP_EOL;
         }
+        echo '</pre>';
 
-        if ( $status === 'success' && count( $report ) === 0 ) {
+        if ( $this->status === 'success' && count( $report ) === 0 ) {
             $this->report[ 'message' ] = 'All steps completed successfully.';
         }
-        elseif ( $status === 'error' ) {
+        elseif ( $this->status === 'error' ) {
             $this->report[ 'message' ] =
-                "The $this->service failed, did not complete successfully, reporting " . implode( ', ', $report ) . '.';
+                "The $this->name failed, did not complete successfully, reporting " . implode( ', ', $report ) . '.';
         }
         else {
-            $this->report[ 'message' ] = "The $this->service completed with " . implode( ', ', $report ) . '.';
+            $this->report[ 'message' ] = "The $this->name completed with " . implode( ', ', $report ) . '.';
         }
-
-
+        $this->stopwatch->stopSection( "Status:$this->name" );
         return $this;
     }
 
