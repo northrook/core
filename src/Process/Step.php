@@ -94,6 +94,10 @@ final class Step
             return $this;
         }
 
+        if ( $message ) {
+            $this->message( $message );
+        }
+
         $this->completed   = $status ??= 'success';
         $this->status      = $status;
         $this->completedMs = $this->stopwatch->stop( $this->name )->getDuration();
