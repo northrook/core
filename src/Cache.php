@@ -42,6 +42,14 @@ final class Cache
      */
     private array $objectCache = [];
 
+    public function __construct() {
+        trigger_deprecation(
+            'Northrook\Core',
+            '0.1.0',
+            'Use Symfony\Cache instead.',
+        );
+    }
+
 
     /**
      * Will assign the provided {@see AdapterInterface} to the asset cache.
