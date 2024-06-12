@@ -19,11 +19,11 @@
   "require": {
     "php": ">=8.2",
     "ext-mbstring": "*",
-    "symfony/filesystem": "^7.0",
     "northrook/logger": "dev-main",
-    "symfony/cache": "^7.1",
-    "symfony/var-exporter": "^7.1",
-    "symfony/stopwatch": "^7.1"
+    "symfony/filesystem": "@stable",
+    "symfony/cache": "@stable",
+    "symfony/var-exporter": "@stable",
+    "symfony/stopwatch": "@stable"
   },
   "require-dev": {
     "symfony/deprecation-contracts": "@stable",

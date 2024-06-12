@@ -82,18 +82,17 @@ final class ManifestCache
             return $manifest;
             PHP;
 
-
         try {
             ( new Filesystem() )->dumpFile( $this->cachePath, $content );
         }
-        catch ( IOException $e ) {
+        catch ( IOException $IOException ) {
             Log::Error(
                 'Unable to update the asset manifest.',
                 [
                     'path'     => $this->cachePath,
-                    'message'  => $e->getMessage(),
-                    'code'     => $e->getCode(),
-                    'previous' => $e->getPrevious(),
+                    'message'  => $IOException->getMessage(),
+                    'code'     => $IOException->getCode(),
+                    'previous' => $IOException->getPrevious(),
                 ],
             );
 
