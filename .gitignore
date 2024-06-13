@@ -15,6 +15,7 @@
 /src/Config.php
 /src/Settings.php
 /src/Type/*
+/src/Cache/ManifestCache.php
 /public/
 /var/
 /build/
