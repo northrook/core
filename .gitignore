@@ -19,9 +19,7 @@
 /public/
 /var/
 /build/
-/*.php
-/*.twig
-/*.latte
+/index.php
 
 # Node
 /node_modules/

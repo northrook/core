@@ -25,6 +25,7 @@ final class Timestamp
     public function __construct(
         string $timezone = 'UTC',
     ) {
+        dd( $this::class . ' Deprecated' );
         try {
             $this->timezone = new \DateTimeZone( $timezone );
         }

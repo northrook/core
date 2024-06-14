@@ -23,7 +23,7 @@
     "symfony/filesystem": "@stable",
     "symfony/cache": "@stable",
     "symfony/var-exporter": "@stable",
-    "symfony/stopwatch": "@stable"
+    "symfony/stopwatch": "^7.1"
   },
   "require-dev": {
     "symfony/deprecation-contracts": "@stable",

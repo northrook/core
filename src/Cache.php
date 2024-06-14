@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Northrook\Core;
 
 // TODO : Add option to use a Symfony CacheAdapter
+use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Log;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
@@ -16,6 +17,7 @@ use Symfony\Component\Cache\Exception\CacheException;
  * # A simple cache store.
  *
  */
+#[Deprecated]
 final class Cache
 {
     public const TTL_MINUTE  = 60;
