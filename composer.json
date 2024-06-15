@@ -6,7 +6,10 @@
   "autoload": {
     "psr-4": {
       "Northrook\\Core\\": "src/"
-    }
+    },
+    "files": [
+      "src/functions.php"
+    ]
   },
   "authors": [
     {
