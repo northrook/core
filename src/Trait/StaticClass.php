@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Trait;
 
-use LogicException;
-
 /**
  * Designate a class as static.
  *
@@ -16,13 +14,13 @@ use LogicException;
 trait StaticClass
 {
     final protected function __construct() {
-        throw new LogicException(
+        throw new \LogicException(
             $this::class . " is using the `StaticClass` trait, and should not be instantiated directly.",
         );
     }
 
     final protected function __clone() {
-        throw new LogicException(
+        throw new \LogicException(
             $this::class . " is using the `StaticClass` trait, and should not be cloned.",
         );
     }

@@ -6,7 +6,6 @@ namespace Northrook\Core;
 
 use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Log;
-use Symfony\Component\ErrorHandler\Debug;
 
 /**
  * @template Debug of bool

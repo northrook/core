@@ -20,8 +20,6 @@
     "php": ">=8.2",
     "ext-mbstring": "*",
     "northrook/logger": "dev-main",
-    "symfony/filesystem": "@stable",
-    "symfony/cache": "@stable",
     "symfony/var-exporter": "@stable",
     "symfony/stopwatch": "^7.1"
   },
