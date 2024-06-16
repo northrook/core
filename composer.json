@@ -24,11 +24,13 @@
     "ext-mbstring": "*",
     "northrook/logger": "dev-main",
     "symfony/var-exporter": "@stable",
-    "symfony/stopwatch": "^7.1"
+    "symfony/stopwatch": "^7.1",
+    "ext-zend-opcache": "*"
   },
   "require-dev": {
     "symfony/deprecation-contracts": "@stable",
     "symfony/var-dumper": "@stable",
-    "symfony/error-handler": "@stable"
+    "symfony/error-handler": "@stable",
+    "northrook/dev-env": "dev-main"
   }
 }
