@@ -1,7 +1,41 @@
-<?php // globally available functions
+<?php
+
+/* Core Functions
+
+ License: MIT
+ Copyright (c) 2024
+ Martin Nielsen <mn@northrook.com>
+
+*/
 
 declare( strict_types = 1 );
 
+namespace Northrook\Core\Functions;
+
+/**
+ * # Get the class name of a provided class, or the calling class.
+ *
+ * - Will use the `debug_backtrace()` to get the calling class if no `$class` is provided.
+ *
+ * ```
+ * $class = new \Northrook\Core\Env();
+ * classBasename( $class );
+ * // => 'Env'
+ * ```
+ *
+ *
+ * @param class-string|object|null  $class
+ *
+ * @return string
+ */
+function classBasename( string | object | null $class = null ) : string {
+    $class ??= debug_backtrace()[ 1 ] [ 'class' ];
+    $class = is_object( $class ) ? $class::class : $class;
+
+    $namespace = strrpos( $class, '\\' );
+
+    return $namespace ? substr( $class, ++$namespace ) : $class;
+}
 
 /**
  * # Generate a deterministic hash key from a value.
@@ -57,7 +91,7 @@ function hashKey(
 }
 
 /**
- * Normalise a `string`, assuming returning it as a `key`.
+ * # Normalise a `string`, assuming returning it as a `key`.
  *
  * - Removes non-alphanumeric characters.
  * - Removes leading and trailing separators.
@@ -85,7 +119,7 @@ function normalizeKey( string $string, string $separator = '-' ) : string {
 }
 
 /**
- * Normalise a `string`, assuming it is a `path`.
+ * # Normalise a `string`, assuming it is a `path`.
  *
  * - Removes repeated slashes.
  * - Normalises slashes to system separator.
