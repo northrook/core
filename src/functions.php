@@ -38,6 +38,55 @@ function classBasename( string | object | null $class = null ) : string {
 }
 
 /**
+ * # Get all the classes, traits, and interfaces used by a class.
+ *
+ *
+ * @param null|string|object  $class
+ * @param bool                $includeSelf
+ * @param bool                $includeInterface
+ * @param bool                $includeTrait
+ * @param bool                $namespace
+ * @param bool                $details
+ *
+ * @return array
+ */
+function extendingClasses(
+    string | object | null $class = null,
+    bool                   $includeSelf = true,
+    bool                   $includeInterface = true,
+    bool                   $includeTrait = true,
+    bool                   $namespace = true,
+    bool                   $details = false,
+) : array {
+
+    $class ??= debug_backtrace()[ 1 ] [ 'class' ];
+    $class = is_object( $class ) ? $class::class : $class;
+
+    $classes = $includeSelf ? [ $class => 'self' ] : [];
+
+    $parent  = class_parents( $class );
+    $classes += array_fill_keys( $parent, 'parent' );
+
+    if ( $includeInterface ) {
+        $interfaces = class_implements( $class );
+        $classes    += array_fill_keys( $interfaces, 'interface' );
+    }
+
+    if ( $includeTrait ) {
+        $traits  = class_uses( $class );
+        $classes += array_fill_keys( $traits, 'trait' );
+    }
+
+    if ( $details ) {
+        return $classes;
+    }
+
+    $classes = array_keys( $classes );
+
+    return $namespace ? $classes : array_map( 'Northrook\Core\Functions\classBasename', $classes );
+}
+
+/**
  * # Generate a deterministic hash key from a value.
  *
  *  - `$value` will be stringified using `json_encode()` by default.
@@ -135,7 +184,7 @@ function normalizeKey( string $string, string $separator = '-' ) : string {
  *
  * @return string
  */
-function normalizeRealPath(
+function normalizePath(
     string $string,
     bool   $trailingSlash = false,
 ) : string {
