@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Debug;
+namespace Northrook\Debug;
 
 /**
  * Debug_backtrace helper class.
@@ -22,6 +22,13 @@ final class Backtrace
         int  $limit = 0,
         ?int $depth = null,
     ) {
+        trigger_deprecation(
+            'northrook/logger',
+            '1.0.0',
+            'The "%s" class is deprecated. No custom backtrace will be used.',
+            Backtrace::class,
+        );
+
         $this->backtrace = array_slice(
             debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, $limit ),
             0,
