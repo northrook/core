@@ -13,6 +13,17 @@ declare( strict_types = 1 );
 namespace Northrook\Core\Function;
 
 /**
+ * # Determine if a value is a scalar.
+ *
+ * @param mixed  $value
+ *
+ * @return bool
+ */
+function isScalar( mixed $value ) : bool {
+    return is_scalar( $value ) || $value instanceof \Stringable || is_null( $value );
+}
+
+/**
  * # Get the class name of a provided class, or the calling class.
  *
  * - Will use the `debug_backtrace()` to get the calling class if no `$class` is provided.

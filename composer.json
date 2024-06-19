@@ -21,8 +21,8 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.2",
+    "psr/log": "^1|^2|^3",
     "ext-mbstring": "*",
-    "northrook/logger": "dev-main",
     "symfony/var-exporter": "@stable",
     "symfony/stopwatch": "^7.1",
     "ext-zend-opcache": "*"
