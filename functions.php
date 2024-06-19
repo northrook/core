@@ -10,7 +10,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Functions;
+namespace Northrook\Core\Function;
 
 /**
  * # Get the class name of a provided class, or the calling class.

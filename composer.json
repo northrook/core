@@ -8,7 +8,7 @@
       "Northrook\\Core\\": "src/"
     },
     "files": [
-      "src/functions.php"
+      "functions.php"
     ]
   },
   "authors": [
