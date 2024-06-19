@@ -21,7 +21,7 @@ namespace Northrook\Core\Function;
  */
 function isScalar( mixed $value ) : bool {
     return is_scalar( $value ) || $value instanceof \Stringable || is_null( $value );
-}
+}``
 
 /**
  * # Get the class name of a provided class, or the calling class.

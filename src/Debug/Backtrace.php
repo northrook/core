@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Debug;
+namespace Northrook\Core\Debug;
 
 /**
  * Debug_backtrace helper class.

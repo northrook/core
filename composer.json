@@ -5,7 +5,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Northrook\\": "src/"
+      "Northrook\\Core\\": "src/"
     },
     "files": [
       "src/functions.php"
@@ -22,12 +22,15 @@
   "require": {
     "php": ">=8.2",
     "ext-mbstring": "*",
-    "ext-zend-opcache": "*",
     "symfony/var-exporter": "@stable",
     "symfony/stopwatch": "^7.1",
+    "ext-zend-opcache": "*",
     "northrook/logger": "dev-main"
   },
   "require-dev": {
+    "symfony/deprecation-contracts": "@stable",
+    "symfony/var-dumper": "@stable",
+    "symfony/error-handler": "@stable",
     "northrook/dev-env": "dev-main"
   }
 }
