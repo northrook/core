@@ -20,8 +20,8 @@ namespace Northrook\Core\Function;
  * @return bool
  */
 function isScalar( mixed $value ) : bool {
-    return is_scalar( $value ) || $value instanceof \Stringable || is_null( $value );
-}``
+    return \is_scalar( $value ) || $value instanceof \Stringable || \is_null( $value );
+}
 
 /**
  * # Get the class name of a provided class, or the calling class.
@@ -40,12 +40,12 @@ function isScalar( mixed $value ) : bool {
  * @return string
  */
 function classBasename( string | object | null $class = null ) : string {
-    $class ??= debug_backtrace()[ 1 ] [ 'class' ];
-    $class = is_object( $class ) ? $class::class : $class;
+    $class ??= \debug_backtrace()[ 1 ] [ 'class' ];
+    $class = \is_object( $class ) ? $class::class : $class;
 
-    $namespace = strrpos( $class, '\\' );
+    $namespace = \strrpos( $class, '\\' );
 
-    return $namespace ? substr( $class, ++$namespace ) : $class;
+    return $namespace ? \substr( $class, ++$namespace ) : $class;
 }
 
 /**
@@ -70,31 +70,31 @@ function extendingClasses(
     bool                   $details = false,
 ) : array {
 
-    $class ??= debug_backtrace()[ 1 ] [ 'class' ];
-    $class = is_object( $class ) ? $class::class : $class;
+    $class ??= \debug_backtrace()[ 1 ] [ 'class' ];
+    $class = \is_object( $class ) ? $class::class : $class;
 
     $classes = $includeSelf ? [ $class => 'self' ] : [];
 
-    $parent  = class_parents( $class );
-    $classes += array_fill_keys( $parent, 'parent' );
+    $parent  = \class_parents( $class );
+    $classes += \array_fill_keys( $parent, 'parent' );
 
     if ( $includeInterface ) {
-        $interfaces = class_implements( $class );
-        $classes    += array_fill_keys( $interfaces, 'interface' );
+        $interfaces = \class_implements( $class );
+        $classes    += \array_fill_keys( $interfaces, 'interface' );
     }
 
     if ( $includeTrait ) {
-        $traits  = class_uses( $class );
-        $classes += array_fill_keys( $traits, 'trait' );
+        $traits  = \class_uses( $class );
+        $classes += \array_fill_keys( $traits, 'trait' );
     }
 
     if ( $details ) {
         return $classes;
     }
 
-    $classes = array_keys( $classes );
+    $classes = \array_keys( $classes );
 
-    return $namespace ? $classes : array_map( 'Northrook\Core\Functions\classBasename', $classes );
+    return $namespace ? $classes : \array_map( 'Northrook\Core\Function\classBasename', $classes );
 }
 
 /**
@@ -135,19 +135,19 @@ function hashKey(
 
     // Use serialize if defined
     if ( $encoder === 'serialize' ) {
-        $value = serialize( $value );
+        $value = \serialize( $value );
     }
     // Implode if defined and $value is an array
-    elseif ( $encoder === 'implode' && is_array( $value ) ) {
-        $value = implode( ':', $value );
+    elseif ( $encoder === 'implode' && \is_array( $value ) ) {
+        $value = \implode( ':', $value );
     }
     // JSON as default, or as fallback
     else {
-        $value = json_encode( $value ) ?: serialize( $value );
+        $value = \json_encode( $value ) ?: \serialize( $value );
     }
 
     // Hash the $value to a 16 character string
-    return hash( algo : 'xxh3', data : $value );
+    return \hash( algo : 'xxh3', data : $value );
 }
 
 /**
@@ -169,13 +169,13 @@ function hashKey(
  */
 function normalizeKey( string $string, string $separator = '-' ) : string {
     // Convert to lowercase
-    $string = strtolower( $string );
+    $string = \strtolower( $string );
 
     // Replace non-alphanumeric characters with the separator
-    $string = preg_replace( '/[^a-z0-9]+/i', $separator, $string );
+    $string = \preg_replace( '/[^a-z0-9]+/i', $separator, $string );
 
     // Remove leading and trailing separators
-    return trim( $string, $separator );
+    return \trim( $string, $separator );
 }
 
 /**
@@ -199,10 +199,10 @@ function normalizePath(
     string $string,
     bool   $trailingSlash = false,
 ) : string {
-    $normalize = str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
-    $exploded  = explode( DIRECTORY_SEPARATOR, $normalize );
-    $path      = implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
+    $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
+    $exploded  = \explode( DIRECTORY_SEPARATOR, $normalize );
+    $path      = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
 
-    $path = ( realpath( $path ) ?: $path );
+    $path = \realpath( $path ) ?: $path;
     return $trailingSlash ? $path . DIRECTORY_SEPARATOR : $path;
 }
