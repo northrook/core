@@ -13,6 +13,23 @@ declare( strict_types = 1 );
 namespace Northrook\Core\Function;
 
 /**
+ * # Ensure a number is within a range.
+ *
+ * @param int|float  $number
+ * @param int|float  $ceil
+ * @param int|float  $floor
+ *
+ * @return int|float
+ */
+function numberWithin( int | float $number, int | float $ceil, int | float $floor ) : int | float {
+    return match ( true ) {
+        $number >= $ceil => $ceil,
+        $number < $floor => $floor,
+        default          => $number
+    };
+}
+
+/**
  * # Determine if a value is a scalar.
  *
  * @param mixed  $value
