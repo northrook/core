@@ -24,7 +24,7 @@ interface Printable extends \Stringable
     /**
      * Echo the resulting HTML, or nothing if the element does not pass validation.
      *
-     * ⚠️ Must handle all parsing, optimization, escaping, and encoding.
+     * ⚠️ Assumes the {@see __toString()} handles all parsing, optimization, escaping, and encoding.
      *
      *  ```
      * // escape strings, optimize, etc
