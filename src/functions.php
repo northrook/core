@@ -12,6 +12,31 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Function;
 
+/** Replace each key from `$map` with its value, when found in `$content`.
+ *
+ * @param array         $map  search:replace
+ * @param string|array  $content
+ * @param bool          $caseSensitive
+ *
+ * @return array|string|string[] The processed `$content`, or null if `$content` is empty
+ */
+function replaceEach(
+    array          $map,
+    string | array $content,
+    bool           $caseSensitive = true,
+) : string | array {
+
+    if ( !$content ) {
+        return $content;
+    }
+
+    $keys = \array_keys( $map );
+
+    return $caseSensitive
+        ? \str_replace( $keys, $map, $content )
+        : \str_ireplace( $keys, $map, $content );
+}
+
 /**
  * # Ensure a number is within a range.
  *
