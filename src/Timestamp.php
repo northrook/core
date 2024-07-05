@@ -14,7 +14,7 @@ class Timestamp implements \Stringable
 
     private readonly \DateTimeImmutable $dateTimeImmutable;
 
-    public readonly int    $timestamp;
+    public readonly int    $unixTimestamp;
     public readonly string $datetime;
     public readonly string $timezone;
 
@@ -25,11 +25,10 @@ class Timestamp implements \Stringable
     ) {
         $this->setDateTime( $dateTime, $timezone );
 
-        $this->timestamp = $this->dateTimeImmutable->getTimestamp();
-        $this->timezone  = $this->dateTimeImmutable->getTimezone()->getName();
-        $this->datetime  = $this->dateTimeImmutable->format( $format ) . ' ' . $this->timezone;
+        $this->unixTimestamp = $this->dateTimeImmutable->getTimestamp();
+        $this->timezone      = $this->dateTimeImmutable->getTimezone()->getName();
+        $this->datetime      = $this->dateTimeImmutable->format( $format ) . ' ' . $this->timezone;
     }
-
 
     final public function format( string $format ) : string {
         return $this->dateTimeImmutable->format( $format );
