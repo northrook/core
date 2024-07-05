@@ -12,6 +12,23 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Function;
 
+
+function timestamp(
+    string | \DateTimeInterface $dateTime = 'now',
+    string | \DateTimeZone      $timezone = 'UTC',
+) : \DateTimeImmutable {
+    try {
+        return new \DateTimeImmutable( $dateTime, timezone_open( $timezone ) ?: null );
+    }
+    catch ( \Exception $exception ) {
+        throw new \InvalidArgumentException(
+            message  : "Unable to create a new DateTimeImmutable object for $timezone.",
+            code     : 500,
+            previous : $exception,
+        );
+    }
+}
+
 /** Replace each key from `$map` with its value, when found in `$content`.
  *
  * @param array         $map  search:replace
