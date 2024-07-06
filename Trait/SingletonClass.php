@@ -4,13 +4,15 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Trait;
 
+use Northrook\Core\Exception\ClassStructureException;
+
 /**
  * Designate a class as a Singleton.
  *
  * - Store {@see static::$this} in the static property {@see SingletonClass::$instance}.
  * - If this is done in the constructor, you should call {@see SingletonClass::instantiationCheck()} to prevent re-instantiation
  * - The constructor can be public.
- * - The {@see SingletonClass::getInstance()} method should be used to get the instance.
+ * - The {@see SingletonClass::getInstance()} method should be used to retrieve the instance.
  * - It is protected by default, you can override the visibility if needed.
  *
  * @author Martin Nielsen <mn@northrook.com>
@@ -22,10 +24,20 @@ trait SingletonClass
     /**
      * Retrieve the Singleton instance.
      *
+     * @param bool   $selfInstantiate
+     * @param array  $arguments
+     *
      * @return static
      */
-    protected static function getInstance() : static {
-        return self::$instance ??= new static();
+    protected static function getInstance(
+        bool  $selfInstantiate = false,
+        mixed ...$arguments,
+    ) : static {
+        return self::$instance ??= $selfInstantiate
+            ? new static( ...$arguments )
+            : throw new ClassStructureException(
+                "The " . self::class . " has not yet been instantiated.\nPlease initialise it before using the getInstance method.",
+            );
     }
 
     /**

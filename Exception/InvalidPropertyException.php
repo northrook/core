@@ -2,8 +2,6 @@
 
 namespace Northrook\Core\Exception;
 
-use Northrook\Core\Debug\Backtrace;
-
 class InvalidPropertyException extends \Exception
 {
 
@@ -16,8 +14,8 @@ class InvalidPropertyException extends \Exception
         int                    $code = 0,
         ?\Throwable            $previous = null,
     ) {
-        $this->caller = Backtrace::get()->caller;
-
+        $this->caller = $this->getCaller();
+        
         $invalid = $this->getType( $this->invalidProperty );
 
         $invalid = match ( $invalid ) {
@@ -38,6 +36,14 @@ class InvalidPropertyException extends \Exception
         $message ??= "Invalid property $invalid in '{$this->caller}', should be $required.";
 
         parent::__construct( $message, $code, $previous );
+    }
+
+    private function getCaller() : string {
+        $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 );
+
+        $caller = $backtrace[ 1 ] ?? $backtrace[ 0 ];
+
+        return implode( '', [ $caller[ 'class' ] ?? null, $caller[ 'type' ] ?? null, $caller[ 'function' ] ?? null ] );
     }
 
     private function getType( mixed $value ) : string {
