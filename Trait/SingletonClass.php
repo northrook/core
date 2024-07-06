@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Trait;
 
-use Northrook\Core\Exception\ClassStructureException;
+use Northrook\Core\Exception\UninitializedPropertyException;
 
 /**
  * Designate a class as a Singleton.
@@ -35,9 +35,7 @@ trait SingletonClass
     ) : static {
         return self::$instance ??= $selfInstantiate
             ? new static( ...$arguments )
-            : throw new ClassStructureException(
-                "The " . self::class . " has not yet been instantiated.\nPlease initialise it before using the getInstance method.",
-            );
+            : throw new UninitializedPropertyException( '$instance', self::class );
     }
 
     /**

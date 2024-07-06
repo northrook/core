@@ -7,8 +7,6 @@ namespace Northrook\Core\Exception;
 class UninitializedPropertyException extends \LogicException
 {
 
-    public readonly string $caller;
-
     /**
      * @param string           $propertyName
      * @param class-string     $className
@@ -24,19 +22,27 @@ class UninitializedPropertyException extends \LogicException
         ?\Throwable            $previous = null,
     ) {
 
-        $this->caller = $this->getCaller();
+        $caller = $this->getCaller();
 
-        $message ??= "{$this->caller} could not access property '{$this->propertyName}', but is not initialized in '{$this->caller}'.";
+        $message ??= ( $caller ? "$caller could"
+                : "Could" ) . " not access property {$this->className}::{$this->propertyName}, as it is uninitialised.";
 
         parent::__construct( $message, $code, $previous );
     }
 
-    private function getCaller() : string {
+    private function getCaller() : ?string {
         $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 );
 
-        $caller = $backtrace[ 1 ] ?? $backtrace[ 0 ];
 
-        return implode( '', [ $caller[ 'class' ] ?? null, $caller[ 'type' ] ?? null, $caller[ 'function' ] ?? null ] );
+        $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 );
+        $caller    = $backtrace[ 2 ] ?? false;
+
+        if ( $caller ) {
+            return implode(
+                '', [ $caller[ 'class' ] ?? null, $caller[ 'type' ] ?? null, $caller[ 'function' ] ?? null ],
+            );
+        }
+        return null;
     }
 
 }
