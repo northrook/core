@@ -4,6 +4,11 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
+function escChar( string $string ) : string {
+
+    return implode( '', array_map( static fn ( $char ) => '\\' . $char, str_split( $string ) ) );
+}
+
 class Timestamp implements \Stringable
 {
     public const FORMAT_SORTABLE         = 'Y-m-d H:i:s';
@@ -30,7 +35,85 @@ class Timestamp implements \Stringable
         $this->datetime      = $this->dateTimeImmutable->format( $format ) . ' ' . $this->timezone;
     }
 
-    final public function format( string $format ) : string {
+    private function wrapFormatted( string $string, ?string $classPrefix = null ) : string {
+
+        $each = [];
+
+        $string = preg_replace_callback_array(
+            [
+                // Day
+                "#[dD]#"           => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'day',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+                // Month
+                "#[mM]#"           => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'month',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+                // Year
+                "#[yY]#"           => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'year',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+                // Day
+                "#[jS]#"           => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'day',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+                // Weekday
+                "#W#"              => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'weekday',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+                // Time
+                '#[aABgGhHisu].*#' => function ( $match ) use ( &$each ) {
+                    $each[] = [
+                        'type' => 'time',
+                        'flag' => $match[ 0 ],
+                    ];
+                    return '[' . count( $each ) - 1 . ']';
+                },
+            ],
+            $string,
+        );
+
+
+        foreach ( $each as $key => $value ) {
+            $class  = implode( '-', [ $classPrefix, $value[ 'type' ] ] );
+            $flag   = $value[ 'flag' ];
+            $string = str_replace(
+                "[$key]",
+                escChar( '<span class="' . $class . '">' ) . $flag . escChar( '</span>' ),
+                $string,
+            );
+        }
+
+        return $string;
+    }
+
+    final public function format( string $format, bool | string $wrapEach = false ) : string {
+
+        if ( $wrapEach ) {
+            $prefixClass = is_string( $wrapEach ) ? $wrapEach : 'datetime';
+            $format      = $this->wrapFormatted( $format, $prefixClass );
+        }
+
         return $this->dateTimeImmutable->format( $format );
     }
 

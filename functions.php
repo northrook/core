@@ -284,15 +284,16 @@ function normalizeKey( string $string, string $separator = '-' ) : string {
  * // => '.\assets\scripts\example.js'
  * ```
  *
- * @param string  $string         The string to normalize.
- * @param bool    $trailingSlash  Append a trailing slash.
+ * @param string[]  $string         The string to normalize.
+ * @param bool      $trailingSlash  Append a trailing slash.
  *
  * @return string
  */
 function normalizePath(
-    string $string,
-    bool   $trailingSlash = false,
+    string | array $string,
+    bool           $trailingSlash = false,
 ) : string {
+    
     $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
     $exploded  = \explode( DIRECTORY_SEPARATOR, $normalize );
     $path      = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
