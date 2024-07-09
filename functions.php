@@ -256,14 +256,14 @@ function hashKey(
  * // => 'assets-scripts-example-js'
  * ```
  *
- * @param string  $string
- * @param string  $separator
+ * @param string[]  $string
+ * @param string    $separator
  *
  * @return string
  */
-function normalizeKey( string $string, string $separator = '-' ) : string {
+function normalizeKey( string | array $string, string $separator = '-' ) : string {
     // Convert to lowercase
-    $string = \strtolower( $string );
+    $string = \strtolower( \is_string( $string ) ? $string : \implode( $separator, $string ) );
 
     // Replace non-alphanumeric characters with the separator
     $string = \preg_replace( '/[^a-z0-9]+/i', $separator, $string );
@@ -293,7 +293,7 @@ function normalizePath(
     string | array $string,
     bool           $trailingSlash = false,
 ) : string {
-    
+
     $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
     $exploded  = \is_string( $normalize ) ? \explode( DIRECTORY_SEPARATOR, $normalize ) : $normalize;
     $path      = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
