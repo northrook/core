@@ -295,7 +295,7 @@ function normalizePath(
 ) : string {
     
     $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
-    $exploded  = \explode( DIRECTORY_SEPARATOR, $normalize );
+    $exploded  = \is_string( $normalize ) ? \explode( DIRECTORY_SEPARATOR, $normalize ) : $normalize;
     $path      = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
 
     $path = \realpath( $path ) ?: $path;
