@@ -71,6 +71,23 @@ function numberWithin( int | float $number, int | float $ceil, int | float $floo
     };
 }
 
+function isUrl( mixed $url, ?string $requiredProtocol = null ) : bool {
+
+    if ( !$url || !isScalar( $url ) ) {
+        return false;
+    }
+
+    if ( !str_contains( (string) $url, '://' ) ) {
+        return false;
+    }
+
+    if ( $requiredProtocol && !str_starts_with( $url, $requiredProtocol ) ) {
+        return false;
+    }
+
+    return true;
+}
+
 /**
  * # Determine if a value is a scalar.
  *
