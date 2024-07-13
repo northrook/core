@@ -9,8 +9,6 @@ namespace Northrook\Core\Abstract;
  *
  * - Prevent instantiation of a class.
  *
- * @internal
- *
  * @author Martin Nielsen <mn@northrook.com>
  */
 abstract class StaticClass
