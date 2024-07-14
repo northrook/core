@@ -21,6 +21,8 @@ trait InstantiatedStaticClass
      */
     final protected function instantiationCheck( bool | array $check, bool $throwOnFail = true ) : bool {
 
+        dump( __METHOD__ );
+
         $pass = is_bool( $check ) ? $check : in_array( true, $check, true );
 
         if ( $throwOnFail && $check ) {

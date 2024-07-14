@@ -10,7 +10,17 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Function;
+namespace Northrook\Core;
+
+function memoize( mixed $key, callable $callback ) : mixed {
+    static $cache = [];
+    return $cache[ encodeKey( $key ) ] ??= $callback();
+}
+
+function escChar( string $string ) : string {
+
+    return \implode( '', \array_map( static fn ( $char ) => '\\' . $char, \str_split( $string ) ) );
+}
 
 
 function timestamp(
@@ -116,11 +126,9 @@ function isScalar( mixed $value ) : bool {
  * @return string
  */
 function classBasename( string | object | null $class = null ) : string {
-    $class ??= \debug_backtrace()[ 1 ] [ 'class' ];
-    $class = \is_object( $class ) ? $class::class : $class;
-
+    $class     ??= \debug_backtrace()[ 1 ] [ 'class' ];
+    $class     = \is_object( $class ) ? $class::class : $class;
     $namespace = \strrpos( $class, '\\' );
-
     return $namespace ? \substr( $class, ++$namespace ) : $class;
 }
 
@@ -171,6 +179,7 @@ function extendingClasses(
     $classes = \array_keys( $classes );
 
     return $namespace ? $classes : \array_map( 'Northrook\Core\Function\classBasename', $classes );
+
 }
 
 /**
@@ -209,6 +218,19 @@ function booleanValues( array $array, bool $default = true ) : array {
 }
 
 /**
+ * # Generate a deterministic key from a value.
+ *
+ *  - `$value` will be stringified using `json_encode()`.
+ *
+ * @param mixed  ...$value
+ *
+ * @return string
+ */
+function encodeKey( mixed ...$value ) : string {
+    return \json_encode( $value, 64 | 256 | 512 );
+}
+
+/**
  * # Generate a deterministic hash key from a value.
  *
  *  - `$value` will be stringified using `json_encode()` by default.
@@ -243,7 +265,6 @@ function hashKey(
     mixed  $value,
     string $encoder = 'json',
 ) : string {
-
     // Use serialize if defined
     if ( $encoder === 'serialize' ) {
         $value = \serialize( $value );
@@ -290,11 +311,14 @@ function normalizeKey( string | array $string, string $separator = '-' ) : strin
 }
 
 /**
- * # Normalise a `string`, assuming it is a `path`.
+ * # Normalise a `string` or `string[]`, assuming it is a `path`.
  *
- * - Removes repeated slashes.
+ * - If an array of strings is passed, they will be joined using the directory separator.
  * - Normalises slashes to system separator.
- * - No validation is performed.
+ * - Removes repeated separators.
+ * - Valid paths will be added to the realpath cache.
+ * - The resulting string will be cached for this process.
+ * - Will throw a {@see \LengthException} if the resulting string exceeds {@see PHP_MAXPATHLEN}.
  *
  * ```
  * normalizePath( './assets\\\/scripts///example.js' );
@@ -310,11 +334,52 @@ function normalizePath(
     string | array $string,
     bool           $trailingSlash = false,
 ) : string {
+    static $cache = [];
+    return $cache[ \json_encode( [ $string, $trailingSlash ], 832 ) ] ??= (
+    static function () use ( $string, $trailingSlash ) : string {
 
-    $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
-    $exploded  = \is_string( $normalize ) ? \explode( DIRECTORY_SEPARATOR, $normalize ) : $normalize;
-    $path      = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
+        // Normalize separators
+        $normalize = \str_replace( [ '\\', '/' ], DIRECTORY_SEPARATOR, $string );
 
-    $path = \realpath( $path ) ?: $path;
-    return $trailingSlash ? $path . DIRECTORY_SEPARATOR : $path;
+        // Explode strings for separator deduplication
+        $exploded = \is_string( $normalize ) ? \explode( DIRECTORY_SEPARATOR, $normalize ) : $normalize;
+
+        // Filter the exploded path, and implode using the directory separator
+        $path = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
+
+
+        // Ensure the resulting path does not exceed the system limitations
+        validateCharacterLimit( $path, \PHP_MAXPATHLEN - 2, __NAMESPACE__ . '\normalizePath' );
+
+        // Add to realpath cache if valid
+        $path = \realpath( $path ) ?: $path;
+
+        // Return with or without a $trailingSlash
+        return $trailingSlash ? $path . DIRECTORY_SEPARATOR : $path;
+    } )();
+}
+
+/**
+ * Throws a {@see \LengthException} when the length of `$string` exceeds the provided `$limit`.
+ *
+ * @param string       $string
+ * @param int          $limit
+ * @param null|string  $caller  Class, method, or function name
+ *
+ * @return void
+ */
+function validateCharacterLimit(
+    string  $string,
+    int     $limit,
+    ?string $caller = null,
+) : void {
+    $limit  = \PHP_MAXPATHLEN - 2;
+    $length = \strlen( $string );
+    if ( $length > $limit ) {
+        throw new \LengthException (
+            $caller
+                ? $caller . " resulted in a $length character string, exceeding the $limit limit."
+                : "The provided string is $length characters long, exceeding the $limit limit.",
+        );
+    }
 }

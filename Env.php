@@ -59,27 +59,22 @@ class Env
             );
         }
 
-        if ( str_starts_with( $env, Env::PRODUCTION ) ) {
+        if ( \str_starts_with( $env, Env::PRODUCTION ) ) {
             $env = Env::PRODUCTION;
         }
 
-        if ( str_starts_with( $env, Env::DEVELOPMENT ) ) {
+        if ( \str_starts_with( $env, Env::DEVELOPMENT ) ) {
             $env = Env::DEVELOPMENT;
         }
 
-        if ( str_starts_with( $env, Env::STAGING ) ) {
+        if ( \str_starts_with( $env, Env::STAGING ) ) {
             $env = Env::STAGING;
         }
 
-        Env::$environment = strtolower( $env );
+        Env::$environment = \strtolower( $env );
         Env::$debug       = $debug;
 
         Env::$instantiated = true;
-    }
-
-    public static function __callStatic( string $name, array $arguments ) : bool {
-        $name = str_starts_with( $name, 'is' ) ? substr( $name, 2 ) : $name;
-        return Env::$environment === strtolower( $name );
     }
 
     /**

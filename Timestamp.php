@@ -4,11 +4,6 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
-function escChar( string $string ) : string {
-
-    return implode( '', array_map( static fn ( $char ) => '\\' . $char, str_split( $string ) ) );
-}
-
 class Timestamp implements \Stringable
 {
     public const FORMAT_SORTABLE         = 'Y-m-d H:i:s';
@@ -39,55 +34,55 @@ class Timestamp implements \Stringable
 
         $each = [];
 
-        $string = preg_replace_callback_array(
+        $string = \preg_replace_callback_array(
             [
                 // Day
-                "#[dD]#"           => function ( $match ) use ( &$each ) {
+                "#[dD]#"           => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'day',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
                 // Month
-                "#[mM]#"           => function ( $match ) use ( &$each ) {
+                "#[mM]#"           => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'month',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
                 // Year
-                "#[yY]#"           => function ( $match ) use ( &$each ) {
+                "#[yY]#"           => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'year',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
                 // Day
-                "#[jS]#"           => function ( $match ) use ( &$each ) {
+                "#[jS]#"           => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'day',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
                 // Weekday
-                "#W#"              => function ( $match ) use ( &$each ) {
+                "#W#"              => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'weekday',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
                 // Time
-                '#[aABgGhHisu].*#' => function ( $match ) use ( &$each ) {
+                '#[aABgGhHisu].*#' => static function ( $match ) use ( &$each ) {
                     $each[] = [
                         'type' => 'time',
                         'flag' => $match[ 0 ],
                     ];
-                    return '[' . count( $each ) - 1 . ']';
+                    return '[' . \count( $each ) - 1 . ']';
                 },
             ],
             $string,
@@ -95,9 +90,9 @@ class Timestamp implements \Stringable
 
 
         foreach ( $each as $key => $value ) {
-            $class  = implode( '-', [ $classPrefix, $value[ 'type' ] ] );
+            $class  = \implode( '-', [ $classPrefix, $value[ 'type' ] ] );
             $flag   = $value[ 'flag' ];
-            $string = str_replace(
+            $string = \str_replace(
                 "[$key]",
                 escChar( '<span class="' . $class . '">' ) . $flag . escChar( '</span>' ),
                 $string,
@@ -110,7 +105,7 @@ class Timestamp implements \Stringable
     final public function format( string $format, bool | string $wrapEach = false ) : string {
 
         if ( $wrapEach ) {
-            $prefixClass = is_string( $wrapEach ) ? $wrapEach : 'datetime';
+            $prefixClass = \is_string( $wrapEach ) ? $wrapEach : 'datetime';
             $format      = $this->wrapFormatted( $format, $prefixClass );
         }
 
@@ -126,7 +121,7 @@ class Timestamp implements \Stringable
         string | \DateTimeZone      $timezone = 'UTC',
     ) : void {
         try {
-            $this->dateTimeImmutable = new \DateTimeImmutable( $dateTime, timezone_open( $timezone ) ?: null );
+            $this->dateTimeImmutable = new \DateTimeImmutable( $dateTime, \timezone_open( $timezone ) ?: null );
         }
         catch ( \Exception $exception ) {
             throw new \InvalidArgumentException(
