@@ -4,14 +4,11 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Exception;
 
-use LogicException;
-
 /**
  * The exception occurred during Component compilation.
  */
-class ClassStructureException extends LogicException
+class ClassStructureException extends \LogicException
 {
-
     /**
      * Construct the exception. Note: The message is NOT binary safe.
      * @link https://php.net/manual/en/exception.construct.php

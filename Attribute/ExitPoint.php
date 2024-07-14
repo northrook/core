@@ -11,8 +11,8 @@ use Attribute;
  *
  * @link    https://github.com/northrook/core
  */
-#[Attribute( Attribute::TARGET_FUNCTION, Attribute::TARGET_METHOD )]
+#[Attribute( Attribute::TARGET_FUNCTION | Attribute::TARGET_METHOD )]
 class ExitPoint
 {
-    public function __construct( callable $consumedBy, ) {}
+    public function __construct( mixed $consumedBy = null ) {}
 }

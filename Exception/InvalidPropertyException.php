@@ -1,10 +1,11 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Core\Exception;
 
 class InvalidPropertyException extends \Exception
 {
-
     public readonly string $caller;
 
     public function __construct(
@@ -15,7 +16,7 @@ class InvalidPropertyException extends \Exception
         ?\Throwable            $previous = null,
     ) {
         $this->caller = $this->getCaller();
-        
+
         $invalid = $this->getType( $this->invalidProperty );
 
         $invalid = match ( $invalid ) {

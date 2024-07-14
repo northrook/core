@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Core\Exception;
 
 /**
@@ -12,14 +14,12 @@ namespace Northrook\Core\Exception;
  */
 class BreakingChangeException extends \LogicException
 {
-    
     /**
      * Construct the exception. Note: The message is NOT binary safe.
      * @link https://php.net/manual/en/exception.construct.php
      *
-     * @param string       $message  [optional] The Exception message to throw.
-     * @param string|null  $string
-     * @param int          $code     [optional] The Exception code.
+     * @param string  $message  [optional] The Exception message to throw.
+     * @param int     $code     [optional] The Exception code.
      */
     public function __construct(
         string $message = '',

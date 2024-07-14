@@ -6,8 +6,6 @@ namespace Northrook\Core\Exception;
 
 class FileTypeException extends \RuntimeException
 {
-
-
     /**
      * Construct the exception. Note: The message is NOT binary safe.
      * @link https://php.net/manual/en/exception.construct.php

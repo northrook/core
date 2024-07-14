@@ -6,7 +6,6 @@ namespace Northrook\Core\Exception;
 
 class UninitializedPropertyException extends \LogicException
 {
-
     /**
      * @param string           $propertyName
      * @param class-string     $className
@@ -31,9 +30,7 @@ class UninitializedPropertyException extends \LogicException
     }
 
     private function getCaller() : ?string {
-        $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 );
-
-
+        // $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1 );
         $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 );
         $caller    = $backtrace[ 2 ] ?? false;
 

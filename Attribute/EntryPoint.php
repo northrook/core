@@ -2,7 +2,6 @@
 
 declare( strict_types = 1 );
 
-
 namespace Northrook\Core\Attribute;
 
 use Attribute;
@@ -12,7 +11,7 @@ use Attribute;
  *
  * @link    https://github.com/northrook/core
  */
-#[Attribute( Attribute::TARGET_FUNCTION, Attribute::TARGET_METHOD )]
+#[Attribute( Attribute::TARGET_FUNCTION | Attribute::TARGET_METHOD )]
 class EntryPoint
 {
 

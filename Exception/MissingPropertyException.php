@@ -1,10 +1,11 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Core\Exception;
 
 class MissingPropertyException extends \LogicException
 {
-
     /**
      * @param string           $propertyName
      * @param class-string     $className
