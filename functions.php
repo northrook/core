@@ -12,6 +12,29 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
+
+/**
+ * Retrieves the project root directory.
+ *
+ * - This function assumes the Composer directory is present in the project root.
+ * - The return is cached for this process.
+ *
+ * @return string
+ */
+function getProjectRootDirectory() : string {
+    static $projectRoot;
+    return $projectRoot ??= (
+    static function () : string {
+        // Get an array of each directory leading to this file
+        $explodeCurrentDirectory = \explode( DIRECTORY_SEPARATOR, __DIR__ );
+        // Slice off three levels, in this case /core/northrook/composer-dir, commonly /vendor
+        $vendorDirectory = \array_slice( $explodeCurrentDirectory, 0, -3 );
+        // Implode and return the $projectRoot path
+        return \implode( DIRECTORY_SEPARATOR, $vendorDirectory );
+    }
+    )();
+}
+
 function memoize( mixed $key, callable $callback ) : mixed {
     static $cache = [];
     return $cache[ encodeKey( $key ) ] ??= $callback();
