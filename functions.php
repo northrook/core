@@ -51,7 +51,7 @@ function timestamp(
     string | \DateTimeZone      $timezone = 'UTC',
 ) : \DateTimeImmutable {
     try {
-        return new \DateTimeImmutable( $dateTime, timezone_open( $timezone ) ?: null );
+        return new \DateTimeImmutable( $dateTime, \timezone_open( $timezone ) ?: null );
     }
     catch ( \Exception $exception ) {
         throw new \InvalidArgumentException(
@@ -114,11 +114,11 @@ function isUrl( mixed $url, ?string $requiredProtocol = null ) : bool {
         return false;
     }
 
-    if ( !preg_match( '/([\w\-+:\\/]*?).+\.[a-z0-9]{2,}/', $url ) ) {
+    if ( !\preg_match( '/([\w\-+:\\/]*?).+\.[a-z0-9]{2,}/', $url ) ) {
         return false;
     }
 
-    if ( $requiredProtocol && !str_starts_with( $url, "$requiredProtocol://" ) ) {
+    if ( $requiredProtocol && !\str_starts_with( $url, "$requiredProtocol://" ) ) {
         return false;
     }
 
@@ -228,20 +228,20 @@ function extendingClasses(
 function booleanValues( array $array, bool $default = true ) : array {
 
     // Isolate the options
-    $array = array_filter( $array, static fn ( $value ) => is_bool( $value ) || is_null( $value ) );
+    $array = \array_filter( $array, static fn ( $value ) => \is_bool( $value ) || \is_null( $value ) );
 
     // If any option is true, set all others to false
-    if ( in_array( true, $array, true ) ) {
-        return array_map( static fn ( $option ) => $option === true, $array );
+    if ( \in_array( true, $array, true ) ) {
+        return \array_map( static fn ( $option ) => $option === true, $array );
     }
 
     // If any option is false, set all others to true
-    if ( in_array( false, $array, true ) ) {
-        return array_map( static fn ( $option ) => $option !== false, $array );
+    if ( \in_array( false, $array, true ) ) {
+        return \array_map( static fn ( $option ) => $option !== false, $array );
     }
 
     // If none are true or false, set all to the default
-    return array_map( static fn ( $option ) => $default, $array );
+    return \array_map( static fn ( $option ) => $default, $array );
 }
 
 /**
@@ -372,7 +372,7 @@ function normalizePath(
         $exploded = \is_string( $normalize ) ? \explode( DIRECTORY_SEPARATOR, $normalize ) : $normalize;
 
         // Filter the exploded path, and implode using the directory separator
-        $path = \implode( DIRECTORY_SEPARATOR, array_filter( $exploded ) );
+        $path = \implode( DIRECTORY_SEPARATOR, \array_filter( $exploded ) );
 
 
         // Ensure the resulting path does not exceed the system limitations
@@ -384,6 +384,80 @@ function normalizePath(
         // Return with or without a $trailingSlash
         return $trailingSlash ? $path . DIRECTORY_SEPARATOR : $path;
     } )();
+}
+
+
+/**
+ * @param string  $string  $string
+ * @param bool    $trailingSlash
+ *
+ * @return string
+ */
+function normalizeUrl(
+    string $string,
+    bool   $trailingSlash = false,
+) : string {
+    static $cache = [];
+    return $cache[ \json_encode( [ $string, $trailingSlash ], 832 ) ] ??= (
+    static function () use ( $string, $trailingSlash ) : string {
+        $protocol = '';
+        $fragment = '';
+        $query    = '';
+
+        // Extract and lowercase the $protocol
+        if ( \str_contains( $string, '://' ) ) {
+            [ $protocol, $string ] = \explode( '://', $string, 2 );
+            $protocol = \strtolower( $protocol ) . '://';
+        }
+
+        // Check if the $string contains $query and $fragment
+        $matchQuery    = \strpos( $string, '?' );
+        $matchFragment = \strpos( $string, '#' );
+
+        // If the $string contains both
+        if ( $matchQuery && $matchFragment ) {
+
+            // To parse both regardless of order, we check which one appears first in the $string.
+            // Split the $string by the first $match, which will then contain the other.
+
+            // $matchQuery is first
+            if ( $matchQuery < $matchFragment ) {
+                [ $string, $query ] = \explode( '?', $string, 2 );
+                [ $query, $fragment ] = \explode( '#', $query, 2 );
+            }
+            // $matchFragment is first
+            else {
+                [ $string, $fragment ] = \explode( '#', $string, 2 );
+                [ $fragment, $query ] = \explode( '?', $fragment, 2 );
+            }
+
+            // After splitting, prepend the relevant identifiers.
+            $query    = "?$query";
+            $fragment = "#$fragment";
+        }
+        // If the $string only contains $query
+        elseif ( $matchQuery ) {
+            [ $string, $query ] = \explode( '?', $string, 2 );
+            $query = "?$query";
+        }
+        // If the $string only contains $fragment
+        elseif ( $matchFragment ) {
+            [ $string, $fragment ] = \explode( '#', $string, 2 );
+            $fragment = "#$fragment";
+        }
+
+        // Remove duplicate separators, and lowercase the $path
+        $path = \strtolower( \implode( '/', \array_filter( \explode( '/', $string ) ) ) );
+
+        // Prepend trailing separator if needed
+        if ( $trailingSlash ) {
+            $path .= '/';
+        }
+
+        // Assemble the URL
+        return $protocol . $path . $query . $fragment;
+    }
+    )();
 }
 
 /**
