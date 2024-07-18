@@ -12,6 +12,36 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
+function filterHtml( $s ) : string {
+    return \htmlspecialchars( (string) $s, ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE, 'UTF-8' );
+}
+
+/**
+ * Escapes string for use inside HTML text.
+ */
+function filterHtmlText( $s ) : string {
+    return \htmlspecialchars( (string) $s, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8' );
+}
+
+/**
+ * Escapes string for use inside CSS template.
+ */
+function filterCssString( $s ) : string {
+    // http://www.w3.org/TR/2006/WD-CSS21-20060411/syndata.html#q6
+    return \addcslashes( (string) $s, "\x00..\x1F!\"#$%&'()*+,./:;<=>?@[\\]^`{|}~" );
+}
+
+/**
+ * Escapes variables for use inside <script>.
+ */
+function filterJsString( mixed $variable ) : string {
+    $json = \json_encode( $variable, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE );
+    if ( \json_last_error() ) {
+        throw new \RuntimeException( \json_last_error_msg() );
+    }
+
+    return \str_replace( [ ']]>', '<!', '</' ], [ ']]\u003E', '\u003C!', '<\/' ], $json );
+}
 
 /**
  * Retrieves the project root directory.
