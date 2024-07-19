@@ -5,11 +5,13 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Northrook\\Core\\": ""
-    },
-    "files": [
-      "functions.php"
-    ]
+      "Northrook\\Core\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Acme\\Tests\\": "tests/"
+    }
   },
   "authors": [
     {
@@ -22,6 +24,7 @@
   "require": {
     "php": ">=8.2",
     "symfony/stopwatch": "^7.1",
+    "northrook/functions": "dev-main",
     "northrook/logger": "dev-main"
   },
   "require-dev": {
@@ -29,6 +32,7 @@
     "symfony/var-dumper": "@stable",
     "symfony/error-handler": "@stable",
     "northrook/dev-env": "dev-main",
-    "symfony/finder": "^7.1"
+    "symfony/finder": "^7.1",
+    "phpbench/phpbench": "^1.3"
   }
 }
