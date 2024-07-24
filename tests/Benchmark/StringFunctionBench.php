@@ -2,10 +2,9 @@
 
 namespace Acme\Tests\Benchmark;
 
-use Northrook\Core\Runtime\Filter;
 use PhpBench\Attributes\{Iterations, Revs};
-use function Northrook\Core\escapeUrl;
-use function Northrook\Core\filterUrl;
+use function Northrook\escapeUrl;
+use function Northrook\filterUrl;
 
 #[Revs( 128 )]
 #[Iterations( 5 )]
