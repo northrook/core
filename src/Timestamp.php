@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core;
 
+use function Northrook\escapeCharacters;
+
 class Timestamp implements \Stringable
 {
     public const FORMAT_SORTABLE         = 'Y-m-d H:i:s';
@@ -94,7 +96,7 @@ class Timestamp implements \Stringable
             $flag   = $value[ 'flag' ];
             $string = \str_replace(
                 "[$key]",
-                escChar( '<span class="' . $class . '">' ) . $flag . escChar( '</span>' ),
+                escapeCharacters( '<span class="' . $class . '">' ) . $flag . escapeCharacters( '</span>' ),
                 $string,
             );
         }
