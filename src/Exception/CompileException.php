@@ -7,7 +7,7 @@ namespace Northrook\Core\Exception;
 /**
  * The exception occurred during Component compilation.
  */
-class CompileException extends \Exception
+class CompileException extends \LogicException
 {
     /**
      * Construct the exception. Note: The message is NOT binary safe.
