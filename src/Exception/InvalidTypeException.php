@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 
 namespace Northrook\Core\Exception;
 
-class InvalidTypeException extends \RuntimeException
+use Throwable;
+
+class InvalidTypeException extends \InvalidArgumentException
 {
     /**
      * Construct the exception. Note: The message is NOT binary safe.
@@ -15,12 +17,11 @@ class InvalidTypeException extends \RuntimeException
      * @param int     $code     [optional] The Exception code.
      */
     public function __construct(
-        string                 $message,
-        public readonly string $value,
-        int                    $code = 422,
+        string                $message,
+        public readonly mixed $value,
+        int                   $code = 422,
+        ?Throwable            $previous = null,
     ) {
-        parent::__construct( $message, $code );
-        $this->message = $message;
-        $this->code    = $code;
+        parent::__construct( $message, $code, $previous );
     }
 }
