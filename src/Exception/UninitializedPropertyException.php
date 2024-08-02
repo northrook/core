@@ -8,23 +8,25 @@ class UninitializedPropertyException extends \LogicException
 {
     /**
      * @param string           $propertyName
-     * @param class-string     $className
      * @param null|string      $message
      * @param int              $code
      * @param null|\Throwable  $previous
      */
     public function __construct(
         public readonly string $propertyName,
-        public readonly string $className,
         ?string                $message = null,
         int                    $code = 0,
         ?\Throwable            $previous = null,
     ) {
 
-        $caller = $this->getCaller();
 
-        $message ??= ( $caller ? "$caller could"
-                : "Could" ) . " not access property {$this->className}::{$this->propertyName}, as it is uninitialised.";
+        if ( !$message ) {
+
+            $caller = $this->getCaller();
+
+            $message = ( $caller ? "$caller could" : "Could" )
+                       . " not access property {$this->propertyName}, as it is uninitialised.";
+        }
 
         parent::__construct( $message, $code, $previous );
     }
