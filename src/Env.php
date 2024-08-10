@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core;
+namespace Northrook;
 
 use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Log;
@@ -136,5 +136,6 @@ class Env
     public static function isDebug() : bool {
         return Env::$debug;
     }
+
 
 }

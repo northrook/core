@@ -2,11 +2,14 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core;
+namespace Northrook;
 
-use function Northrook\escapeCharacters;
+use Northrook\Logger\Log;
 
-class Timestamp implements \Stringable
+/**
+ * @author  Martin Nielsen <mn@northrook.com>
+ */
+final readonly class Time implements \Stringable
 {
     public const FORMAT_SORTABLE         = 'Y-m-d H:i:s';
     public const FORMAT_HUMAN            = 'd-m-Y H:i:s';
@@ -14,18 +17,19 @@ class Timestamp implements \Stringable
     public const FORMAT_RFC3339          = 'Y-m-d\TH:i:sP';
     public const FORMAT_RFC3339_EXTENDED = 'Y-m-d\TH:i:s.vP';
 
-    private readonly \DateTimeImmutable $dateTimeImmutable;
+    private \DateTimeImmutable $dateTimeImmutable;
 
-    public readonly int    $unixTimestamp;
-    public readonly string $datetime;
-    public readonly string $timezone;
+    public int    $unixTimestamp;
+    public string $datetime;
+    public string $timezone;
 
     public function __construct(
         string | \DateTimeInterface $dateTime = 'now',
         string | \DateTimeZone      $timezone = 'UTC',
-        string                      $format = Timestamp::FORMAT_SORTABLE,
+        string                      $format = Time::FORMAT_SORTABLE,
     ) {
         $this->setDateTime( $dateTime, $timezone );
+
 
         $this->unixTimestamp = $this->dateTimeImmutable->getTimestamp();
         $this->timezone      = $this->dateTimeImmutable->getTimezone()->getName();
@@ -123,7 +127,10 @@ class Timestamp implements \Stringable
         string | \DateTimeZone      $timezone = 'UTC',
     ) : void {
         try {
-            $this->dateTimeImmutable = new \DateTimeImmutable( $dateTime, \timezone_open( $timezone ) ?: null );
+            $this->dateTimeImmutable ??= new \DateTimeImmutable(
+                $dateTime,
+                $this::getTimezone( $timezone ),
+            );
         }
         catch ( \Exception $exception ) {
             throw new \InvalidArgumentException(
@@ -132,6 +139,21 @@ class Timestamp implements \Stringable
                 previous : $exception,
             );
         }
+    }
+
+    public static function getTimezone( null | string | \DateTimeZone $timezone = null ) : ?\DateTimeZone {
+        if ( $timezone instanceof \DateTimeZone ) {
+            return $timezone;
+        }
+
+        try {
+            return new \DateTimeZone( $timezone ?? \date_default_timezone_get() );
+        }
+        catch ( \Exception $exception ) {
+            Log::exception( $exception, context : [ 'timezone' => $timezone ] );
+            return new \DateTimeZone( 'UTC' );
+        }
+
     }
 
 }

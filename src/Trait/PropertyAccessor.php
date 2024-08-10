@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Trait;
+namespace Northrook\Trait;
 
 /**
  * Access properties of an object.

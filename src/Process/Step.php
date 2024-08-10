@@ -3,7 +3,7 @@
 namespace Northrook\Core\Process;
 
 use Northrook\Core\Attribute\ExitPoint;
-use Northrook\Core\Trait\PropertyAccessor;
+use Northrook\Trait\PropertyAccessor;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 /**

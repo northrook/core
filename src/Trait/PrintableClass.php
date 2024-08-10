@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Trait;
+namespace Northrook\Trait;
 
 /**
  * Designate a class as printable.

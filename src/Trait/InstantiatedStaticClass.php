@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Trait;
+namespace Northrook\Trait;
 
 use Northrook\Core\Exception\UninitializedPropertyException;
 
