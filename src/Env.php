@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Northrook;
 
-use JetBrains\PhpStorm\ExpectedValues;
 use Northrook\Logger\Log;
 
 /**
@@ -16,13 +15,12 @@ use Northrook\Logger\Log;
  * @author  Martin Nielsen <mn@northrook.com>
  *
  */
-class Env
+final class Env
 {
-    private const ENVIRONMENTS = [ 'prod', 'dev', 'staging', Env::PRODUCTION, Env::DEVELOPMENT, Env::STAGING ];
-
-    public const PRODUCTION  = 'prod';
-    public const DEVELOPMENT = 'dev';
-    public const STAGING     = 'staging';
+    public const
+        PRODUCTION = 'prod',
+        DEVELOPMENT = 'dev',
+        STAGING = 'staging';
 
     /**
      * @var bool true if the App instance has been instantiated
@@ -39,13 +37,14 @@ class Env
      */
     private static string $environment = 'dev';
 
+    private static bool $isCLI;
+
     /**
      * @param string<Env>  $env       The environment to check against
      * @param bool<Debug>  $debug     Whether to enable debug mode
      * @param bool         $override  Whether to allow overriding the Env properties
      */
     public function __construct(
-        #[ExpectedValues( Env::ENVIRONMENTS )]
         string $env,
         bool   $debug,
         bool   $override = false,
@@ -59,44 +58,14 @@ class Env
             );
         }
 
-        if ( \str_starts_with( $env, Env::PRODUCTION ) ) {
-            $env = Env::PRODUCTION;
-        }
-
-        if ( \str_starts_with( $env, Env::DEVELOPMENT ) ) {
-            $env = Env::DEVELOPMENT;
-        }
-
-        if ( \str_starts_with( $env, Env::STAGING ) ) {
-            $env = Env::STAGING;
-        }
-
-        Env::$environment = \strtolower( $env );
-        Env::$debug       = $debug;
-
+        Env::$environment  = match ( \strtolower( $env )[ 0 ] ?? null ) {
+            'd'     => Env::DEVELOPMENT,
+            's'     => Env::STAGING,
+            'p'     => Env::PRODUCTION,
+            default => $env
+        };
+        Env::$debug        = $debug;
         Env::$instantiated = true;
-    }
-
-    /**
-     * Retrieve an array of all the properties of the {@see Env} instance.
-     *
-     * Optionally, you can pass a property name to retrieve a specific property.
-     *
-     * @param ?string  $property  Return a specific property of the {@see Env}
-     *
-     * @return bool<Debug>|string<Env>|array
-     */
-    public static function get(
-        #[ExpectedValues( [ 'environment', 'debug', 'instantiated' ] )]
-        ?string $property = null,
-    ) : bool | string | array {
-        return $property
-            ? Env::${$property} ?? false
-            : [
-                'instantiated' => Env::$instantiated,
-                'environment'  => Env::$environment,
-                'debug'        => Env::$debug,
-            ];
     }
 
     /**
@@ -113,21 +82,21 @@ class Env
                 context : [ 'debug' => 'debug', 'environment' => Env::$environment, ],
             );
         }
-        return Env::$environment === 'prod';
+        return Env::$environment === Env::PRODUCTION;
     }
 
     /**
      * @return bool<Env>
      */
     public static function isDevelopment() : bool {
-        return Env::$environment === 'dev';
+        return Env::$environment === Env::DEVELOPMENT;
     }
 
     /**
      * @return bool<Env>
      */
     public static function isStaging() : bool {
-        return Env::$environment === 'staging';
+        return Env::$environment === Env::STAGING;
     }
 
     /**
@@ -135,6 +104,10 @@ class Env
      */
     public static function isDebug() : bool {
         return Env::$debug;
+    }
+
+    public static function isCLI() : bool {
+        return ( PHP_SAPI === 'cli' || \defined( 'STDIN' ) );
     }
 
 

@@ -9,7 +9,7 @@ use PhpBench\Attributes\{BeforeMethods, Iterations, RetryThreshold, Revs};
 #[Revs( 128 )]
 #[Iterations( 50 )]
 #[RetryThreshold( 2 )]
-class StringFunctionBench
+class TrieArrayBench
 {
     const KEYS = [
         'dir.root',
