@@ -13,7 +13,6 @@
 *.lock
 /src/Type.php
 /src/Config.php
-/src/Settings.php
 /src/Type/*
 /src/Cache/ManifestCache.php
 /public/

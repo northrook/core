@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Interface;
+namespace Northrook\Interface;
 
 /**
  * @template htmlString of string

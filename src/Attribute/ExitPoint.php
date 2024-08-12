@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Attribute;
+namespace Northrook\Attribute;
 
 use Attribute;
 

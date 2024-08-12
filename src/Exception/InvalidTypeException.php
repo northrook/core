@@ -2,10 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Exception;
+namespace Northrook\Exception;
 
+use JetBrains\PhpStorm\Deprecated;
 use Throwable;
 
+#[Deprecated( 'Use \TypeError() instead.' )]
 class InvalidTypeException extends \InvalidArgumentException
 {
     /**
@@ -22,6 +24,11 @@ class InvalidTypeException extends \InvalidArgumentException
         int                   $code = 422,
         ?Throwable            $previous = null,
     ) {
+        \trigger_deprecation(
+            'northrook/core',
+            'dev',
+            'Use \TypeError() instead.',
+        );
         parent::__construct( $message, $code, $previous );
     }
 }

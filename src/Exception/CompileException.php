@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Exception;
+namespace Northrook\Exception;
 
 /**
  * The exception occurred during Component compilation.

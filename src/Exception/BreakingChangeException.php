@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Exception;
+namespace Northrook\Exception;
 
 /**
  * An exception that indicates a breaking change.

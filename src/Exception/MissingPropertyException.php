@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Core\Exception;
+namespace Northrook\Exception;
 
 class MissingPropertyException extends \LogicException
 {
@@ -21,7 +21,6 @@ class MissingPropertyException extends \LogicException
         ?\Throwable            $previous = null,
     ) {
         $message ??= "Property '{$this->propertyName}' does not exist in '{$this->className}'.";
-
         parent::__construct( $message, $code, $previous );
     }
 

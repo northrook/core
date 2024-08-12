@@ -1,8 +1,8 @@
 <?php
 
-namespace Northrook\Core\Process;
+namespace Northrook\Process;
 
-use Northrook\Core\Attribute\ExitPoint;
+use Northrook\Attribute\ExitPoint;
 use Northrook\Trait\PropertyAccessor;
 use Symfony\Component\Stopwatch\Stopwatch;
 
