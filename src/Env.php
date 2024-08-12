@@ -30,14 +30,12 @@ final class Env
     /**
      * @var bool<Debug>
      */
-    private static bool $debug = false;
+    private static bool $debug;
 
     /**
      * @var string<Env>
      */
-    private static string $environment = 'dev';
-
-    private static bool $isCLI;
+    private static string $environment = Env::DEVELOPMENT;
 
     /**
      * @param string<Env>  $env       The environment to check against
@@ -46,7 +44,7 @@ final class Env
      */
     public function __construct(
         string $env,
-        bool   $debug,
+        ?bool  $debug = null,
         bool   $override = false,
     ) {
 
@@ -58,12 +56,13 @@ final class Env
             );
         }
 
-        Env::$environment  = match ( \strtolower( $env )[ 0 ] ?? null ) {
-            'd'     => Env::DEVELOPMENT,
-            's'     => Env::STAGING,
-            'p'     => Env::PRODUCTION,
-            default => $env
-        };
+        foreach ( [ Env::DEVELOPMENT, Env::STAGING, Env::PRODUCTION ] as $environment ) {
+            if ( \str_starts_with( $env, $environment ) ) {
+                Env::$environment = $environment;
+            }
+        }
+
+
         Env::$debug        = $debug;
         Env::$instantiated = true;
     }
@@ -76,7 +75,7 @@ final class Env
      * @return bool<Env>
      */
     public static function isProduction() : bool {
-        if ( Env::$debug ) {
+        if ( Env::isDebug() ) {
             Log::Notice(
                 message : '{debug} is enabled in {environment}',
                 context : [ 'debug' => 'debug', 'environment' => Env::$environment, ],
@@ -103,12 +102,7 @@ final class Env
      * @return bool<Debug>
      */
     public static function isDebug() : bool {
-        return Env::$debug;
+        return Env::$debug ??= Env::$environment !== Env::PRODUCTION;
     }
-
-    public static function isCLI() : bool {
-        return ( PHP_SAPI === 'cli' || \defined( 'STDIN' ) );
-    }
-
 
 }
