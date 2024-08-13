@@ -78,8 +78,9 @@ final class Settings
         $this->frozen    = $freeze;
     }
 
+
     public static function get( string $setting ) : mixed {
-        return Settings::$instance->settings[ $setting ]
+        return Settings::getInstance( true )->settings[ $setting ]
             ??= Settings::$instance->generate( $setting );
     }
 
