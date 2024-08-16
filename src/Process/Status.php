@@ -54,6 +54,11 @@ final class Status
         private ?Stopwatch $stopwatch = null,
         bool               $morePrecision = false,
     ) {
+        \trigger_deprecation(
+            'northrook\core',
+            'dev',
+            $this::class . ' is deprecated.',
+        );
         // Use provided name, or guess the name from the caller
         $this->name ??= debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ]
                         ?? throw new \LogicException( 'No name provided for ' . Status::class . ' instance.' );

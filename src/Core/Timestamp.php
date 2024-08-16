@@ -28,6 +28,12 @@ class Timestamp implements \Stringable
         string | \DateTimeZone      $timezone = 'UTC',
         string                      $format = Timestamp::FORMAT_SORTABLE,
     ) {
+
+        \trigger_deprecation(
+            'northrook\core',
+            'dev',
+            $this::class . ' is deprecated.',
+        );
         $this->setDateTime( $dateTime, $timezone );
 
         $this->unixTimestamp = $this->dateTimeImmutable->getTimestamp();

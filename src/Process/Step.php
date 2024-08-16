@@ -43,6 +43,13 @@ final class Step
         private readonly Stopwatch $stopwatch,
         private readonly string    $section,
     ) {
+
+        \trigger_deprecation(
+            'northrook\core',
+            'dev',
+            $this::class . ' is deprecated.',
+        );
+
         $this->name = $name;
         $this->stopwatch->start( $name, $this->section );
 
