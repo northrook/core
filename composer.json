@@ -25,7 +25,10 @@
     "php": ">=8.2",
     "symfony/stopwatch": "^7.1",
     "northrook/functions": "dev-main",
-    "northrook/logger": "dev-main"
+    "northrook/logger": "dev-main",
+    "northrook/filesystem": "dev-main",
+    "northrook/settings": "dev-main",
+    "northrook/memo": "dev-main"
   },
   "require-dev": {
     "northrook/dev-env": "dev-main",
