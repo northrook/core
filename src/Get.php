@@ -7,18 +7,19 @@ namespace Northrook;
 use function Northrook\Cache\memoize;
 use Northrook\Resource\Path;
 
+
 final class Get
 {
-
     /** # ../
      * Path resolver
      *
      * @param string  $path  = [ 'dir.root', 'dir.var', 'dir.cache', 'dir.storage', 'dir.uploads', 'dir.assets', 'dir.public', 'dir.public.assets', 'dir.public.uploads'][$any]
      */
-    public static function path( string $path, bool $object = false ) : null | string | Path {
+    public static function path( string $path, bool $object = false ) : null | string | Path
+    {
         return memoize(
-            static function () use ( $path, $object ) {
-
+            static function() use ( $path, $object )
+            {
                 // If we're an actual path to something in the project, return as-is
                 if ( \stripos( $path, Settings::get( 'dir.root' ) ) === 0 ) {
                     return $object ? new Path( $path ) : normalizePath( $path );
