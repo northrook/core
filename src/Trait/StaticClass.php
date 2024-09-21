@@ -4,6 +4,9 @@ declare( strict_types = 1 );
 
 namespace Northrook\Trait;
 
+use JetBrains\PhpStorm\Deprecated;
+
+
 /**
  * Designate a class as static.
  *
@@ -13,15 +16,17 @@ namespace Northrook\Trait;
  */
 trait StaticClass
 {
-    final protected function __construct() {
+    final protected function __construct()
+    {
         throw new \LogicException(
-            $this::class . " is using the `StaticClass` trait, and should not be instantiated directly.",
+                $this::class . " is using the `StaticClass` trait, and should not be instantiated directly.",
         );
     }
 
-    final protected function __clone() {
+    final protected function __clone()
+    {
         throw new \LogicException(
-            $this::class . " is using the `StaticClass` trait, and should not be cloned.",
+                $this::class . " is using the `StaticClass` trait, and should not be cloned.",
         );
     }
 }

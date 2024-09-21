@@ -78,12 +78,12 @@ trait SingletonClass
         throw $this->singletonClass( __METHOD__ );
     }
 
-    private function __sleep() : array
+    public function __sleep() : array
     {
         throw $this->singletonClass( __METHOD__ );
     }
 
-    private function __wakeup() : void
+    public function __wakeup() : void
     {
         throw $this->singletonClass( __METHOD__ );
     }
