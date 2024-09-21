@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Northrook\Trait;
 
-
 /**
  * Designate a class as a Singleton.
  *
@@ -23,18 +22,19 @@ trait SingletonClass
     /**
      * Retrieve the Singleton instance.
      *
-     * @param bool   $selfInstantiate
+     * @param bool   $construct
      * @param array  $arguments
      *
      * @return static
      */
     protected static function getInstance(
-        bool  $selfInstantiate = false,
-        mixed ...$arguments,
-    ) : static {
-        return self::$instance ??= $selfInstantiate
-            ? new static( ...$arguments )
-            : throw new \LogicException();
+            bool  $construct = false,
+            mixed ...$arguments,
+    ) : static
+    {
+        return self::$instance ??= $construct
+                ? new static( ...$arguments )
+                : throw new \LogicException();
     }
 
     /**
@@ -50,23 +50,48 @@ trait SingletonClass
      *
      * @return bool
      */
-    final protected function instantiationCheck( ?bool $check = null, bool $throwOnFail = true ) : bool {
-
+    final protected function instantiationCheck( ?bool $check = null, bool $throwOnFail = true ) : bool
+    {
         $check ??= isset( self::$instance );
 
         if ( $throwOnFail && $check ) {
             throw new \LogicException(
-                "The " . self::class . " has already been instantiated.\nIt cannot be re-instantiated.",
+                    "The " . self::class . " has already been instantiated.\nIt cannot be re-instantiated.",
             );
         }
 
         return $check;
     }
 
-    /**
-     * Singletons should not be cloned.
-     *
-     * @return void
-     */
-    private function __clone() : void {}
+    public function __serialize() : array
+    {
+        throw $this->singletonClass( __METHOD__ );
+    }
+
+    public function __unserialize( array $data ) : void
+    {
+        throw $this->singletonClass( __METHOD__ );
+    }
+
+    private function __clone() : void
+    {
+        throw $this->singletonClass( __METHOD__ );
+    }
+
+    private function __sleep() : array
+    {
+        throw $this->singletonClass( __METHOD__ );
+    }
+
+    private function __wakeup() : void
+    {
+        throw $this->singletonClass( __METHOD__ );
+    }
+
+    private function singletonClass( string $method ) : \BadMethodCallException
+    {
+        return new \BadMethodCallException(
+                "Calling {$method} is not allowed, " . static::class . " is a Singleton.",
+        );
+    }
 }
