@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Northrook;
 
 use Northrook\Logger\Log;
+use function String\escapeCharacters;
 
 /**
  * @author  Martin Nielsen <mn@northrook.com>
@@ -24,92 +25,97 @@ final readonly class Time implements \Stringable
     public string $timezone;
 
     public function __construct(
-        string | \DateTimeInterface $dateTime = 'now',
-        string | \DateTimeZone      $timezone = 'UTC',
-        string                      $format = Time::FORMAT_SORTABLE,
-    ) {
+            string | \DateTimeInterface $dateTime = 'now',
+            string | \DateTimeZone      $timezone = 'UTC',
+            string                      $format = Time::FORMAT_SORTABLE,
+    )
+    {
         $this->setDateTime( $dateTime, $timezone );
-
 
         $this->unixTimestamp = $this->dateTimeImmutable->getTimestamp();
         $this->timezone      = $this->dateTimeImmutable->getTimezone()->getName();
         $this->datetime      = $this->dateTimeImmutable->format( $format ) . ' ' . $this->timezone;
     }
 
-    private function wrapFormatted( string $string, ?string $classPrefix = null ) : string {
-
+    private function wrapFormatted( string $string, ?string $classPrefix = null ) : string
+    {
         $each = [];
 
         $string = \preg_replace_callback_array(
-            [
-                // Day
-                "#[dD]#"           => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'day',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-                // Month
-                "#[mM]#"           => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'month',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-                // Year
-                "#[yY]#"           => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'year',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-                // Day
-                "#[jS]#"           => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'day',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-                // Weekday
-                "#W#"              => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'weekday',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-                // Time
-                '#[aABgGhHisu].*#' => static function ( $match ) use ( &$each ) {
-                    $each[] = [
-                        'type' => 'time',
-                        'flag' => $match[ 0 ],
-                    ];
-                    return '[' . \count( $each ) - 1 . ']';
-                },
-            ],
-            $string,
+                [
+                    // Day
+                    "#[dD]#"           => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'day',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                    // Month
+                    "#[mM]#"           => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'month',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                    // Year
+                    "#[yY]#"           => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'year',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                    // Day
+                    "#[jS]#"           => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'day',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                    // Weekday
+                    "#W#"              => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'weekday',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                    // Time
+                    '#[aABgGhHisu].*#' => static function( $match ) use ( &$each )
+                    {
+                        $each[] = [
+                                'type' => 'time',
+                                'flag' => $match[ 0 ],
+                        ];
+                        return '[' . \count( $each ) - 1 . ']';
+                    },
+                ],
+                $string,
         );
-
 
         foreach ( $each as $key => $value ) {
             $class  = \implode( '-', [ $classPrefix, $value[ 'type' ] ] );
             $flag   = $value[ 'flag' ];
             $string = \str_replace(
-                "[$key]",
-                escapeCharacters( '<span class="' . $class . '">' ) . $flag . escapeCharacters( '</span>' ),
-                $string,
+                    "[$key]",
+                    escapeCharacters( '<span class="' . $class . '">' ) . $flag . escapeCharacters( '</span>' ),
+                    $string,
             );
         }
 
         return $string;
     }
 
-    final public function format( string $format, bool | string $wrapEach = false ) : string {
-
+    final public function format( string $format, bool | string $wrapEach = false ) : string
+    {
         if ( $wrapEach ) {
             $prefixClass = \is_string( $wrapEach ) ? $wrapEach : 'datetime';
             $format      = $this->wrapFormatted( $format, $prefixClass );
@@ -118,30 +124,33 @@ final readonly class Time implements \Stringable
         return $this->dateTimeImmutable->format( $format );
     }
 
-    final public function __toString() : string {
+    final public function __toString() : string
+    {
         return $this->datetime;
     }
 
     private function setDateTime(
-        string | \DateTimeInterface $dateTime = 'now',
-        string | \DateTimeZone      $timezone = 'UTC',
-    ) : void {
+            string | \DateTimeInterface $dateTime = 'now',
+            string | \DateTimeZone      $timezone = 'UTC',
+    ) : void
+    {
         try {
             $this->dateTimeImmutable ??= new \DateTimeImmutable(
-                $dateTime,
-                $this::getTimezone( $timezone ),
+                    $dateTime,
+                    $this::getTimezone( $timezone ),
             );
         }
         catch ( \Exception $exception ) {
             throw new \InvalidArgumentException(
-                message  : "Unable to create a new DateTimeImmutable object for $timezone.",
-                code     : 500,
-                previous : $exception,
+                    message  : "Unable to create a new DateTimeImmutable object for $timezone.",
+                    code     : 500,
+                    previous : $exception,
             );
         }
     }
 
-    public static function getTimezone( null | string | \DateTimeZone $timezone = null ) : ?\DateTimeZone {
+    public static function getTimezone( null | string | \DateTimeZone $timezone = null ) : ?\DateTimeZone
+    {
         if ( $timezone instanceof \DateTimeZone ) {
             return $timezone;
         }
@@ -153,7 +162,6 @@ final readonly class Time implements \Stringable
             Log::exception( $exception, context : [ 'timezone' => $timezone ] );
             return new \DateTimeZone( 'UTC' );
         }
-
     }
 
 }
