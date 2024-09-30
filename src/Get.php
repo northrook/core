@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 
 namespace Northrook;
 
-use function Northrook\Cache\memoize;
 use Northrook\Resource\Path;
+use function Northrook\Cache\memoize;
 use function String\normalizePath;
 
 final class Get

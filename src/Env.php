@@ -17,10 +17,10 @@ use Northrook\Logger\Log;
  */
 final class Env
 {
-    public const
-        PRODUCTION = 'prod',
-        DEVELOPMENT = 'dev',
-        STAGING = 'staging';
+    public const string
+            PRODUCTION = 'prod',
+            DEVELOPMENT = 'dev',
+            STAGING = 'staging';
 
     /**
      * @var bool true if the App instance has been instantiated
@@ -43,14 +43,14 @@ final class Env
      * @param bool         $override  Whether to allow overriding the Env properties
      */
     public function __construct(
-        string $env,
-        ?bool  $debug = null,
-        bool   $override = false,
-    ) {
-
+            string $env,
+            ?bool  $debug = null,
+            bool   $override = false,
+    )
+    {
         if ( Env::$instantiated && !$override ) {
             throw new \LogicException(
-                'The ' . Env::class . ' instance has already been instantiated.
+                    'The ' . Env::class . ' instance has already been instantiated.
                 
                 If this was intentional, you can call the constructor with the third argument `override` argument set to `true`.',
             );
@@ -61,7 +61,6 @@ final class Env
                 Env::$environment = $environment;
             }
         }
-
 
         Env::$debug        = $debug;
         Env::$instantiated = true;
@@ -74,11 +73,12 @@ final class Env
      *
      * @return bool<Env>
      */
-    public static function isProduction() : bool {
+    public static function isProduction() : bool
+    {
         if ( Env::isDebug() ) {
             Log::Notice(
-                message : '{debug} is enabled in {environment}',
-                context : [ 'debug' => 'debug', 'environment' => Env::$environment, ],
+                    message : '{debug} is enabled in {environment}',
+                    context : [ 'debug' => 'debug', 'environment' => Env::$environment, ],
             );
         }
         return Env::$environment === Env::PRODUCTION;
@@ -87,21 +87,24 @@ final class Env
     /**
      * @return bool<Env>
      */
-    public static function isDevelopment() : bool {
+    public static function isDevelopment() : bool
+    {
         return Env::$environment === Env::DEVELOPMENT;
     }
 
     /**
      * @return bool<Env>
      */
-    public static function isStaging() : bool {
+    public static function isStaging() : bool
+    {
         return Env::$environment === Env::STAGING;
     }
 
     /**
      * @return bool<Debug>
      */
-    public static function isDebug() : bool {
+    public static function isDebug() : bool
+    {
         return Env::$debug ??= Env::$environment !== Env::PRODUCTION;
     }
 

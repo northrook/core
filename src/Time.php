@@ -12,11 +12,11 @@ use function String\escapeCharacters;
  */
 final readonly class Time implements \Stringable
 {
-    public const FORMAT_SORTABLE         = 'Y-m-d H:i:s';
-    public const FORMAT_HUMAN            = 'd-m-Y H:i:s';
-    public const FORMAT_W3C              = 'Y-m-d\TH:i:sP';
-    public const FORMAT_RFC3339          = 'Y-m-d\TH:i:sP';
-    public const FORMAT_RFC3339_EXTENDED = 'Y-m-d\TH:i:s.vP';
+    public const string FORMAT_SORTABLE         = 'Y-m-d H:i:s';
+    public const string FORMAT_HUMAN            = 'd-m-Y H:i:s';
+    public const string FORMAT_W3C              = 'Y-m-d\TH:i:sP';
+    public const string FORMAT_RFC3339          = 'Y-m-d\TH:i:sP';
+    public const string FORMAT_RFC3339_EXTENDED = 'Y-m-d\TH:i:s.vP';
 
     private \DateTimeImmutable $dateTimeImmutable;
 
