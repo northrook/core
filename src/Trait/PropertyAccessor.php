@@ -1,8 +1,10 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Trait;
+
+use LogicException;
 
 /**
  * Access properties of an object.
@@ -29,26 +31,29 @@ namespace Northrook\Trait;
  */
 trait PropertyAccessor
 {
-
     abstract public function __get( string $property );
 
     /**
      * Check if the property exists.
      *
-     * @param string  $property
+     * @param string $property
      *
      * @return bool
      */
-    public function __isset( string $property ) : bool {
-        return isset( $this->$property );
+    public function __isset( string $property ) : bool
+    {
+        return isset( $this->{$property} );
     }
 
     /**
      * The {@see PropertyAccessor} trait does not allow setting properties.
      *
-     * @throws \LogicException
+     * @throws LogicException
+     * @param  string         $name
+     * @param  mixed          $value
      */
-    public function __set( string $name, mixed $value ) {
-        throw new \LogicException( $this::class . ' properties are read-only.' );
+    public function __set( string $name, mixed $value )
+    {
+        throw new LogicException( $this::class.' properties are read-only.' );
     }
 }

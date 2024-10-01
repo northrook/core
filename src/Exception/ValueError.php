@@ -1,25 +1,26 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Exception;
 
-final class ValueError extends \RuntimeException
-{
+use RuntimeException;
+use Throwable;
 
+final class ValueError extends RuntimeException
+{
     public function __construct(
-        string           $message = "",
+        string           $message = '',
         protected string $file = '',
         protected int    $line = 0,
         int              $code = 0,
-        ?\Throwable      $previous = null,
-    )
-    {
-        if ( !$this->file ) {
-            $this->file = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[ 0 ][ 'file' ];
+        ?Throwable       $previous = null,
+    ) {
+        if ( ! $this->file ) {
+            $this->file = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'];
         }
-        if ( !$this->line ) {
-            $this->line = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[ 0 ][ 'line' ];
+        if ( ! $this->line ) {
+            $this->line = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'];
         }
         parent::__construct( $message, $code, $previous );
     }

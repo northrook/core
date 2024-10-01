@@ -1,15 +1,15 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Interface;
 
-/**
- * @template htmlString of string
- */
-interface Printable extends \Stringable
-{
+use Stringable;
 
+/**
+ */
+interface Printable extends Stringable
+{
     /**
      * Prepare a string of HTML for front-end use.
      *
@@ -19,7 +19,7 @@ interface Printable extends \Stringable
      *
      * @used-by __toString()
      *
-     * @return ?string<htmlString>
+     * @return ?string
      */
     public function toString() : ?string;
 

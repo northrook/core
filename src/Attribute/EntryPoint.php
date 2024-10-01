@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Attribute;
 
@@ -14,13 +14,12 @@ use Attribute;
 #[Attribute( Attribute::TARGET_FUNCTION | Attribute::TARGET_METHOD )]
 class EntryPoint
 {
-
     /**
-     * @param null|string  $via  = ['config/service.php', 'autowire', 'new', 'static'][$any]
-     * @param null|string  $usedBy
+     * @param null|string $via    = ['config/service.php', 'autowire', 'new', 'static'][$any]
+     * @param null|string $usedBy
      */
     public function __construct(
-            ?string $via = null,
-            ?string $usedBy = null,
+        ?string $via = null,
+        ?string $usedBy = null,
     ) {}
 }

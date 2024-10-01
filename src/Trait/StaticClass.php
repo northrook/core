@@ -1,11 +1,10 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Trait;
 
-use JetBrains\PhpStorm\Deprecated;
-
+use LogicException;
 
 /**
  * Designate a class as static.
@@ -18,15 +17,11 @@ trait StaticClass
 {
     final protected function __construct()
     {
-        throw new \LogicException(
-                $this::class . " is using the `StaticClass` trait, and should not be instantiated directly.",
-        );
+        throw new LogicException( $this::class.' is using the `StaticClass` trait, and should not be instantiated directly.' );
     }
 
     final protected function __clone()
     {
-        throw new \LogicException(
-                $this::class . " is using the `StaticClass` trait, and should not be cloned.",
-        );
+        throw new LogicException( $this::class.' is using the `StaticClass` trait, and should not be cloned.' );
     }
 }

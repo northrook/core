@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Trait;
 
@@ -16,22 +16,23 @@ namespace Northrook\Trait;
  */
 trait PrintableClass
 {
-
     /**
      * Nullable implementation of the {@see __toString()} method.
      *
      * @return ?string
      */
-    public function toString() : ?string {
+    public function toString() : ?string
+    {
         return $this->__toString() ?: null;
     }
 
     /**
-     * Echo the
+     * Echo the.
      *
      * @return void
      */
-    public function print() : void {
+    public function print() : void
+    {
         echo $this->__toString();
     }
 }

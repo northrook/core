@@ -1,8 +1,11 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Trait;
+
+use BadMethodCallException;
+use LogicException;
 
 /**
  * Designate a class as a Singleton.
@@ -22,19 +25,18 @@ trait SingletonClass
     /**
      * Retrieve the Singleton instance.
      *
-     * @param bool   $construct
-     * @param array  $arguments
+     * @param bool  $construct
+     * @param array $arguments
      *
      * @return static
      */
     protected static function getInstance(
-            bool  $construct = false,
-            mixed ...$arguments,
-    ) : static
-    {
+        bool     $construct = false,
+        mixed ...$arguments,
+    ) : static {
         return self::$instance ??= $construct
                 ? new static( ...$arguments )
-                : throw new \LogicException();
+                : throw new LogicException();
     }
 
     /**
@@ -42,11 +44,11 @@ trait SingletonClass
      *
      * - Will check if {@see SingletonClass::$instance} is set by default.
      * - `$check` will validate against {@see SingletonClass::$instance} by default.
-     * - Set `$throwOnFail` to `true` to throw a {@see \LogicException}.
+     * - Set `$throwOnFail` to `true` to throw a {@see LogicException}.
      * - Set `$throwOnFail` to `false` to return `$check` as boolean.
      *
-     * @param ?bool  $check        [isset(self::$instance)]
-     * @param bool   $throwOnFail  [true]
+     * @param ?bool $check       [isset(self::$instance)]
+     * @param bool  $throwOnFail [true]
      *
      * @return bool
      */
@@ -55,9 +57,7 @@ trait SingletonClass
         $check ??= isset( self::$instance );
 
         if ( $throwOnFail && $check ) {
-            throw new \LogicException(
-                    "The " . self::class . " has already been instantiated.\nIt cannot be re-instantiated.",
-            );
+            throw new LogicException( 'The '.self::class." has already been instantiated.\nIt cannot be re-instantiated." );
         }
 
         return $check;
@@ -88,10 +88,10 @@ trait SingletonClass
         throw $this->singletonClass( __METHOD__ );
     }
 
-    private function singletonClass( string $method ) : \BadMethodCallException
+    private function singletonClass( string $method ) : BadMethodCallException
     {
-        return new \BadMethodCallException(
-                "Calling {$method} is not allowed, " . static::class . " is a Singleton.",
+        return new BadMethodCallException(
+            "Calling {$method} is not allowed, ".static::class.' is a Singleton.',
         );
     }
 }

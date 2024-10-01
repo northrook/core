@@ -1,8 +1,10 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Northrook\Exception;
+
+use LogicException;
 
 /**
  * An exception that indicates a breaking change.
@@ -10,16 +12,15 @@ namespace Northrook\Exception;
  * This is caused by the deprecation of a class or function.
  *
  * This exception must never be used in a production environment.
- *
  */
-class BreakingChangeException extends \LogicException
+class BreakingChangeException extends LogicException
 {
     /**
      * Construct the exception. Note: The message is NOT binary safe.
      * @link https://php.net/manual/en/exception.construct.php
      *
-     * @param string  $message  [optional] The Exception message to throw.
-     * @param int     $code     [optional] The Exception code.
+     * @param string $message [optional] The Exception message to throw
+     * @param int    $code    [optional] The Exception code
      */
     public function __construct(
         string $message = '',
