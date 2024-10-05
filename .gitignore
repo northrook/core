@@ -11,6 +11,7 @@
 # Build data
 .env
 *.lock
+*.cache
 /src/Type.php
 /src/Config.php
 /src/Type/*
