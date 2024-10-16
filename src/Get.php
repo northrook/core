@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Northrook;
 
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Resource\Path;
 use Support\Normalize;
 use function Northrook\Cache\memoize;
 
+#[Deprecated]
 final class Get
 {
     /** # ../
@@ -20,6 +22,7 @@ final class Get
      */
     public static function path( string $path, bool $object = false ) : null|string|Path
     {
+        dump( __METHOD__.' has been deprecated. Use Pathfinder.' );
         return memoize(
             static function() use ( $path, $object ) {
                 // If we're an actual path to something in the project, return as-is
