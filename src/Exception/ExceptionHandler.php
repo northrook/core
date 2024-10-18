@@ -36,6 +36,9 @@ abstract class ExceptionHandler
         foreach ( $context as $key => $value ) {
             $message = \str_replace( "{{$key}}", "'{$value}'", $message );
         }
+        if ( ! $context ) {
+            $message = \preg_replace( '#{(.*?)}#', '`$1`', $message );
+        }
         return $message;
     }
 }

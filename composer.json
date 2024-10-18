@@ -32,6 +32,6 @@
   },
   "require-dev": {
     "northrook/dev-env": "dev-main",
-    "phpbench/phpbench": "^1.3"
+    "phpbench/phpbench": "@stable"
   }
 }

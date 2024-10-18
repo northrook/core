@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Northrook;
 
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Logger\Log;
 use function String\escapeCharacters;
 use DateTimeImmutable;
@@ -16,6 +17,7 @@ use Stringable;
 /**
  * @author  Martin Nielsen <mn@northrook.com>
  */
+#[Deprecated]
 final readonly class Time implements Stringable
 {
     public const string FORMAT_SORTABLE = 'Y-m-d H:i:s';
@@ -145,7 +147,7 @@ final readonly class Time implements Stringable
             );
         }
         catch ( Exception $exception ) {
-            throw new InvalidArgumentException( message  : "Unable to create a new DateTimeImmutable object for {$timezone}.", code     : 500, previous : $exception);
+            throw new InvalidArgumentException( message  : "Unable to create a new DateTimeImmutable object for {$timezone}.", code     : 500, previous : $exception );
         }
     }
 
