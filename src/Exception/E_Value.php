@@ -39,7 +39,7 @@ final class E_Value extends ExceptionHandler
      * @param string|Stringable    $message
      * @param array<string, mixed> $context
      * @param ?Throwable           $previous
-     * @param ?bool                $halt
+     * @param ?bool                $throw
      *
      * @return null
      */
@@ -47,10 +47,10 @@ final class E_Value extends ExceptionHandler
         #[Language( 'Smarty' )] string|Stringable $message,
         array             $context = [],
         ?Throwable        $previous = null,
-        ?bool             $halt = AUTO,
+        ?bool             $throw = AUTO,
     ) : null {
 
-        [$message, $halt] = E_Value::autoHalt( $message, $halt );
+        [$message, $throw] = E_Value::autoHalt( $message, $throw );
 
         $error = new ValueError(
             E_Value::handleMessage( $message, $context ),
@@ -60,6 +60,6 @@ final class E_Value extends ExceptionHandler
 
         Log::exception( $error, message: $message, context : $context );
 
-        return $halt ? throw $error : null;
+        return $throw ? throw $error : null;
     }
 }
