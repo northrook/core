@@ -34,7 +34,7 @@ abstract class ExceptionHandler
     final protected static function handleMessage( string $message, array $context ) : string
     {
         foreach ( $context as $key => $value ) {
-            $message = \str_replace( "{{$key}}", "'{$value}'", $message );
+            $message = \str_replace( "{{$key}}", "{$value}", $message );
         }
         if ( ! $context ) {
             $message = \preg_replace( '#{(.*?)}#', '`$1`', $message );
