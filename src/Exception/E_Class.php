@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Northrook\Exception;
 
 use JetBrains\PhpStorm\Language;
-use LogicException;
 use Northrook\Logger\Log;
 use Throwable;
 use Stringable;
@@ -26,11 +25,11 @@ final class E_Class extends ExceptionHandler
         ?Throwable        $previous = null,
     ) : null {
         Log::exception(
-            new LogicException(
+            new ClassException(
                 $message,
-                previous: $previous,
                 file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
                 line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
+                previous: $previous,
             ),
             context : $context,
         );
@@ -54,11 +53,11 @@ final class E_Class extends ExceptionHandler
 
         [$message, $throw] = E_Class::autoHalt( $message, $throw );
 
-        $error = new LogicException(
+        $error = new ClassException(
             E_Class::handleMessage( $message, $context ),
-            previous: $previous,
             file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
             line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
+            previous: $previous,
         );
 
         Log::exception( $error, message: $message, context : $context );
