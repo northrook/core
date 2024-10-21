@@ -6,7 +6,7 @@ namespace Northrook\Trait;
 
 use BadMethodCallException;
 use LogicException;
-use Northrook\Exception\E_Class;
+use Northrook\Exception\{ClassException, E_Class};
 use Northrook\Interface\Singleton;
 
 /**
@@ -28,22 +28,27 @@ trait SingletonClass
     /**
      * Retrieve the Singleton instance.
      *
-     * @param bool  $construct
-     * @param array $arguments
+     * @param bool $construct
+     * @param      ...$arguments
      *
      * @return static
      */
     protected static function getInstance(
-        bool     $construct = false,
-        mixed ...$arguments,
+        bool $construct = false,
+          ...$arguments,
     ) : static {
         return self::$__instance ??= $construct
                 ? new static( ...$arguments )
-                : throw new LogicException();
+        : throw new ClassException( 'The singleton '.static::class.' has not been instantiated.' );
+    }
+
+    final protected function instantiateSingleton() : void
+    {
+        $this::$__instance ??= $this;
     }
 
     /**
-     * Ensure the class has not already been instantiated.
+     * Ensure the {@see Singleton::class} has not already been instantiated.
      *
      * - Will check if {@see SingletonClass::$__instance} is set by default.
      * - `$check` will validate against {@see SingletonClass::$__instance} by default.
