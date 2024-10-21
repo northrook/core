@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Northrook\Exception;
 
 use JetBrains\PhpStorm\Language;
+use LogicException;
 use Northrook\Logger\Log;
 use Throwable;
 use Stringable;
 use const Support\AUTO;
 
-final class E_Value extends ExceptionHandler
+final class E_Class extends ExceptionHandler
 {
     /**
      * @param string|Stringable    $message
@@ -25,11 +26,11 @@ final class E_Value extends ExceptionHandler
         ?Throwable        $previous = null,
     ) : null {
         Log::exception(
-            new ValueError(
+            new LogicException(
                 $message,
+                previous: $previous,
                 file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
                 line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
-                previous: $previous,
             ),
             context : $context,
         );
@@ -51,13 +52,13 @@ final class E_Value extends ExceptionHandler
         ?bool             $throw = AUTO,
     ) : null {
 
-        [$message, $throw] = E_Value::autoHalt( $message, $throw );
+        [$message, $throw] = E_Class::autoHalt( $message, $throw );
 
-        $error = new ValueError(
-            E_Value::handleMessage( $message, $context ),
+        $error = new LogicException(
+            E_Class::handleMessage( $message, $context ),
+            previous: $previous,
             file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
             line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
-            previous: $previous,
         );
 
         Log::exception( $error, message: $message, context : $context );
