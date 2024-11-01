@@ -19,7 +19,7 @@ class EntryPoint
      * @param null|string $usedBy
      */
     public function __construct(
-        ?string $via = null,
-        ?string $usedBy = null,
+        public ?string $via = null,
+        public ?string $usedBy = null,
     ) {}
 }

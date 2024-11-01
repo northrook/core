@@ -17,10 +17,10 @@ final class ValueError extends RuntimeException
         ?Throwable       $previous = null,
     ) {
         if ( ! $this->file ) {
-            $this->file = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'];
+            $this->file = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'] ?? 'unknown file';
         }
         if ( ! $this->line ) {
-            $this->line = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'];
+            $this->line = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'] ?? 0;
         }
         parent::__construct( $message, $code, $previous );
     }

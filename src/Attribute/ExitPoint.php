@@ -14,5 +14,5 @@ use Attribute;
 #[Attribute( Attribute::TARGET_FUNCTION | Attribute::TARGET_METHOD )]
 class ExitPoint
 {
-    public function __construct( mixed $consumedBy = null ) {}
+    public function __construct( public mixed $consumedBy = null ) {}
 }

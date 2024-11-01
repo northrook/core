@@ -13,9 +13,9 @@ use const Support\AUTO;
 final class E_Class extends ExceptionHandler
 {
     /**
-     * @param string|Stringable    $message
-     * @param array<string, mixed> $context
-     * @param ?Throwable           $previous
+     * @param string|Stringable        $message
+     * @param array<array-key, string> $context
+     * @param ?Throwable               $previous
      *
      * @return null
      */
@@ -26,9 +26,9 @@ final class E_Class extends ExceptionHandler
     ) : null {
         Log::exception(
             new ClassException(
-                $message,
-                file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
-                line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
+                E_Class::handleMessage( (string) $message, $context ),
+                file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'] ?? 'unkown file',
+                line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'] ?? 0,
                 previous: $previous,
             ),
             context : $context,
@@ -37,10 +37,10 @@ final class E_Class extends ExceptionHandler
     }
 
     /**
-     * @param string|Stringable    $message
-     * @param array<string, mixed> $context
-     * @param ?Throwable           $previous
-     * @param ?bool                $throw
+     * @param string|Stringable        $message
+     * @param array<array-key, string> $context
+     * @param ?Throwable               $previous
+     * @param ?bool                    $throw
      *
      * @return null
      */
@@ -51,12 +51,12 @@ final class E_Class extends ExceptionHandler
         ?bool             $throw = AUTO,
     ) : null {
 
-        [$message, $throw] = E_Class::autoHalt( $message, $throw );
+        [$message, $throw] = E_Class::autoHalt( (string) $message, $throw );
 
         $error = new ClassException(
             E_Class::handleMessage( $message, $context ),
-            file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'],
-            line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'],
+            file : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['file'] ?? 'unkown file',
+            line : \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )[0]['line'] ?? 0,
             previous: $previous,
         );
 

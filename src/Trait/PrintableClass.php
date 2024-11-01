@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Northrook\Trait;
 
+use Northrook\Interface\Printable;
+
 /**
  * Designate a class as printable.
  *
  * - Ensure the class implements the {@see Printable} interface.
  *
  * @method string __toString()
- * @implements \Stringable
+ *
+ * @phpstan-require-implements Printable
  *
  * @author Martin Nielsen <mn@northrook.com>
  */
@@ -27,7 +30,7 @@ trait PrintableClass
     }
 
     /**
-     * Echo the.
+     * Echo {@see self::__toString}.
      *
      * @return void
      */

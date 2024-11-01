@@ -52,7 +52,7 @@ final class Env
             }
         }
 
-        Env::$debug        = $debug;
+        Env::$debug        = $debug ?? Env::isDevelopment();
         Env::$instantiated = true;
     }
 
@@ -91,7 +91,7 @@ final class Env
     }
 
     /**
-     * @return bool<Debug>
+     * @return bool
      */
     public static function isDebug() : bool
     {

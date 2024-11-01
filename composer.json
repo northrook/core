@@ -5,7 +5,7 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Northrook\\": "src"
+      "Northrook\\": "src/"
     }
   },
   "autoload-dev": {
@@ -23,15 +23,16 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.3",
-    "symfony/stopwatch": "^7.1",
     "northrook/support": "dev-main",
     "northrook/logger": "dev-main",
     "northrook/filesystem": "dev-main",
-    "northrook/settings": "dev-main",
     "northrook/memo": "dev-main"
   },
   "require-dev": {
     "northrook/dev-env": "dev-main",
     "phpbench/phpbench": "@stable"
+  },
+  "scripts": {
+    "phpstan": "vendor/bin/phpstan analyse"
   }
 }
