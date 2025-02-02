@@ -1,16 +1,11 @@
 {
   "name": "northrook/core",
-  "description": "Core support functions.",
+  "description": "Core implementation.",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Northrook\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Acme\\Tests\\": "tests/"
+      "Core\\": "src/"
     }
   },
   "authors": [
@@ -22,15 +17,11 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.3",
-    "northrook/support": "dev-main",
-    "northrook/logger": "dev-main",
-    "northrook/filesystem": "dev-main",
-    "northrook/memo": "dev-main"
+    "php": ">=8.3"
   },
   "require-dev": {
-    "northrook/dev-env": "dev-main",
-    "phpbench/phpbench": "@stable"
+    "northrook/php-cs": "dev-main",
+    "northrook/support": "dev-main"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"

@@ -5,11 +5,11 @@ docs                    export-ignore
 .gitattributes          export-ignore
 .gitignore              export-ignore
 .php-cs-fixer.php       export-ignore
-phpbench.json           export-ignore
 .php-cs-fixer.dist.php  export-ignore
 .phpstorm.meta.php      export-ignore
 *.neon                  export-ignore
 phpunit.xml.dist        export-ignore
+phpbench.json           export-ignore
 
 # Auto detect text files and perform LF normalization
 * text=auto eol=lf

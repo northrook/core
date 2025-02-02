@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Northrook\Interface;
+namespace Core\Interface;
 
 use Stringable;
 
-/**
- */
 interface Printable extends Stringable
 {
     /**
