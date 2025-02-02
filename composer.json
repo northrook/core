@@ -21,7 +21,10 @@
   },
   "require-dev": {
     "northrook/php-cs": "dev-main",
-    "northrook/support": "dev-main"
+    "northrook/support": "dev-main",
+    "psr/simple-cache": "^3.0",
+    "symfony/cache-contracts": "^3.5",
+    "symfony/cache": "^7.2"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"
