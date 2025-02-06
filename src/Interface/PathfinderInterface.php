@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Interface;
 
+use Core\Pathfinder\Path;
 use Stringable;
 
 interface PathfinderInterface
@@ -34,10 +35,10 @@ interface PathfinderInterface
      * @param string|Stringable $path
      * @param null|string       $relativeTo
      *
-     * @return ?\Support\FileInfo
+     * @return ?Path
      */
-    public function getFileInfo(
+    public function getPath(
         string|Stringable $path,
         ?string           $relativeTo = null,
-    ) : ?\Support\FileInfo;
+    ) : ?Path;
 }

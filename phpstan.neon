@@ -5,6 +5,10 @@ parameters:
 	reportUnmatchedIgnoredErrors: false
 	ignoreErrors:
 		-
+			message: '#Trait .+ is used zero times and is not analysed.#'
+			path: src/Interface/PrintableClass.php
+
+		-
 			message: '#Access to an undefined static property .+::\$.+#'
 			path: *.php
 
