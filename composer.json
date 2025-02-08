@@ -25,7 +25,8 @@
     "psr/simple-cache": "^3.0",
     "symfony/cache-contracts": "^3.5",
     "symfony/cache": "^7.2",
-    "northrook/pathfinder": "dev-main"
+    "northrook/pathfinder": "dev-main",
+    "northrook/view-element": "dev-main"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"
