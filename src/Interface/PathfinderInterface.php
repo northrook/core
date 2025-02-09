@@ -10,35 +10,35 @@ use Stringable;
 interface PathfinderInterface
 {
     /**
-     * @param string|Stringable $path
-     * @param null|string       $relativeTo
+     * @param string|Stringable      $path
+     * @param null|string|Stringable $relativeTo
      *
      * @return string
      */
     public function __invoke(
-        string|Stringable $path,
-        ?string           $relativeTo = null,
+        string|Stringable      $path,
+        null|string|Stringable $relativeTo = null,
     ) : string;
 
     /**
-     * @param string|Stringable $path
-     * @param null|string       $relativeTo
+     * @param string|Stringable      $path
+     * @param null|string|Stringable $relativeTo
      *
      * @return string
      */
     public function get(
-        string|Stringable $path,
-        ?string           $relativeTo = null,
+        string|Stringable      $path,
+        null|string|Stringable $relativeTo = null,
     ) : string;
 
     /**
-     * @param string|Stringable $path
-     * @param null|string       $relativeTo
+     * @param string|Stringable      $path
+     * @param null|string|Stringable $relativeTo
      *
      * @return Path
      */
     public function getPath(
-        string|Stringable $path,
-        ?string           $relativeTo = null,
+        string|Stringable      $path,
+        null|string|Stringable $relativeTo = null,
     ) : Path;
 }
