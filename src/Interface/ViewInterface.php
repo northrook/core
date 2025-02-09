@@ -9,13 +9,9 @@ use Stringable;
 interface ViewInterface extends Stringable
 {
     /**
-     * Return a {@see ViewInterface} as {@see Stringable} or `string`.
-     *
-     * Pass `true` to return as `string`.
-     *
-     * @param bool $string [false]
+     * Return a {@see ViewInterface} as {@see Stringable}.
      *
      * @return Stringable
      */
-    public function getHtml( bool $string = false ) : string|Stringable;
+    public function getHtml() : Stringable;
 }
