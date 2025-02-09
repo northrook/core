@@ -13,32 +13,32 @@ interface PathfinderInterface
      * @param string|Stringable $path
      * @param null|string       $relativeTo
      *
-     * @return ?string
+     * @return string
      */
     public function __invoke(
         string|Stringable $path,
         ?string           $relativeTo = null,
-    ) : ?string;
+    ) : string;
 
     /**
      * @param string|Stringable $path
      * @param null|string       $relativeTo
      *
-     * @return ?string
+     * @return string
      */
     public function get(
         string|Stringable $path,
         ?string           $relativeTo = null,
-    ) : ?string;
+    ) : string;
 
     /**
      * @param string|Stringable $path
      * @param null|string       $relativeTo
      *
-     * @return ?Path
+     * @return Path
      */
     public function getPath(
         string|Stringable $path,
         ?string           $relativeTo = null,
-    ) : ?Path;
+    ) : Path;
 }
