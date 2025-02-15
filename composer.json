@@ -5,8 +5,11 @@
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Core\\": "src/"
-    }
+      "Core\\": "src"
+    },
+    "files": [
+      "src/functions.php"
+    ]
   },
   "authors": [
     {
