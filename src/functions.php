@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Support;
 
-use Stringable;
-use LengthException;
+use Stringable, LengthException;
 
 /**
  * Normalize all slashes in a string to `/`.

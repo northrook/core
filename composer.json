@@ -23,14 +23,11 @@
     "php": ">=8.3"
   },
   "require-dev": {
-    "northrook/php-cs": "dev-main",
-    "northrook/support": "dev-main",
+    "northrook/dev": "dev-main",
+    "latte/latte": "^3.0",
     "psr/simple-cache": "^3.0",
     "symfony/cache-contracts": "^3.5",
-    "symfony/cache": "^7.2",
-    "northrook/pathfinder": "dev-main",
-    "northrook/view-element": "dev-main",
-    "latte/latte": "^3.0"
+    "northrook/pathfinder": "dev-main"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"

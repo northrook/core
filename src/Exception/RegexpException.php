@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Core\Exception;
 
-use RuntimeException;
-use Throwable;
-use const PREG_BACKTRACK_LIMIT_ERROR;
-use const PREG_BAD_UTF8_ERROR;
-use const PREG_BAD_UTF8_OFFSET_ERROR;
-use const PREG_INTERNAL_ERROR;
-use const PREG_RECURSION_LIMIT_ERROR;
+use RuntimeException, Throwable;
+
+use const PREG_BACKTRACK_LIMIT_ERROR, PREG_BAD_UTF8_ERROR, PREG_BAD_UTF8_OFFSET_ERROR, PREG_INTERNAL_ERROR, PREG_RECURSION_LIMIT_ERROR;
 
 final class RegexpException extends RuntimeException
 {

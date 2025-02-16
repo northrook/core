@@ -2,9 +2,7 @@
 
 namespace Core\Exception;
 
-use LogicException;
-use Throwable;
-use Stringable;
+use LogicException, Throwable, Stringable;
 
 class DuplicateEntryException extends LogicException
 {
