@@ -6,6 +6,13 @@ namespace Support;
 
 use Stringable, LengthException;
 
+const PLACEHOLDER_ARGS   = [[]];
+const PLACEHOLDER_ARG    = [];
+const PLACEHOLDER_ARRAY  = [];
+const PLACEHOLDER_STRING = '';
+const PLACEHOLDER_NULL   = null;
+const PLACEHOLDER_INT    = 0;
+
 /**
  * Normalize all slashes in a string to `/`.
  *
