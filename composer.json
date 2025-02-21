@@ -20,7 +20,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.3"
+    "php": ">=8.3",
+    "ext-ctype": "*"
   },
   "require-dev": {
     "northrook/dev": "dev-main",

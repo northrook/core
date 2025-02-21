@@ -14,6 +14,53 @@ const PLACEHOLDER_NULL   = null;
 const PLACEHOLDER_INT    = 0;
 
 /**
+ * Determines if a given set of characters is fully included in a string.
+ *
+ * Checks whether all characters from the specified character set exist in the string,
+ * starting at an optional offset and considering an optional length.
+ *
+ * @param null|string|Stringable $string     the string to search within
+ * @param string                 $characters the set of characters to check for inclusion
+ * @param int                    $offset     The position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
+ *
+ * @return bool returns true if all characters from the set are found in the string, false otherwise
+ */
+function str_includes(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+    return \strlen( $characters ) === \strspn( $characters, $string, $offset, $length );
+}
+
+/**
+ * Checks if the given string excludes specific characters within an optional range.
+ *
+ * @param null|string|Stringable $string     the input string to evaluate
+ * @param string                 $characters a list of characters to check for exclusion
+ * @param int                    $offset     the starting position for the check (default is 0)
+ * @param ?int                   $length     the length of the substring to check (default is null, meaning until the end of the string)
+ *
+ * @return bool returns true if the string excludes all specified characters, false otherwise
+ */
+function str_excludes(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return true;
+    }
+    return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
+}
+
+/**
  * Normalize all slashes in a string to `/`.
  *
  * @param string|Stringable $path
@@ -92,10 +139,11 @@ function normalizePath( string ...$path ) : string
  *
  * @param string|Stringable $string
  * @param string            $contains [..] optional `str_contains` check
+ * @param string            $illegal
  *
  * @return bool
  */
-function isPath( string|Stringable $string, string $contains = '..' ) : bool
+function isPath( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
 {
     // Stringify scalars and Stringable objects
     // Stringify
@@ -103,6 +151,10 @@ function isPath( string|Stringable $string, string $contains = '..' ) : bool
 
     // Must be at least two characters long to be a path string
     if ( ! $string || \strlen( $string ) < 2 ) {
+        return false;
+    }
+
+    if ( str_excludes( $string, '{}' ) ) {
         return false;
     }
 
