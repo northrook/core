@@ -62,7 +62,7 @@ function class_string( object|string $class ) : string
  *
  * @return string `FQCN::#` or `f.q.cn.#` when normalized
  */
-function get_class_id( object $class, bool $normalize = false ) : string
+function class_id( object $class, bool $normalize = false ) : string
 {
     if ( $normalize ) {
         return \strtolower( \trim( \str_replace( '\\', '.', $class::class ), '.' ).'.'.\spl_object_id( $class ) );
