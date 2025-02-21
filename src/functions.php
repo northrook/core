@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Support;
 
+use ArrayAccess;
+
 use Stringable, LengthException;
 
 const PLACEHOLDER_ARGS   = [[]];
@@ -12,6 +14,62 @@ const PLACEHOLDER_ARRAY  = [];
 const PLACEHOLDER_STRING = '';
 const PLACEHOLDER_NULL   = null;
 const PLACEHOLDER_INT    = 0;
+
+/**
+ * Check whether the script is being executed from a command line.
+ */
+function isCLI() : bool
+{
+    return PHP_SAPI === 'cli' || \defined( 'STDIN' );
+}
+
+/**
+ * Checks whether OPcache is installed and enabled for the given environment.
+ */
+function isOPcacheEnabled() : bool
+{
+    // Ensure OPcache is installed and not disabled
+    if (
+        ! \function_exists( 'opcache_invalidate' )
+        || ! \ini_get( 'opcache.enable' )
+    ) {
+        return false;
+    }
+
+    // If called from CLI, check accordingly, otherwise true
+    return ! isCLI() || \ini_get( 'opcache.enable_cli' );
+}
+
+/**
+ * @param class-string|object|string $class
+ *
+ * @return string
+ */
+function class_string( object|string $class ) : string
+{
+    return \is_object( $class ) ? $class::class : $class;
+}
+
+/**
+ * Returns a string of the `$class`, appended by the object_jid.
+ *
+ * ```
+ * \Namespace\ClassName::42
+ * ```
+ *
+ * @param object $class
+ * @param bool   $normalize
+ *
+ * @return string `FQCN::#` or `f.q.cn.#` when normalized
+ */
+function get_class_id( object $class, bool $normalize = false ) : string
+{
+    if ( $normalize ) {
+        return \strtolower( \trim( \str_replace( '\\', '.', $class::class ), '.' ).'.'.\spl_object_id( $class ) );
+    }
+
+    return $class::class.'::'.\spl_object_id( $class );
+}
 
 /**
  * Determines if a given set of characters is fully included in a string.
@@ -58,6 +116,57 @@ function str_excludes(
         return true;
     }
     return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
+}
+
+/**
+ * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
+ *
+ * @phpstan-assert-if-true scalar $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function isEmpty( mixed $value ) : bool
+{
+    // If it is a boolean, it cannot be empty
+    if ( \is_bool( $value ) ) {
+        return false;
+    }
+
+    if ( \is_numeric( $value ) ) {
+        return false;
+    }
+
+    return empty( $value );
+}
+
+/**
+ * # Determine if a value is a scalar.
+ *
+ * @phpstan-assert-if-true scalar|\Stringable|null $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function isScalar( mixed $value ) : bool
+{
+    return \is_scalar( $value ) || $value instanceof Stringable || \is_null( $value );
+}
+
+/**
+ * `is_iterable` implementation that also checks for {@see ArrayAccess}.
+ *
+ * @phpstan-assert-if-true iterable|\Traversable $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function isIterable( mixed $value ) : bool
+{
+    return \is_iterable( $value ) || $value instanceof ArrayAccess;
 }
 
 /**
