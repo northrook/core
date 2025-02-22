@@ -391,7 +391,7 @@ function normalizeWhitespace( string|Stringable|null $string ) : string
 function normalizePath( ?string ...$path ) : string
 {
     // Normalize separators
-    $normalized = \str_replace( ['\\', '/'], DIRECTORY_SEPARATOR, $path );
+    $normalized = \str_replace( ['\\', '/'], DIRECTORY_SEPARATOR, \array_filter( $path ) );
 
     $isRelative = $normalized[0][0] === DIRECTORY_SEPARATOR;
 
