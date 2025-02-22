@@ -202,16 +202,16 @@ function str_encode( null|string|Stringable $string, ?string $encoding = AUTO ) 
 /**
  * - Ensures appropriate string encoding.
  *
- * @param string|Stringable     $string
- * @param false|int<2,4>        $tabSize  [4]
- * @param null|non-empty-string $encoding [UTF-8]
+ * @param null|string|Stringable $string
+ * @param false|int<2,4>         $tabSize  [4]
+ * @param null|non-empty-string  $encoding [UTF-8]
  *
  * @return string
  */
 function str_normalize(
-    string|Stringable $string,
-    false|int         $tabSize = 4,
-    ?string           $encoding = AUTO,
+    string|Stringable|null $string,
+    false|int              $tabSize = 4,
+    ?string                $encoding = AUTO,
 ) : string {
     // Ensure appropriate string encoding
     $string = str_encode( $string, $encoding );
@@ -234,6 +234,21 @@ function str_normalize(
 
     // Trim repeated whitespace, normalize line breaks
     return (string) \preg_replace( ['# +#', '#\r\n#', '#\r#'], [' ', "\n"], \trim( $string ) );
+}
+
+/**
+ * Compress a string by replacing consecutive whitespace characters with a single one.
+ *
+ * @param null|string|Stringable $string         $string
+ * @param bool                   $whitespaceOnly if true, only spaces are squished, leaving tabs and new lines intact
+ *
+ * @return string the squished string with consecutive whitespace replaced by the defined whitespace character
+ */
+function str_squish( string|Stringable|null $string, bool $whitespaceOnly = false ) : string
+{
+    return (string) ( $whitespaceOnly
+            ? \preg_replace( '# +#', WHITESPACE, \trim( (string) $string ) )
+            : \preg_replace( "#\s+#", WHITESPACE, \trim( (string) $string ) ) );
 }
 
 /**
@@ -371,9 +386,9 @@ function normalizeWhitespace( string|Stringable|null $string ) : string
  * // => '.\assets\scripts\example.js'
  * ```
  *
- * @param string ...$path
+ * @param ?string ...$path
  */
-function normalizePath( string ...$path ) : string
+function normalizePath( ?string ...$path ) : string
 {
     // Normalize separators
     $normalized = \str_replace( ['\\', '/'], DIRECTORY_SEPARATOR, $path );
