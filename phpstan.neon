@@ -5,6 +5,9 @@ parameters:
 	reportUnmatchedIgnoredErrors: false
 	ignoreErrors:
 		-
+			message: '#PHPDoc tag @phpstan-assert-if-true for.+iterable.#'
+			path: *.php
+		-
 			message: '#Trait .+ is used zero times and is not analysed.#'
 			path: src/Interface/PrintableClass.php
 

@@ -5,8 +5,29 @@ declare(strict_types=1);
 namespace Support;
 
 use ArrayAccess;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
+use Exception;
+use InvalidArgumentException;
+use BadFunctionCallException;
 
 use Stringable, LengthException;
+
+/** Will use a `default` setting unless changed */
+const AUTO = null;
+
+const
+    TAB          = "\t",
+    EMPTY_STRING = '',
+    WHITESPACE   = ' ';
+
+/** Line Feed  */
+const LF = "\n";
+/** Carriage Return */
+const CR = "\r";
+/** Carriage Return and Line Feed */
+const CRLF = "\r\n";
 
 const PLACEHOLDER_ARGS   = [[]];
 const PLACEHOLDER_ARG    = [];
@@ -14,6 +35,82 @@ const PLACEHOLDER_ARRAY  = [];
 const PLACEHOLDER_STRING = '';
 const PLACEHOLDER_NULL   = null;
 const PLACEHOLDER_INT    = 0;
+
+/**
+ * @param DateTimeInterface|string $when
+ * @param null|DateTimeZone|string $timezone [UTC]
+ *
+ * @return DateTimeImmutable
+ */
+function timestamp(
+    string|DateTimeInterface $when = 'now',
+    string|DateTimeZone|null $timezone = AUTO,
+) : DateTimeImmutable {
+    $fromDateTime = $when instanceof DateTimeInterface;
+    $datetime     = (string) ( $fromDateTime ? $when->getTimestamp() : $when );
+
+    $timezone = match ( true ) {
+        \is_null( $timezone )   => $fromDateTime ? $when->getTimezone() : \timezone_open( 'UTC' ),
+        \is_string( $timezone ) => \timezone_open( $timezone ),
+        default                 => $timezone,
+    } ?: null;
+
+    try {
+        return new DateTimeImmutable( $datetime, $timezone );
+    }
+    catch ( Exception $exception ) {
+        $message = 'Unable to create a new DateTimeImmutable object: '.$exception->getMessage();
+        throw new InvalidArgumentException( $message, 500, $exception );
+    }
+}
+
+/**
+ * Retrieves the project root directory.
+ *
+ * - This function assumes the Composer directory is present in the project root.
+ *
+ * @return string
+ */
+function getProjectDirectory() : string
+{
+    static $projectDirectory = null;
+
+    return $projectDirectory ??= ( static function() : string {
+        // Split the current directory into an array of directory segments
+        $segments = \explode( DIRECTORY_SEPARATOR, __DIR__ );
+
+        // Ensure the directory array has at least 5 segments and a valid vendor value
+        if ( ( \count( $segments ) >= 5 && $segments[\count( $segments ) - 4] === 'vendor' ) ) {
+            // Remove the last 4 segments (vendor, package name, and Composer structure)
+            $rootSegments = \array_slice( $segments, 0, -4 );
+        }
+        else {
+            $message = __FUNCTION__.' was unable to determine a valid root. Current path: '.__DIR__;
+            throw new BadFunctionCallException( $message );
+        }
+
+        // Normalize and return the project path
+        return normalizePath( ...$rootSegments );
+    } )();
+}
+
+/**
+ * Retrieves the system temp directory for this project.
+ *
+ * - The directory is named using a hash based on the getProjectDirectory.
+ *
+ * @return string
+ */
+function getSystemCacheDirectory() : string
+{
+    static $cacheDirectory = null;
+    return $cacheDirectory ??= ( static function() : string {
+        $tempDir = \sys_get_temp_dir();
+        $dirHash = \hash( 'xxh3', getProjectDirectory() );
+
+        return normalizePath( $tempDir, $dirHash );
+    } )();
+}
 
 /**
  * Check whether the script is being executed from a command line.
