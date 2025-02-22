@@ -14,7 +14,8 @@ const AUTO = null;
 const
     TAB          = "\t",
     EMPTY_STRING = '',
-    WHITESPACE   = ' ';
+    WHITESPACE   = ' ',
+    NEWLINE      = "\n";
 
 /** Line Feed  */
 const LF = "\n";
@@ -365,6 +366,16 @@ function normalizeSlashes( string|Stringable $path ) : string
 function normalizeWhitespace( string|Stringable|null $string ) : string
 {
     return (string) \preg_replace( '#\s+#', ' ', \trim( (string) $string ) );
+}
+
+/**
+ * @param null|string|Stringable $string
+ *
+ * @return string
+ */
+function normalizeNewline( string|Stringable|null $string ) : string
+{
+    return \str_replace( ["\r\n", "\r", "\n"], NEWLINE, (string) $string );
 }
 
 /**
