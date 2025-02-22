@@ -294,6 +294,43 @@ function str_excludes(
 }
 
 /**
+ * Replace each key from `$map` with its value, when found in `$content`.
+ *
+ * @param array<string,null|string|Stringable> $map
+ * @param string[]                             $content
+ * @param bool                                 $caseSensitive
+ *
+ * @return ($content is string ? string : string[])
+ */
+function str_replace_each(
+    array        $map,
+    string|array $content,
+    bool         $caseSensitive = true,
+) : string|array {
+    // Bail early on empty content
+    if ( ! $content ) {
+        return $content;
+    }
+
+    // Validate and normalize the $map
+    foreach ( $map as $match => $replace ) {
+        \assert( \is_string( $match ), __METHOD__.' does not accept empty match keys' );
+        $map[$match] = (string) $replace;
+    }
+
+    $search  = \array_keys( $map );
+    $replace = \array_values( $map );
+
+    /**
+     * @var string[] $search
+     * @var string[] $replace
+     * */
+    return $caseSensitive
+            ? \str_replace( $search, $replace, $content )
+            : \str_ireplace( $search, $replace, $content );
+}
+
+/**
  * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
  *
  * @phpstan-assert-if-true scalar $value

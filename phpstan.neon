@@ -2,7 +2,10 @@ parameters:
 	level: 9
 	paths:
 		- src
+	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: false
+	tips:
+		treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		-
 			message: '#PHPDoc tag @phpstan-assert-if-true for.+iterable.#'
