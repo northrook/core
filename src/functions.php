@@ -37,17 +37,21 @@ const PLACEHOLDER_NULL   = null;
 const PLACEHOLDER_INT    = 0;
 
 /**
- * @param DateTimeInterface|string $when
- * @param null|DateTimeZone|string $timezone [UTC]
+ * @param DateTimeInterface|int|string $when
+ * @param null|DateTimeZone|string     $timezone [UTC]
  *
  * @return DateTimeImmutable
  */
 function timestamp(
-    string|DateTimeInterface $when = 'now',
-    string|DateTimeZone|null $timezone = AUTO,
+    int|string|DateTimeInterface $when = 'now',
+    string|DateTimeZone|null     $timezone = AUTO,
 ) : DateTimeImmutable {
     $fromDateTime = $when instanceof DateTimeInterface;
-    $datetime     = (string) ( $fromDateTime ? $when->getTimestamp() : $when );
+    $datetime     = $fromDateTime ? $when->getTimestamp() : $when;
+
+    if ( \is_int( $datetime ) ) {
+        $datetime = "@{$datetime}";
+    }
 
     $timezone = match ( true ) {
         \is_null( $timezone )   => $fromDateTime ? $when->getTimezone() : \timezone_open( 'UTC' ),
@@ -166,6 +170,70 @@ function class_id( object $class, bool $normalize = false ) : string
     }
 
     return $class::class.'::'.\spl_object_id( $class );
+}
+
+/**
+ * Ensures appropriate string encoding.
+ *
+ * Replacement for the deprecated {@see \mb_convert_encoding()}, see [PHP.watch](https://php.watch/versions/8.2/mbstring-qprint-base64-uuencode-html-entities-deprecated) for details.
+ *
+ * Directly inspired by [aleblanc](https://github.com/aleblanc)'s comment on [this GitHub issue](https://github.com/symfony/symfony/issues/44281#issuecomment-1647665965).
+ *
+ * @param null|string|Stringable $string
+ * @param null|non-empty-string  $encoding [UTF-8]
+ *
+ * @return string
+ */
+function str_encode( null|string|Stringable $string, ?string $encoding = AUTO ) : string
+{
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $encoding ??= 'UTF-8';
+
+    $entities = \htmlentities( $string, ENT_NOQUOTES, $encoding, false );
+    $decoded  = \htmlspecialchars_decode( $entities, ENT_NOQUOTES );
+    $map      = [0x80, 0x10_FF_FF, 0, ~0];
+
+    return \mb_encode_numericentity( $decoded, $map, $encoding );
+}
+
+/**
+ * - Ensures appropriate string encoding.
+ *
+ * @param string|Stringable     $string
+ * @param false|int<2,4>        $tabSize  [4]
+ * @param null|non-empty-string $encoding [UTF-8]
+ *
+ * @return string
+ */
+function str_normalize(
+    string|Stringable $string,
+    false|int         $tabSize = 4,
+    ?string           $encoding = AUTO,
+) : string {
+    // Ensure appropriate string encoding
+    $string = str_encode( $string, $encoding );
+
+    // Convert leading spaces to tabs
+    if ( $tabSize ) {
+        $string = (string) \preg_replace_callback(
+            '#^ *#m',
+            static function( $matches ) use ( $tabSize ) {
+                // Group each $tabSize
+                $tabs = \intdiv( \strlen( $matches[0] ), $tabSize );
+
+                // Replace $tabs with "\t", excess spaces discarded
+                // Otherwise leading whitespace is trimmed
+                return ( $tabs > 0 ) ? \str_repeat( "\t", $tabs ) : '';
+            },
+            $string,
+        );
+    }
+
+    // Trim repeated whitespace, normalize line breaks
+    return (string) \preg_replace( ['# +#', '#\r\n#', '#\r#'], [' ', "\n"], \trim( $string ) );
 }
 
 /**
