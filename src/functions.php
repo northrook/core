@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace Support;
 
-use ArrayAccess;
-use DateTimeImmutable;
-use DateTimeInterface;
-use DateTimeZone;
-use Exception;
-use InvalidArgumentException;
-use BadFunctionCallException;
+use Stringable, ArrayAccess;
+use DateTimeImmutable, DateTimeZone, DateTimeInterface;
+use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
 
-use Stringable, LengthException;
-
-/** Will use a `default` setting unless changed */
+/** Indicates a `default` value will be used unless provided */
 const AUTO = null;
 
 const

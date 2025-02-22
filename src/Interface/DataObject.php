@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Core\Interface;
 
 /**
@@ -17,7 +15,4 @@ namespace Core\Interface;
  *
  * @author Martin Nielsen <mn@northrook.com>
  */
-abstract readonly class DataObject implements DataInterface
-{
-    public const bool READONLY = true;
-}
+abstract readonly class DataObject implements DataInterface {}
