@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Support;
 
+use Random\RandomException;
 use Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
@@ -441,6 +442,27 @@ function cacheKey( mixed ...$value ) : string
     }
 
     return \strtolower( \trim( \implode( ':', $key ) ) );
+}
+
+/**
+ * Generate a random hashed string.
+ *
+ * - `xxh32` 8 characters
+ * - `xxh64` 16 characters
+ *
+ * @param 'xxh32'|'xxh64' $algo    [xxh64]
+ * @param int<2,12>       $entropy [7]
+ *
+ * @return string
+ */
+function randKey( string $algo = 'xxh64', int $entropy = 7 ) : string
+{
+    try {
+        return \hash( $algo, data : \random_bytes( $entropy ) );
+    }
+    catch ( RandomException ) {
+        return \hash( $algo, data : (string) \rand( 0, PHP_INT_MAX ) );
+    }
 }
 
 /**
