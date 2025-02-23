@@ -364,6 +364,86 @@ function slug(
 }
 
 /**
+ * # Generate a deterministic hash key from a value.
+ *
+ *  - `$value` will be stringified using `json_encode()` by default.
+ *  - The value is hashed using `xxh3`.
+ *  - The hash is not reversible.
+ *
+ * The $value can be stringified in one of the following ways:
+ *
+ * ## `json`
+ * Often the fastest option when passing a large object.
+ * Will fall back to `serialize` if `json_encode()` fails.
+ *
+ * ## `serialize`
+ * Can sometimes be faster for arrays of strings.
+ *
+ * ## `implode`
+ * Very fast for simple arrays of strings.
+ * Requires the `$value` to be an `array` of `string|int|float|bool|Stringable`.
+ * Nested arrays are not supported.
+ *
+ * ```
+ * hashKey( [ 'example', new stdClass(), true ] );
+ * // => a0a42b9a3a72e14c
+ * ```
+ *
+ * @param mixed                        $value
+ * @param 'implode'|'json'|'serialize' $encoder
+ *
+ * @return string 16 character hash of the value
+ */
+function hashKey(
+    mixed  $value,
+    string $encoder = 'json',
+) : string {
+    if ( ! \is_string( $value ) ) {
+        // Use serialize if defined
+        if ( $encoder === 'serialize' ) {
+            $value = \serialize( $value );
+        }
+        // Implode if defined and $value is an array
+        elseif ( $encoder === 'implode' && \is_array( $value ) ) {
+            $value = \implode( ':', $value );
+        }
+        // JSON as default, or as fallback
+        else {
+            $value = \json_encode( $value ) ?: \serialize( $value );
+        }
+    }
+
+    // Hash the $value to a 16 character string
+    return \hash( algo : 'xxh3', data : $value );
+}
+
+/**
+ * @param mixed ...$value
+ */
+function cacheKey( mixed ...$value ) : string
+{
+    $key = [];
+
+    foreach ( $value as $segment ) {
+        if ( \is_null( $segment ) ) {
+            continue;
+        }
+
+        $key[] = match ( \gettype( $segment ) ) {
+            'string'  => $segment,
+            'boolean' => $segment ? 'true' : 'false',
+            'integer' => (string) $segment,
+            default   => \hash(
+                algo : 'xxh32',
+                data : \json_encode( $value ) ?: \serialize( $value ),
+            ),
+        };
+    }
+
+    return \strtolower( \trim( \implode( ':', $key ) ) );
+}
+
+/**
  * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
  *
  * @phpstan-assert-if-true scalar $value
