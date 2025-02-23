@@ -7,6 +7,7 @@ namespace Support;
 use Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
+use voku\helper\ASCII;
 
 /** Indicates a `default` value will be used unless provided */
 const AUTO = null;
@@ -331,6 +332,38 @@ function str_replace_each(
 }
 
 /**
+ * @param null|string|Stringable $string
+ * @param string                 $separator
+ * @param ?callable-string       $filter    {@see \strtolower} by default
+ * @param string                 $language  [en]
+ *
+ * @return string
+ */
+function slug(
+    null|string|Stringable $string,
+    string                 $separator = '-',
+    ?string                $filter = 'strtolower',
+    string                 $language = 'en',
+) : string {
+    if ( ! $string = \trim( (string) $string ) ) {
+        return EMPTY_STRING;
+    }
+
+    if ( \class_exists( ASCII::class ) ) {
+        /** @var ASCII::* $language */
+        $string = ASCII::to_ascii( $string, $language );
+    }
+
+    // Replace non-alphanumeric characters with the separator
+    $string = \trim(
+        (string) \preg_replace( "#[^a-z0-9{$separator}]+#i", $separator, $string ),
+        " \n\r\t\v\0{$separator}",
+    );
+
+    return \is_callable( $filter ) ? (string) $filter( $string ) : $string;
+}
+
+/**
  * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
  *
  * @phpstan-assert-if-true scalar $value
@@ -461,6 +494,85 @@ function normalizePath( ?string ...$path ) : string
     }
 
     return $path;
+}
+
+/**
+ * @param array<int, ?string>|string $path                 the string to normalize
+ * @param false|string               $substituteWhitespace [-]
+ * @param bool                       $trailingSlash
+ *
+ * @return string
+ */
+function normalizeUrl(
+    string|array $path,
+    false|string $substituteWhitespace = '-',
+    bool         $trailingSlash = false,
+) : string {
+    $string = \is_array( $path ) ? \implode( '/', $path ) : $path;
+
+    // Normalize slashes
+    $string = \str_replace( '\\', '/', $string );
+
+    // Handle whitespace
+    if ( $substituteWhitespace !== false ) {
+        $string = (string) \preg_replace( '#\s+#', $substituteWhitespace, $string );
+    }
+
+    $protocol = '/';
+    $fragment = '';
+    $query    = '';
+
+    // Extract and lowercase the $protocol
+    if ( \str_contains( $string, '://' ) ) {
+        [$protocol, $string] = \explode( '://', $string, 2 );
+        $protocol            = \strtolower( $protocol ).'://';
+    }
+
+    // Check if the $string contains $query and $fragment
+    $matchQuery    = \strpos( $string, '?' );
+    $matchFragment = \strpos( $string, '#' );
+
+    // If the $string contains both
+    if ( $matchQuery && $matchFragment ) {
+        // To parse both regardless of order, we check which one appears first in the $string.
+        // Split the $string by the first $match, which will then contain the other.
+
+        // $matchQuery is first
+        if ( $matchQuery < $matchFragment ) {
+            [$string, $query]   = \explode( '?', $string, 2 );
+            [$query, $fragment] = \explode( '#', $query, 2 );
+        }
+        // $matchFragment is first
+        else {
+            [$string, $fragment] = \explode( '#', $string, 2 );
+            [$fragment, $query]  = \explode( '?', $fragment, 2 );
+        }
+
+        // After splitting, prepend the relevant identifiers.
+        $query    = "?{$query}";
+        $fragment = "#{$fragment}";
+    }
+    // If the $string only contains $query
+    elseif ( $matchQuery ) {
+        [$string, $query] = \explode( '?', $string, 2 );
+        $query            = "?{$query}";
+    }
+    // If the $string only contains $fragment
+    elseif ( $matchFragment ) {
+        [$string, $fragment] = \explode( '#', $string, 2 );
+        $fragment            = "#{$fragment}";
+    }
+
+    // Remove duplicate separators, and lowercase the $path
+    $path = \strtolower( \implode( '/', \array_filter( \explode( '/', $string ) ) ) );
+
+    // Prepend trailing separator if needed
+    if ( $trailingSlash ) {
+        $path .= '/';
+    }
+
+    // Assemble the URL
+    return $protocol.$path.$query.$fragment;
 }
 
 /**

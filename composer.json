@@ -25,10 +25,9 @@
   },
   "require-dev": {
     "northrook/dev": "dev-main",
+    "northrook/pathfinder": "dev-main",
     "latte/latte": "^3.0",
-    "psr/simple-cache": "^3.0",
-    "symfony/cache-contracts": "^3.5",
-    "northrook/pathfinder": "dev-main"
+    "voku/portable-ascii": "*"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"
