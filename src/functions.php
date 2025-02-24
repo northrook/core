@@ -332,19 +332,19 @@ function str_replace_each(
             : \str_ireplace( $search, $replace, $content );
 }
 
-function str_starts_with( string $haystack, string $needle ) : bool
+function mb_str_starts_with( string $haystack, string $needle ) : bool
 {
     return \mb_stripos( $haystack, $needle, 0, 'UTF-8' ) === 0;
 }
 
-function str_ends_with( string $haystack, string $needle ) : bool
+function mb_str_ends_with( string $haystack, string $needle ) : bool
 {
     return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
 }
 
 function str_start( string $string, string $with ) : string
 {
-    if ( str_starts_with( $string, $with ) ) {
+    if ( \str_starts_with( $string, $with ) ) {
         return $string;
     }
 
@@ -353,7 +353,7 @@ function str_start( string $string, string $with ) : string
 
 function str_end( string $string, string $with ) : string
 {
-    if ( str_ends_with( $string, $with ) ) {
+    if ( \str_ends_with( $string, $with ) ) {
         return $string;
     }
 
