@@ -360,6 +360,36 @@ function str_end( string $string, string $with ) : string
     return $string.$with;
 }
 
+function str_starts_with_any( null|string|Stringable $string, null|string|Stringable ...$needle ) : bool
+{
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    foreach ( $needle as $substring ) {
+        if ( \str_starts_with( $string, (string) $substring ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function str_ends_with_any( null|string|Stringable $string, null|string|Stringable ...$needle ) : bool
+{
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    foreach ( $needle as $substring ) {
+        if ( \str_ends_with( $string, (string) $substring ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * @param null|string|Stringable $string
  * @param string                 $separator
@@ -799,4 +829,16 @@ function isUrl( string|Stringable $string, ?string $requiredProtocol = null ) : 
 function isRelativePath( string|Stringable $path ) : bool
 {
     return \str_starts_with( \str_replace( '\\', '/', (string) $path ), '/' );
+}
+
+function isDelimiter( string $string ) : bool
+{
+    return (bool) \preg_match( '#^[,;]+$#', $string );
+}
+
+function isPunctuation( string $string, bool $endingOnly = false ) : bool
+{
+    return (bool) ( $endingOnly
+            ? \preg_match( '#^[.!]+$#', $string )
+            : \preg_match( '#^[[:punct:]]+$#', $string ) );
 }
