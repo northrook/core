@@ -170,6 +170,50 @@ function class_id( object $class, bool $normalize = false ) : string
 }
 
 /**
+ * @param float $number
+ * @param float $min
+ * @param float $max
+ *
+ * @return bool
+ */
+function num_within( float $number, float $min, float $max ) : bool
+{
+    return $number >= $min && $number <= $max;
+}
+
+/**
+ * @param float $number
+ * @param float $min
+ * @param float $max
+ *
+ * @return float
+ */
+function num_clamp( float $number, float $min, float $max ) : float
+{
+    return \max( $min, \min( $number, $max ) );
+}
+
+/**
+ * @see https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array stackoverflow
+ *
+ * @param int   $humber
+ * @param int[] $in
+ * @param bool  $returnKey
+ *
+ * @return null|int|string
+ */
+function num_closest( int $humber, array $in, bool $returnKey = false ) : string|int|null
+{
+    foreach ( $in as $key => $value ) {
+        if ( $humber <= $value ) {
+            return $returnKey ? $key : $value;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Ensures appropriate string encoding.
  *
  * Replacement for the deprecated {@see \mb_convert_encoding()}, see [PHP.watch](https://php.watch/versions/8.2/mbstring-qprint-base64-uuencode-html-entities-deprecated) for details.
@@ -194,6 +238,20 @@ function str_encode( null|string|Stringable $string, ?string $encoding = AUTO ) 
     $map      = [0x80, 0x10_FF_FF, 0, ~0];
 
     return \mb_encode_numericentity( $decoded, $map, $encoding );
+}
+
+/**
+ * @param float $from
+ * @param float $to
+ *
+ * @return float
+ */
+function num_percent( float $from, float $to ) : float
+{
+    if ( ! $from || $from === $to ) {
+        return 0;
+    }
+    return (float) \number_format( ( $from - $to ) / $from * 100, 2 );
 }
 
 /**
