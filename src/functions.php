@@ -33,6 +33,21 @@ const PLACEHOLDER_STRING = '';
 const PLACEHOLDER_NULL   = null;
 const PLACEHOLDER_INT    = 0;
 
+const URL_SAFE_CHARACTERS_UNICODE = "\w.,_~:;@!$&*?#=%()+\-\[\]\'\/";
+const URL_SAFE_CHARACTERS         = "A-Za-z0-9.,_~:;@!$&*?#=%()+\-\[\]\'\/";
+
+const ENCODE_ESCAPE_JSON            = JSON_UNESCAPED_UNICODE       | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+const ENCODE_PARTIAL_UNESCAPED_JSON = JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE;
+
+const FILTER_STRING_COMMENTS = [
+    '{* '   => '<!-- ', // Latte
+    ' *}'   => ' -->',
+    '{# '   => '<!-- ', // Twig
+    ' #}'   => ' -->',
+    '{{-- ' => '<!-- ', // Blade
+    ' --}}' => ' -->',
+];
+
 /**
  * @param DateTimeInterface|int|string $when
  * @param null|DateTimeZone|string     $timezone [UTC]
@@ -581,6 +596,34 @@ function randKey( string $algo = 'xxh64', int $entropy = 7 ) : string
     }
 }
 
+function implodeKey( mixed $value = AUTO, string $separator = ':' ) : string
+{
+    $key = [];
+
+    if ( ! \is_iterable( $value ) ) {
+        $value = [$value];
+    }
+
+    foreach ( $value as $segment ) {
+        if ( \is_null( $segment ) ) {
+            continue;
+        }
+
+        $key[] = match ( \gettype( $segment ) ) {
+            'string'  => $segment,
+            'boolean' => $segment ? 'true' : 'false',
+            'integer' => (string) $segment,
+            'object'  => $segment::class.'#'.\spl_object_id( $segment ),
+            default   => \hash(
+                algo : 'xxh3',
+                data : \json_encode( $value ) ?: \serialize( $value ),
+            ),
+        };
+    }
+
+    return \implode( $separator, $key );
+}
+
 /**
  * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
  *
@@ -899,4 +942,106 @@ function isPunctuation( string $string, bool $endingOnly = false ) : bool
     return (bool) ( $endingOnly
             ? \preg_match( '#^[.!]+$#', $string )
             : \preg_match( '#^[[:punct:]]+$#', $string ) );
+}
+
+/**
+ * @param mixed $value
+ * @param bool  $nullable
+ *
+ * @return ($nullable is true ? null|string : string)
+ */
+function as_string( mixed $value, bool $nullable = false ) : ?string
+{
+    $value = match ( true ) {
+        \is_bool( $value ) => $value ? 'true' : 'false',
+        \is_null( $value ) => $nullable ? null : EMPTY_STRING,
+        \is_scalar( $value ), $value instanceof Stringable => (string) $value,
+        default => $value,
+    };
+
+    \assert( \is_string( $value ) || ( $nullable && \is_null( $value ) ) );
+
+    return $value;
+}
+
+/**
+ * @param mixed $value
+ * @param bool  $is_list
+ *
+ * @return ($is_list is true ? array<int, mixed> : array<array-key, mixed>)
+ */
+function as_array( mixed $value, bool $is_list = false ) : array
+{
+    $value = match ( true ) {
+        \is_array( $value )  => $value,
+        \is_object( $value ) => \iterator_to_array( $value ),
+        default              => [$value],
+    };
+
+    if ( $is_list ) {
+        \assert( \array_is_list( $value ) );
+    }
+    return $value;
+}
+
+/**
+ * @param null|string|Stringable $string
+ * @param bool                   $comments
+ * @param string                 $encoding
+ * @param int                    $flags
+ *
+ * @return string
+ */
+function escape_html(
+    null|string|Stringable $string,
+    bool                   $comments = false,
+    string                 $encoding = 'UTF-8',
+    int                    $flags = ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return $string;
+    }
+
+    $string = \htmlspecialchars( $string, $flags, $encoding );
+
+    if ( $comments ) {
+        $string = str_replace_each( FILTER_STRING_COMMENTS, $string );
+    }
+
+    return $string;
+}
+
+/**
+ * Filter a string assuming it a URL.
+ *
+ * - Preserves Unicode characters.
+ * - Removes tags by default.
+ *
+ * @param null|string|Stringable $string       $string
+ * @param bool                   $preserveTags [false]
+ *
+ * @return string
+ */
+function url(
+    null|string|Stringable $string,
+    bool                   $preserveTags = false,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return $string;
+    }
+
+    $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
+
+    if ( $preserveTags ) {
+        $safeCharacters .= '{}|^`"><@';
+    }
+
+    $filtered = (string) ( \preg_replace(
+        pattern     : "/[^{$safeCharacters}]/u",
+        replacement : EMPTY_STRING,
+        subject     : $string,
+    ) ?? EMPTY_STRING );
+
+    // Escape special characters including tags
+    return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
 }
