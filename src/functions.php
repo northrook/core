@@ -973,9 +973,9 @@ function as_string( mixed $value, bool $nullable = false ) : ?string
 function as_array( mixed $value, bool $is_list = false ) : array
 {
     $value = match ( true ) {
-        \is_array( $value )  => $value,
-        \is_object( $value ) => \iterator_to_array( $value ),
-        default              => [$value],
+        \is_array( $value )    => $value,
+        \is_iterable( $value ) => \iterator_to_array( $value ),
+        default                => [$value],
     };
 
     if ( $is_list ) {
