@@ -48,6 +48,12 @@ const FILTER_STRING_COMMENTS = [
     ' --}}' => ' -->',
 ];
 
+// @formatter:off
+const TAG_HEADING      = ['hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+const TAG_INLINE       = ['a', 'b', 'i', 's', 'em', 'small', 'strong', 'span', 'mark', 'cite', 'code', 'kbd', 'wbr'];
+const TAG_SELF_CLOSING = ['meta', 'link', 'img', 'input', 'wbr', 'hr', 'br', 'col', 'area', 'base', 'source', 'embed', 'track'];
+// @formatter:on
+
 /**
  * @param DateTimeInterface|int|string $when
  * @param null|DateTimeZone|string     $timezone [UTC]
@@ -1022,7 +1028,7 @@ function escape_html(
  *
  * @return string
  */
-function url(
+function escape_url(
     null|string|Stringable $string,
     bool                   $preserveTags = false,
 ) : string {
