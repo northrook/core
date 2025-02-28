@@ -60,7 +60,7 @@ const TAG_SELF_CLOSING = ['meta', 'link', 'img', 'input', 'wbr', 'hr', 'br', 'co
  *
  * @return DateTimeImmutable
  */
-function timestamp(
+function datetime(
     int|string|DateTimeInterface $when = 'now',
     string|DateTimeZone|null     $timezone = AUTO,
 ) : DateTimeImmutable {
