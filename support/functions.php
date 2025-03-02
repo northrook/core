@@ -310,13 +310,10 @@ function explode_class_callable( mixed $callable, bool $validate = false ) : arr
 }
 
 /**
- * @template T_Class of object
- * @template T_Interface of object
+ * @template T of object
  *
- * @param class-string<T_Class>|string     $class     Check if this class implements a given Interface
- * @param class-string<T_Interface>|string $interface The Interface to check against
- *
- * @phpstan-assert-if-true class-string<T_Interface> $interface
+ * @param class-string    $class     Check if this class implements a given Interface
+ * @param class-string<T> $interface The Interface to check against
  *
  * @return bool
  */
@@ -328,11 +325,11 @@ function implements_interface( string $class, string $interface ) : bool
 
     $interfaces = \class_implements( $class );
 
-    if ( ! $interface ) {
+    if ( ! $interfaces || ! \in_array( $interface, $interfaces, true ) ) {
         return false;
     }
 
-    return \in_array( $interface, $interfaces, true );
+    return \interface_exists( $interface );
 }
 
 /**
@@ -424,7 +421,7 @@ function class_extends(
 
     if ( $namespace ) {
         foreach ( $classes as $key => $class ) {
-            $classes[$key] = ClassInfo::basename( $class );
+            $classes[$key] = class_basename( $class );
         }
     }
 
