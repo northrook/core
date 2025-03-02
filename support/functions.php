@@ -9,6 +9,21 @@ use Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
 use voku\helper\ASCII;
+use BadMethodCallException;
+
+/**
+ * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
+ */
+const LOG_LEVEL = [
+    'debug'     => 100,
+    'info'      => 200,
+    'notice'    => 250,
+    'warning'   => 300,
+    'error'     => 400,
+    'critical'  => 500,
+    'alert'     => 550,
+    'emergency' => 600,
+];
 
 /** Indicates a `default` value will be used unless provided */
 const AUTO = null;
@@ -159,6 +174,7 @@ function isOPcacheEnabled() : bool
     return ! isCLI() || \ini_get( 'opcache.enable_cli' );
 }
 
+// <editor-fold desc="Class Functions">
 /**
  * @param class-string|object|string $class
  *
@@ -167,6 +183,74 @@ function isOPcacheEnabled() : bool
 function class_string( object|string $class ) : string
 {
     return \is_object( $class ) ? $class::class : $class;
+}
+
+/**
+ * # Get the class name of a provided class, or the calling class.
+ *
+ * - Will use the `debug_backtrace()` to get the calling class if no `$class` is provided.
+ *
+ * ```
+ * $class = new \Northrook\Core\Env();
+ * classBasename( $class );
+ * // => 'Env'
+ * ```
+ *
+ * @param class-string|object|string $class
+ * @param ?callable-string           $filter {@see \strtolower} by default
+ *
+ * @return string
+ */
+function class_basename( string|object $class, ?string $filter = 'strtolower' ) : string
+{
+    $namespaced = \explode( '\\', \is_object( $class ) ? $class::class : $class );
+    $basename   = \end( $namespaced );
+
+    if ( \is_callable( $filter ) ) {
+        return $filter( $basename );
+    }
+
+    return $basename;
+}
+
+/**
+ * Returns the name of an object or callable.
+ *
+ * @param callable|callable-string|class-string|string $from
+ * @param bool                                         $validate [optional] ensure the `class_exists`
+ *
+ * @return ($validate is true ? class-string : ?string)
+ */
+function class_name( mixed $from, bool $validate = false ) : ?string
+{
+    // array callables [new SomeClass, 'method']
+    if ( \is_array( $from ) && isset( $from[0] ) && \is_object( $from[0] ) ) {
+        $from = $from[0]::class;
+    }
+
+    // Handle direct objects
+    if ( \is_object( $from ) ) {
+        $from = $from::class;
+    }
+
+    // The [callable] type should have been handled by the two previous checks
+    if ( ! \is_string( $from ) ) {
+        if ( $validate ) {
+            $message = __METHOD__.' was passed an unresolvable class of type '.\gettype( $from ).'.';
+            throw new InvalidArgumentException( $message );
+        }
+        return null;
+    }
+
+    // Handle class strings
+    $class = \str_contains( $from, '::' ) ? \explode( '::', $from, 2 )[0] : $from;
+
+    // Check existence if $validate is true
+    if ( $validate && ! \class_exists( $class ) ) {
+        throw new InvalidArgumentException( message : 'Class '.$class.' does not exists.' );
+    }
+
+    return $class;
 }
 
 /**
@@ -189,6 +273,165 @@ function class_id( object $class, bool $normalize = false ) : string
 
     return $class::class.'::'.\spl_object_id( $class );
 }
+
+/**
+ * Returns the name of an object or callable.
+ *
+ * @param mixed $callable
+ * @param bool  $validate [optional] ensure the `class_exists`
+ *
+ * @return ($validate is true ? array{0: class-string, 1: string} : array{0: string, 1: string})
+ */
+function explode_class_callable( mixed $callable, bool $validate = false ) : array
+{
+    dump( __METHOD__, ...\debug_backtrace() );
+    if ( \is_array( $callable ) && \count( $callable ) === 2 ) {
+        $class  = $callable[0];
+        $method = $callable[1];
+    }
+    elseif ( \is_string( $callable ) && \str_contains( $callable, '::' ) ) {
+        [$class, $method] = \explode( '::', $callable );
+    }
+    else {
+        throw new InvalidArgumentException( 'The provided callable must be a string or an array.' );
+    }
+
+    \assert( \is_string( $class ) && \is_string( $method ) );
+
+    // Check existence if $validate is true
+    if ( $validate && ! \class_exists( $class ) ) {
+        throw new InvalidArgumentException( message : 'Class '.$class.' does not exists.' );
+    }
+
+    return [
+        $class,
+        $method,
+    ];
+}
+
+/**
+ * @template T_Class of object
+ * @template T_Interface of object
+ *
+ * @param class-string<T_Class>|string     $class     Check if this class implements a given Interface
+ * @param class-string<T_Interface>|string $interface The Interface to check against
+ *
+ * @phpstan-assert-if-true class-string<T_Interface> $interface
+ *
+ * @return bool
+ */
+function implements_interface( string $class, string $interface ) : bool
+{
+    if ( ! \class_exists( $class, false ) || ! \interface_exists( $interface ) ) {
+        return false;
+    }
+
+    $interfaces = \class_implements( $class );
+
+    if ( ! $interface ) {
+        return false;
+    }
+
+    return \in_array( $interface, $interfaces, true );
+}
+
+/**
+ * @param class-string|object|string $class     Check if this class uses a given Trait
+ * @param class-string|object|string $trait     The Trait to check against
+ * @param bool                       $recursive [false] Also check for Traits using Traits
+ *
+ * @return bool
+ */
+function uses_trait( string|object $class, string|object $trait, bool $recursive = false ) : bool
+{
+    if ( \is_object( $trait ) ) {
+        $trait = $trait::class;
+    }
+
+    $traits = get_traits( $class );
+
+    if ( $recursive ) {
+        foreach ( $traits as $traitClass ) {
+            $traits += get_traits( $traitClass );
+        }
+    }
+
+    return \in_array( $trait, $traits, true );
+}
+
+/**
+ * @param class-string|object|string $class
+ *
+ * @return array<string, class-string>
+ */
+function get_traits( string|object $class ) : array
+{
+    if ( \is_object( $class ) ) {
+        $class = $class::class;
+    }
+
+    $traits = \class_uses( $class );
+
+    foreach ( \class_parents( $class ) ?: [] as $parent ) {
+        $traits += \class_uses( $parent );
+    }
+
+    return $traits;
+}
+
+/**
+ * # Get all the classes, traits, and interfaces used by a class.
+ *
+ * @param class-string|object|string $class
+ * @param bool                       $includeSelf
+ * @param bool                       $includeInterface
+ * @param bool                       $includeTrait
+ * @param bool                       $namespace
+ * @param bool                       $details
+ *
+ * @return array<array-key, string>
+ */
+function class_extends(
+    string|object $class,
+    bool          $includeSelf = true,
+    bool          $includeInterface = true,
+    bool          $includeTrait = true,
+    bool          $namespace = true,
+    bool          $details = false,
+) : array {
+    $class = \is_object( $class ) ? $class::class : $class;
+
+    $classes = $includeSelf ? [$class => 'self'] : [];
+
+    $parent = \class_parents( $class ) ?: [];
+    $classes += \array_fill_keys( $parent, 'parent' );
+
+    if ( $includeInterface ) {
+        $interfaces = \class_implements( $class ) ?: [];
+        $classes += \array_fill_keys( $interfaces, 'interface' );
+    }
+
+    if ( $includeTrait ) {
+        $traits = \class_uses( $class ) ?: [];
+        $classes += \array_fill_keys( $traits, 'trait' );
+    }
+
+    if ( $details ) {
+        return $classes;
+    }
+
+    $classes = \array_keys( $classes );
+
+    if ( $namespace ) {
+        foreach ( $classes as $key => $class ) {
+            $classes[$key] = ClassInfo::basename( $class );
+        }
+    }
+
+    return $classes;
+}
+
+// </editor-fold>
 
 /**
  * @param float $number
@@ -682,6 +925,47 @@ function isIterable( mixed $value ) : bool
 }
 
 /**
+ * @param null|string|Stringable $value
+ * @param string                 ...$enforceDomain
+ *
+ * @return bool
+ */
+function isEmail( null|string|Stringable $value, string ...$enforceDomain ) : bool
+{
+    // Can not be null or an empty string
+    if ( ! $string = (string) $value ) {
+        return false;
+    }
+
+    // Emails are case-insensitive, lowercase the $value for processing
+    $string = \strtolower( $string );
+
+    // Must contain an [at] and at least one period
+    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
+        return false;
+    }
+
+    // Must end with a letter
+    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
+        return false;
+    }
+
+    // Must only contain valid characters
+    if ( \preg_match( '/[^'.URL_SAFE_CHARACTERS_UNICODE.']/u', $string ) ) {
+        return false;
+    }
+
+    // Validate domains, if specified
+    foreach ( $enforceDomain as $domain ) {
+        if ( \str_ends_with( $string, \strtolower( $domain ) ) ) {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Normalize all slashes in a string to `/`.
  *
  * @param string|Stringable $path
@@ -951,19 +1235,37 @@ function isPunctuation( string $string, bool $endingOnly = false ) : bool
 }
 
 /**
+ * This function tries very hard to return a string from any given `$value`.
+ *
  * @param mixed $value
  * @param bool  $nullable
+ * @param bool  $serialize
  *
  * @return ($nullable is true ? null|string : string)
  */
-function as_string( mixed $value, bool $nullable = false ) : ?string
-{
+function as_string(
+    mixed $value,
+    bool  $nullable = false,
+    bool  $serialize = true,
+) : ?string {
     $value = match ( true ) {
         \is_bool( $value ) => $value ? 'true' : 'false',
         \is_null( $value ) => $nullable ? null : EMPTY_STRING,
         \is_scalar( $value ), $value instanceof Stringable => (string) $value,
         default => $value,
     };
+
+    if ( isIterable( $value ) ) {
+        $value = \iterator_to_array( $value );
+    }
+
+    if ( \is_array( $value ) ) {
+        $value = \json_encode( $value, ENCODE_ESCAPE_JSON );
+    }
+
+    if ( \is_object( $value ) && $serialize ) {
+        $value = \serialize( $value );
+    }
 
     \assert( \is_string( $value ) || ( $nullable && \is_null( $value ) ) );
 
@@ -1051,3 +1353,254 @@ function escape_url(
     // Escape special characters including tags
     return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
 }
+
+// <editor-fold desc="Filters and Escapes">
+
+/**
+ * @param null|string|Stringable $string       $string
+ * @param bool                   $preserveTags
+ *
+ * @return string
+ * @deprecated `\Support\Escape::url( .., .., )`
+ *
+ * Filter a string assuming it a URL.
+ *
+ * - Preserves Unicode characters.
+ * - Removes tags by default.
+ */
+function filterUrl( null|string|Stringable $string, bool $preserveTags = false ) : string
+{
+    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
+    // Can not be null or an empty string
+    // if ( ! $string = (string) $string ) {
+    //     return EMPTY_STRING;
+    // }
+    // trigger_deprecation( 'Northrook\\Functions', 'dev', __METHOD__ );
+    // static $cache = [];
+    //
+    // return $cache[\json_encode( [$string, $preserveTags], 832 )] ??= (
+    //     static function() use ( $string, $preserveTags ) : string {
+    //         $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
+    //
+    //         if ( $preserveTags ) {
+    //             $safeCharacters .= '{}|^`"><@';
+    //         }
+    //
+    //         return \preg_replace(
+    //             pattern     : "/[^{$safeCharacters}]/u",
+    //             replacement : EMPTY_STRING,
+    //             subject     : $string,
+    //         ) ?? EMPTY_STRING;
+    //     }
+    // )();
+}
+
+function stripTags(
+    null|string|Stringable $string,
+    string                 $replacement = ' ',
+    ?string             ...$allowed_tags,
+) : string {
+    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
+    // return \str_replace(
+    //     '  ',
+    //     ' ',
+    //     \strip_tags(
+    //         \str_replace( '<', "{$replacement}<", (string) $string ),
+    //     ),
+    // );
+}
+
+/**
+ * Escapes string for use inside iCal template.
+ *
+ * @param null|string|Stringable $value
+ *
+ * @return string
+ */
+function escapeICal( null|string|Stringable $value ) : string
+{
+    // Can not be null or an empty string
+    if ( ! ( $string = (string) $value ) ) {
+        return EMPTY_STRING;
+    }
+
+    trigger_deprecation( 'Northrook\\Functions', 'probing', __METHOD__ );
+    // https://www.ietf.org/rfc/rfc5545.txt
+    $string = \str_replace( "\r", '', $string );
+    $string = \preg_replace( '#[\x00-\x08\x0B-\x1F]#', "\u{FFFD}", (string) $string );
+
+    return \addcslashes( (string) $string, "\";\\,:\n" );
+}
+
+// </editor-fold>
+
+// <editor-fold desc="Path">
+
+/**
+ * @param string                        $path
+ * @param bool                          $throw
+ * @param null|InvalidArgumentException $exception
+ *
+ * @return bool
+ */
+function path_valid(
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
+    // Ensure we are not receiving any previously set exceptions
+    $exception = null;
+
+    // Check if path exists and is readable
+    $isReadable = \is_readable( $path );
+    $exists     = \file_exists( $path ) && $isReadable;
+
+    // Return early
+    if ( $exists ) {
+        return true;
+    }
+
+    // Determine path type
+    $type = \is_dir( $path ) ? 'dir' : ( \is_file( $path ) ? 'file' : false );
+
+    // Handle non-existent paths
+    if ( ! $type ) {
+        $exception = new InvalidArgumentException( "The '{$path}' does not exist." );
+        if ( $throw ) {
+            throw $exception;
+        }
+        return false;
+    }
+
+    $isWritable = \is_writable( $path );
+
+    $error = ( ! $isWritable && ! $isReadable ) ? ' is not readable nor writable.' : null;
+    $error ??= ( ! $isReadable ) ? ' not writable.' : null;
+    $error ??= ( ! $isReadable ) ? ' not unreadable.' : null;
+    $error ??= ' encountered a filesystem error. The cause could not be determined.';
+
+    // Create exception message
+    $exception = new InvalidArgumentException( "The path '{$path}' {$error}" );
+
+    if ( $throw ) {
+        throw $exception;
+    }
+
+    return false;
+}
+
+/**
+ * @param string                        $path
+ * @param bool                          $throw     [false]
+ * @param null|InvalidArgumentException $exception
+ *
+ * @return bool
+ */
+function path_readable(
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
+    $exception = null;
+
+    if ( ! \file_exists( $path ) ) {
+        $exception = new InvalidArgumentException(
+            'The file at "'.$path.'" does not exist.',
+            500,
+        );
+        if ( $throw ) {
+            throw $exception;
+        }
+    }
+
+    if ( ! \is_readable( $path ) ) {
+        $exception = new InvalidArgumentException(
+            \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
+            500,
+        );
+        if ( $throw ) {
+            throw $exception;
+        }
+    }
+
+    return ! $exception;
+}
+
+/**
+ * @param string                        $path
+ * @param bool                          $throw     [false]
+ * @param null|InvalidArgumentException $exception
+ *
+ * @return bool
+ */
+function path_writable(
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
+    $exception = null;
+
+    if ( ! \file_exists( $path ) ) {
+        $exception = new InvalidArgumentException(
+            'The file at "'.$path.'" does not exist.',
+            500,
+        );
+        if ( $throw ) {
+            throw $exception;
+        }
+    }
+
+    if ( ! \is_writable( $path ) ) {
+        $exception = new InvalidArgumentException(
+            \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
+            500,
+        );
+        if ( $throw ) {
+            throw $exception;
+        }
+    }
+
+    return ! $exception;
+}
+
+// </editor-fold>
+
+// <editor-fold desc="Utility">
+/**
+ * Get a boolean option from an array of options.
+ *
+ * ⚠️ Be careful if passing other nullable values, as they will be converted to booleans.
+ *
+ * - Pass an array of options, `get_defined_vars()` is recommended.
+ * - All 'nullable' values will be converted to booleans.
+ * - `true` options set all others to false.
+ * - `false` options set all others to true.
+ * - Use the `$default` parameter to set value for all if none are set.
+ *
+ * @param array<string, ?bool> $array   Array of options, `get_defined_vars()` is recommended
+ * @param bool                 $default Default value for all options
+ *
+ * @return array<string, bool>
+ */
+function booleanValues( array $array, bool $default = true ) : array
+{
+    // Isolate the options
+    $array = \array_filter( $array, static fn( $value ) => \is_bool( $value ) );
+
+    // If any option is true, set all others to false
+    if ( \in_array( true, $array, true ) ) {
+        return \array_map( static fn( $option ) => $option === true, $array );
+    }
+
+    // If any option is false, set all others to true
+    if ( \in_array( false, $array, true ) ) {
+        return \array_map(
+            static fn( ?bool $option ) => $option !== false,
+            $array,
+        );
+    }
+
+    // If none are true or false, set all to the default
+    return \array_map( static fn( $option ) => $default, $array );
+}
+// </editor-fold>
