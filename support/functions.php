@@ -11,6 +11,7 @@ use Exception, InvalidArgumentException, BadFunctionCallException, LengthExcepti
 use voku\helper\ASCII;
 use BadMethodCallException;
 
+// <editor-fold desc="Constants">
 /**
  * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
  */
@@ -68,6 +69,8 @@ const TAG_HEADING      = ['hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const TAG_INLINE       = ['a', 'b', 'i', 's', 'em', 'small', 'strong', 'span', 'mark', 'cite', 'code', 'kbd', 'wbr'];
 const TAG_SELF_CLOSING = ['meta', 'link', 'img', 'input', 'wbr', 'hr', 'br', 'col', 'area', 'base', 'source', 'embed', 'track'];
 // @formatter:on
+
+// </editor-fold>
 
 /**
  * @param DateTimeInterface|int|string $when
@@ -284,7 +287,6 @@ function class_id( object $class, bool $normalize = false ) : string
  */
 function explode_class_callable( mixed $callable, bool $validate = false ) : array
 {
-    dump( __METHOD__, ...\debug_backtrace() );
     if ( \is_array( $callable ) && \count( $callable ) === 2 ) {
         $class  = $callable[0];
         $method = $callable[1];
