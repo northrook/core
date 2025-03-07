@@ -10,6 +10,8 @@ use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
 use voku\helper\ASCII;
 use BadMethodCallException;
+use RuntimeException;
+use Throwable;
 
 // <editor-fold desc="Constants">
 /**
@@ -71,6 +73,35 @@ const TAG_SELF_CLOSING = ['meta', 'link', 'img', 'input', 'wbr', 'hr', 'br', 'co
 // @formatter:on
 
 // </editor-fold>
+
+// <editor-fold desc="System">
+/**
+ * Check whether the script is being executed from a command line.
+ */
+function isCLI() : bool
+{
+    return PHP_SAPI === 'cli' || \defined( 'STDIN' );
+}
+
+/**
+ * Checks whether OPcache is installed and enabled for the given environment.
+ */
+function isOPcacheEnabled() : bool
+{
+    // Ensure OPcache is installed and not disabled
+    if (
+        ! \function_exists( 'opcache_invalidate' )
+        || ! \ini_get( 'opcache.enable' )
+    ) {
+        return false;
+    }
+
+    // If called from CLI, check accordingly, otherwise true
+    return ! isCLI() || \ini_get( 'opcache.enable_cli' );
+}
+
+// </editor-fold>
+// <editor-fold desc="Get">
 
 /**
  * @param DateTimeInterface|int|string $when
@@ -153,29 +184,33 @@ function getSystemCacheDirectory() : string
 }
 
 /**
- * Check whether the script is being executed from a command line.
+ * Capture the output buffer from a provided `callback`.
+ *
+ * - Will throw a {@see RuntimeException} if the `callback` throws any exceptions.
+ *
+ * @param callable $callback
+ * @param mixed    ...$args
+ *
+ * @return string
  */
-function isCLI() : bool
+function ob_get( callable $callback, mixed ...$args ) : string
 {
-    return PHP_SAPI === 'cli' || \defined( 'STDIN' );
-}
-
-/**
- * Checks whether OPcache is installed and enabled for the given environment.
- */
-function isOPcacheEnabled() : bool
-{
-    // Ensure OPcache is installed and not disabled
-    if (
-        ! \function_exists( 'opcache_invalidate' )
-        || ! \ini_get( 'opcache.enable' )
-    ) {
-        return false;
+    \ob_start();
+    try {
+        $callback( ...$args );
     }
-
-    // If called from CLI, check accordingly, otherwise true
-    return ! isCLI() || \ini_get( 'opcache.enable_cli' );
+    catch ( Throwable $exception ) {
+        \ob_end_clean();
+        throw new RuntimeException(
+            message  : 'An error occurred while capturinb the callback.',
+            code     : 500,
+            previous : $exception,
+        );
+    }
+    return \ob_get_clean() ?: '';
 }
+
+// </editor-fold>
 
 // <editor-fold desc="Class Functions">
 /**
@@ -432,49 +467,7 @@ function class_extends(
 
 // </editor-fold>
 
-/**
- * @param float $number
- * @param float $min
- * @param float $max
- *
- * @return bool
- */
-function num_within( float $number, float $min, float $max ) : bool
-{
-    return $number >= $min && $number <= $max;
-}
-
-/**
- * @param float $number
- * @param float $min
- * @param float $max
- *
- * @return float
- */
-function num_clamp( float $number, float $min, float $max ) : float
-{
-    return \max( $min, \min( $number, $max ) );
-}
-
-/**
- * @see https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array stackoverflow
- *
- * @param int   $humber
- * @param int[] $in
- * @param bool  $returnKey
- *
- * @return null|int|string
- */
-function num_closest( int $humber, array $in, bool $returnKey = false ) : string|int|null
-{
-    foreach ( $in as $key => $value ) {
-        if ( $humber <= $value ) {
-            return $returnKey ? $key : $value;
-        }
-    }
-
-    return null;
-}
+// <editor-fold desc="Strings">
 
 /**
  * Ensures appropriate string encoding.
@@ -501,20 +494,6 @@ function str_encode( null|string|Stringable $string, ?string $encoding = AUTO ) 
     $map      = [0x80, 0x10_FF_FF, 0, ~0];
 
     return \mb_encode_numericentity( $decoded, $map, $encoding );
-}
-
-/**
- * @param float $from
- * @param float $to
- *
- * @return float
- */
-function num_percent( float $from, float $to ) : float
-{
-    if ( ! $from || $from === $to ) {
-        return 0;
-    }
-    return (float) \number_format( ( $from - $to ) / $from * 100, 2 );
 }
 
 /**
@@ -710,6 +689,87 @@ function str_ends_with_any( null|string|Stringable $string, null|string|Stringab
 
     return false;
 }
+
+// </editor-fold>
+
+// <editor-fold desc="Numbers and Math">
+
+/**
+ * Calculate the greatest common divisor between `$a` and `$b`.
+ *
+ * @param int $a
+ * @param int $b
+ *
+ * @return int
+ */
+function num_gcd( int $a, int $b ) : int
+{
+    while ( $b !== 0 ) {
+        [$a, $b] = [$b, $a % $b];
+    }
+
+    return $a;
+}
+
+/**
+ * @param float $number
+ * @param float $min
+ * @param float $max
+ *
+ * @return bool
+ */
+function num_within( float $number, float $min, float $max ) : bool
+{
+    return $number >= $min && $number <= $max;
+}
+
+/**
+ * @param float $number
+ * @param float $min
+ * @param float $max
+ *
+ * @return float
+ */
+function num_clamp( float $number, float $min, float $max ) : float
+{
+    return \max( $min, \min( $number, $max ) );
+}
+
+/**
+ * @see https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array stackoverflow
+ *
+ * @param int   $humber
+ * @param int[] $in
+ * @param bool  $returnKey
+ *
+ * @return null|int|string
+ */
+function num_closest( int $humber, array $in, bool $returnKey = false ) : string|int|null
+{
+    foreach ( $in as $key => $value ) {
+        if ( $humber <= $value ) {
+            return $returnKey ? $key : $value;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * @param float $from
+ * @param float $to
+ *
+ * @return float
+ */
+function num_percent( float $from, float $to ) : float
+{
+    if ( ! $from || $from === $to ) {
+        return 0;
+    }
+    return (float) \number_format( ( $from - $to ) / $from * 100, 2 );
+}
+
+// </editor-fold>
 
 /**
  * @param null|string|Stringable $string
@@ -1291,6 +1351,8 @@ function as_array( mixed $value, bool $is_list = false ) : array
     return $value;
 }
 
+// <editor-fold desc="Filters and Escapes">
+
 /**
  * @param null|string|Stringable $string
  * @param bool                   $comments
@@ -1352,8 +1414,6 @@ function escape_url(
     // Escape special characters including tags
     return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
 }
-
-// <editor-fold desc="Filters and Escapes">
 
 /**
  * @param null|string|Stringable $string       $string
