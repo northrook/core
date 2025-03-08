@@ -1,10 +1,19 @@
 <?php
 
+namespace Cache {
+
+    const
+        DISABLED  = -2,
+        EPHEMERAL = -1,
+        AUTO      = null,
+        FOREVER   = 0;
+}
+
 namespace Time {
 
     const
         MINUTE  = 60,
-        HOUR    = 3_600,
+        HOUR_1  = 3_600,
         HOUR_4  = 14_400,
         HOUR_8  = 28_800,
         HOUR_12 = 43_200,
