@@ -10,19 +10,30 @@ class MissingPropertyException extends LogicException
 {
     /**
      * @param string         $property
-     * @param class-string   $class
+     * @param ?string        $type
+     * @param ?class-string  $class
      * @param null|string    $message
      * @param int            $code
      * @param null|Throwable $previous
      */
     public function __construct(
         public readonly string $property,
-        public readonly string $class,
+        ?string                $type = null,
+        ?string                $class = null,
         ?string                $message = null,
         int                    $code = 500,
         ?Throwable             $previous = null,
     ) {
-        $message ??= "Property '{$this->property}' does not exist in '{$this->class}'.";
+        if ( ! $message ) {
+            $property = $type ? "'\${$property}' of type '{$type}'" : "'{$property}'";
+            $message  = "Property {$property} does not exist";
+            if ( $class ) {
+                $message .= " in class '{$class}'.";
+            }
+            else {
+                $message .= '.';
+            }
+        }
         parent::__construct( $message, $code, $previous );
     }
 }

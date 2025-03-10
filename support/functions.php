@@ -31,6 +31,8 @@ const LOG_LEVEL = [
 /** Indicates a `default` value will be used unless provided */
 const AUTO = null;
 
+const INFER = null;
+
 const
     TAB          = "\t",
     EMPTY_STRING = '',

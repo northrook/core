@@ -5,7 +5,7 @@ namespace Cache {
     const
         DISABLED  = -2,
         EPHEMERAL = -1,
-        AUTO      = null,
+        ADAPTER   = null,
         FOREVER   = 0;
 }
 
