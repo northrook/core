@@ -14,6 +14,7 @@ use RuntimeException;
 use Throwable;
 
 // <editor-fold desc="Constants">
+
 /**
  * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
  */
@@ -28,9 +29,16 @@ const LOG_LEVEL = [
     'emergency' => 600,
 ];
 
+const
+    CACHE_DISABLED  = -2,
+    CACHE_EPHEMERAL = -1,
+    CACHE_AUTO      = null,
+    CACHE_FOREVER   = 0;
+
 /** Indicates a `default` value will be used unless provided */
 const AUTO = null;
 
+/** Value is `required`, but can be inferred at runtime if none is provided */
 const INFER = null;
 
 const
@@ -714,15 +722,15 @@ function num_gcd( int $a, int $b ) : int
 }
 
 /**
- * @param float $number
+ * @param float $num
  * @param float $min
  * @param float $max
  *
  * @return bool
  */
-function num_within( float $number, float $min, float $max ) : bool
+function num_within( float $num, float $min, float $max ) : bool
 {
-    return $number >= $min && $number <= $max;
+    return $num >= $min && $num <= $max;
 }
 
 /**
@@ -740,16 +748,16 @@ function num_clamp( float $number, float $min, float $max ) : float
 /**
  * @see https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array stackoverflow
  *
- * @param int   $humber
+ * @param int   $num
  * @param int[] $in
  * @param bool  $returnKey
  *
  * @return null|int|string
  */
-function num_closest( int $humber, array $in, bool $returnKey = false ) : string|int|null
+function num_closest( int $num, array $in, bool $returnKey = false ) : string|int|null
 {
     foreach ( $in as $key => $value ) {
-        if ( $humber <= $value ) {
+        if ( $num <= $value ) {
             return $returnKey ? $key : $value;
         }
     }

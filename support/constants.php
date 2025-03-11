@@ -1,14 +1,5 @@
 <?php
 
-namespace Cache {
-
-    const
-        DISABLED  = -2,
-        EPHEMERAL = -1,
-        ADAPTER   = null,
-        FOREVER   = 0;
-}
-
 namespace Time {
 
     const
