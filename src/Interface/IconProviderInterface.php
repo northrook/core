@@ -4,7 +4,7 @@ namespace Core\Interface;
 
 use UnitEnum;
 
-interface IconProviderInterface
+interface IconProviderInterface extends ProviderInterface
 {
     public function has( string $icon ) : bool;
 

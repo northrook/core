@@ -9,7 +9,7 @@ use LogicException;
 /**
  * @template Setting of array<string, mixed>|null|bool|float|int|string|UnitEnum
  */
-interface SettingsProviderInterface
+interface SettingsProviderInterface extends ProviderInterface
 {
     /**
      * Get a setting by its key.
