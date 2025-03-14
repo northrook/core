@@ -13,6 +13,7 @@ use voku\helper\ASCII;
 use BadMethodCallException;
 use RuntimeException;
 use Throwable;
+use SplFileInfo;
 
 // <editor-fold desc="Constants">
 
@@ -112,6 +113,48 @@ function isOPcacheEnabled() : bool
 }
 
 // </editor-fold>
+
+// <editor-fold desc="Filesystem">
+
+/**
+ * @param string $filename
+ * @param mixed  $data
+ * @param bool   $overwrite
+ * @param bool   $append
+ *
+ * @return void
+ */
+function file_save(
+    string $filename,
+    mixed  $data,
+    bool   $overwrite = false,
+    bool   $append = false,
+) : void {
+    $path = new SplFileInfo( $filename );
+
+    if ( ! $overwrite && $path->isReadable() ) {
+        return;
+    }
+
+    if ( ! $path->isWritable() ) {
+        throw new RuntimeException( message : 'The file '.$path->getPathname().' is not writable.' );
+    }
+
+    if ( ! \file_exists( $path->getPath() ) ) {
+        \mkdir( $path->getPath(), 0777, true );
+    }
+
+    $mode = $append ? FILE_APPEND : LOCK_EX;
+
+    $status = \file_put_contents( $path->getPathname(), $data, $mode );
+
+    if ( $status === false ) {
+        throw new RuntimeException( message : 'Unable to write to file '.$path->getPathname() );
+    }
+}
+
+// </editor-fold>
+
 // <editor-fold desc="Get">
 
 /**
