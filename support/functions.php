@@ -136,12 +136,12 @@ function file_save(
         return;
     }
 
-    if ( ! $path->isWritable() ) {
-        throw new RuntimeException( message : 'The file '.$path->getPathname().' is not writable.' );
-    }
-
     if ( ! \file_exists( $path->getPath() ) ) {
         \mkdir( $path->getPath(), 0777, true );
+    }
+
+    if ( ! \is_writable( $path->getPath() ) ) {
+        throw new RuntimeException( message : 'The file '.$path->getPathname().' is not writable.' );
     }
 
     $mode = $append ? FILE_APPEND : LOCK_EX;
