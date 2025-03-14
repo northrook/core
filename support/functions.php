@@ -649,6 +649,38 @@ function str_excludes(
     return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
 }
 
+function str_before(
+    null|string|Stringable $string,
+    string                 $needle,
+    bool                   $last = false,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $before = $last
+            ? \strrchr( $string, $needle, true )
+            : \strstr( $string, $needle, true );
+
+    return $before ?: $string;
+}
+
+function str_after(
+    null|string|Stringable $string,
+    string                 $needle,
+    bool                   $last = false,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $before = $last
+            ? \strrchr( $string, $needle )
+            : \strstr( $string, $needle );
+
+    return $before ?: $string;
+}
+
 /**
  * Replace each key from `$map` with its value, when found in `$content`.
  *
