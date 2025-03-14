@@ -127,7 +127,7 @@ function isOPcacheEnabled() : bool
 function file_save(
     string $filename,
     mixed  $data,
-    bool   $overwrite = false,
+    bool   $overwrite = true,
     bool   $append = false,
 ) : void {
     $path = new SplFileInfo( $filename );
