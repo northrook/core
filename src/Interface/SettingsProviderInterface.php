@@ -6,9 +6,6 @@ use UnitEnum;
 use InvalidArgumentException;
 use LogicException;
 
-/**
- * @template Setting of array<string, mixed>|null|bool|float|int|string|UnitEnum
- */
 interface SettingsProviderInterface extends ProviderInterface
 {
     /**
@@ -16,21 +13,20 @@ interface SettingsProviderInterface extends ProviderInterface
      *
      * If a no setting is found, but a valid `set` key and `value` is provided, and given the current `user` has relevant permissions, the Setting will be set and saved.
      *
-     * @param string                         $setting
-     * @param mixed                          $default
-     * @param ?string                        $set
-     * @param array<string, Setting>|Setting $value
+     * @template Setting of null|array<array-key, scalar>|scalar
      *
-     * @return Setting
+     * @param string  $key
+     * @param Setting $default
+     *
+     * @return null|array|bool|float|int|string
+     * @phpstan-return Setting
      *
      * @throws InvalidArgumentException if the setting does not exist
      */
     public function get(
-        string                                    $setting,
-        mixed                                     $default = null,
-        ?string                                   $set = null,
-        UnitEnum|float|int|bool|array|string|null $value = null,
-    ) : mixed;
+        string                           $key,
+        null|array|bool|float|int|string $default,
+    ) : null|array|bool|float|int|string;
 
     /**
      * Return an array of previous versions of a given setting.
@@ -38,7 +34,7 @@ interface SettingsProviderInterface extends ProviderInterface
      * @param string   $settings
      * @param null|int $limit
      *
-     * @return array<array-key, mixed>
+     * @return array<int, null|array<array-key, scalar>|scalar>
      */
     public function versions( string $settings, ?int $limit = null ) : array;
 
@@ -58,7 +54,7 @@ interface SettingsProviderInterface extends ProviderInterface
      *
      * If the `key` matches a setting and the `user` has permissions, it will be updated.
      *
-     * @param array<string, Setting> $parameters
+     * @param array<string, null|array<array-key, scalar>|scalar> $parameters
      *
      * @throws LogicException if the setting cannot be updated or added
      */
@@ -76,7 +72,7 @@ interface SettingsProviderInterface extends ProviderInterface
     /**
      * Get all defined Settings.
      *
-     * @return array<string, mixed>
+     * @return array<string, null|array<array-key, scalar>|scalar>
      */
     public function all() : array;
 
@@ -100,8 +96,8 @@ interface SettingsProviderInterface extends ProviderInterface
     /**
      * Sets a service container parameter.
      *
-     * @param string                         $name
-     * @param array<string, Setting>|Setting $value
+     * @param string                               $name
+     * @param null|array<array-key, scalar>|scalar $value
      *
      * @throws LogicException if the parameter cannot be set
      */
