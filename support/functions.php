@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Support;
 
 use JetBrains\PhpStorm\Deprecated;
+use OverflowException;
 use Random\RandomException;
 use Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
@@ -522,6 +523,62 @@ function class_extends(
 // </editor-fold>
 
 // <editor-fold desc="Strings">
+
+/**
+ * Align a `$string` to the output buffer size by padding the final chunk if necessary.
+ *
+ * @param null|string|Stringable $string
+ * @param null|int<512,131072>   $size      `output_buffering` or `4096` if not set
+ * @param string                 $encoding  `UTF-8` used when processing the string
+ * @param non-empty-string       $character ` ` The single padding character
+ * @param null|int               $length    Final `$length` by reference
+ *
+ * @return string
+ *
+ * @throws InvalidArgumentException on invalid `$character` string
+ * @throws OverflowException        if the resulting string exceeds `PHP_INT_MAX`
+ */
+function str_buffer_align(
+    null|string|Stringable $string,
+    ?int                   $size = null,
+    string                 $encoding = 'UTF-8',
+    string                 $character = ' ',
+    ?int &                   $length = null,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return '';
+    }
+
+    if ( ! $character || \mb_strlen( $character, $encoding ) !== 1 ) {
+        throw new InvalidArgumentException( 'Padding character must be exactly one character long' );
+    }
+
+    $length = \mb_strlen( $string, $encoding );
+
+    // Set the buffer
+    $buffer = ( $size ?? (int) \ini_get( 'output_buffering' ) ) ?: 4_096;
+
+    // Ensure the buffer is within reasonable bounds
+    \assert(
+        num_within( $buffer, 512, 131_072 ),
+        'Buffer size must be between 512 and 131072 bytes. It is currently '.$buffer.' bytes.',
+    );
+
+    if ( $align = $length % $buffer ) {
+        $padding = $buffer - $align;
+
+        // Guard against overflows
+        if ( $length + $padding > PHP_INT_MAX ) {
+            throw new OverflowException( 'Resulting string would be too long' );
+        }
+
+        $string .= \str_repeat( $character, $padding );
+    }
+
+    $length = \mb_strlen( $string, $encoding );
+
+    return $string;
+}
 
 /**
  * Ensures appropriate string encoding.
