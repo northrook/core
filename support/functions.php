@@ -402,6 +402,64 @@ function explode_class_callable( mixed $callable, bool $validate = false ) : arr
 }
 
 /**
+ * @param object|string $class
+ * @param bool          $autoload
+ *
+ * @return array<class-string, class-string>
+ */
+function class_composition( object|string $class, bool $autoload = true ) : array
+{
+    $composition = \class_parents( $class, $autoload ) ?: [];
+
+    foreach ( $composition as $parent ) {
+        $composition += \class_uses( $parent, $autoload );
+    }
+
+    $composition += \class_implements( $class, $autoload ) ?: [];
+    $composition += \class_uses( $class, $autoload ) ?: [];
+
+    return $composition;
+}
+
+/**
+ * @param object|string $class
+ * @param object|string ...$adopts
+ *
+ * @return bool
+ */
+function class_adopts_any( object|string $class, object|string ...$adopts ) : bool
+{
+    $composition = class_composition( $class );
+
+    foreach ( $adopts as $has ) {
+        if ( \array_key_exists( \is_object( $has ) ? $has::class : $has, $composition ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @param object|string $class
+ * @param object|string ...$adopts
+ *
+ * @return bool
+ */
+function class_adopts_all( object|string $class, object|string ...$adopts ) : bool
+{
+    $composition = class_composition( $class );
+
+    foreach ( $adopts as $has ) {
+        if ( ! \array_key_exists( \is_object( $has ) ? $has::class : $has, $composition ) ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * @template T of object
  *
  * @param class-string    $class     Check if this class implements a given Interface
