@@ -580,6 +580,61 @@ function class_extends(
 
 // </editor-fold>
 
+// <editor-fold desc="Checks">
+
+/**
+ * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
+ *
+ * @phpstan-assert-if-true scalar $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function is_empty( mixed $value ) : bool
+{
+    // If it is a boolean, it cannot be empty
+    if ( \is_bool( $value ) ) {
+        return false;
+    }
+
+    if ( \is_numeric( $value ) ) {
+        return false;
+    }
+
+    return empty( $value );
+}
+
+/**
+ * Determine if a `$value` be cast as `(string)`.
+ *
+ * @phpstan-assert-if-true scalar|\Stringable|null $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function is_stringable( mixed $value ) : bool
+{
+    return \is_scalar( $value ) || $value instanceof Stringable || \is_null( $value );
+}
+
+/**
+ * `is_iterable` implementation that also checks for {@see ArrayAccess}.
+ *
+ * @phpstan-assert-if-true iterable|\Traversable $value
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function is_iterable( mixed $value ) : bool
+{
+    return \is_iterable( $value ) || $value instanceof ArrayAccess;
+}
+
+// </editor-fold>
+
 // <editor-fold desc="Strings">
 
 /**
@@ -1174,57 +1229,6 @@ function implodeKey( mixed $value = AUTO, string $separator = ':' ) : string
 }
 
 /**
- * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
- *
- * @phpstan-assert-if-true scalar $value
- *
- * @param mixed $value
- *
- * @return bool
- */
-function isEmpty( mixed $value ) : bool
-{
-    // If it is a boolean, it cannot be empty
-    if ( \is_bool( $value ) ) {
-        return false;
-    }
-
-    if ( \is_numeric( $value ) ) {
-        return false;
-    }
-
-    return empty( $value );
-}
-
-/**
- * # Determine if a value is a scalar.
- *
- * @phpstan-assert-if-true scalar|\Stringable|null $value
- *
- * @param mixed $value
- *
- * @return bool
- */
-function isScalar( mixed $value ) : bool
-{
-    return \is_scalar( $value ) || $value instanceof Stringable || \is_null( $value );
-}
-
-/**
- * `is_iterable` implementation that also checks for {@see ArrayAccess}.
- *
- * @phpstan-assert-if-true iterable|\Traversable $value
- *
- * @param mixed $value
- *
- * @return bool
- */
-function isIterable( mixed $value ) : bool
-{
-    return \is_iterable( $value ) || $value instanceof ArrayAccess;
-}
-
-/**
  * @param null|string|Stringable $value
  * @param string                 ...$enforceDomain
  *
@@ -1555,7 +1559,7 @@ function as_string(
         default => $value,
     };
 
-    if ( isIterable( $value ) ) {
+    if ( is_iterable( $value ) ) {
         $value = \iterator_to_array( $value );
     }
 
