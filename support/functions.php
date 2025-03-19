@@ -126,12 +126,16 @@ function isOPcacheEnabled() : bool
  * @return void
  */
 function file_save(
-    string $filename,
-    mixed  $data,
-    bool   $overwrite = true,
-    bool   $append = false,
+    null|string|Stringable $filename,
+    mixed                  $data,
+    bool                   $overwrite = true,
+    bool                   $append = false,
 ) : void {
-    $path = new SplFileInfo( $filename );
+    if ( ! $filename ) {
+        throw new RuntimeException( 'No filename specified.' );
+    }
+
+    $path = new SplFileInfo( (string) $filename );
 
     if ( ! $overwrite && $path->isReadable() ) {
         return;
@@ -279,28 +283,24 @@ function class_string( object|string $class ) : string
 }
 
 /**
- * # Get the class name of a provided class, or the calling class.
- *
- * - Will use the `debug_backtrace()` to get the calling class if no `$class` is provided.
- *
- * ```
+ * # Get the name of a provided class.
+ *```
  * $class = new \Northrook\Core\Env();
- * classBasename( $class );
- * // => 'Env'
+ * classBasename( $class ) => 'Env'
  * ```
  *
- * @param class-string|object|string $class
- * @param ?callable-string           $filter {@see \strtolower} by default
+ * @param class-string|object|string                               $class
+ * @param null|'strtolower'|'strtoupper'|'ucfirst'|callable-string $callable
  *
  * @return string
  */
-function class_basename( string|object $class, ?string $filter = 'strtolower' ) : string
+function class_basename( string|object $class, ?string $callable = null ) : string
 {
     $namespaced = \explode( '\\', \is_object( $class ) ? $class::class : $class );
     $basename   = \end( $namespaced );
 
-    if ( \is_callable( $filter ) ) {
-        return $filter( $basename );
+    if ( $callable && \is_callable( $callable ) ) {
+        return $callable( $basename );
     }
 
     return $basename;
@@ -467,8 +467,10 @@ function class_adopts_all( object|string $class, object|string ...$adopts ) : bo
  *
  * @return bool
  */
-function implements_interface( string $class, string $interface ) : bool
+function implements_interface( object|string $class, string $interface ) : bool
 {
+    $class = \is_object( $class ) ? $class::class : $class;
+
     if ( ! \class_exists( $class, false ) || ! \interface_exists( $interface ) ) {
         return false;
     }
@@ -821,7 +823,7 @@ function str_excludes(
 
 function str_before(
     null|string|Stringable $string,
-    string                 $needle,
+    null|string|Stringable $needle,
     bool                   $last = false,
 ) : string {
     if ( ! $string = (string) $string ) {
@@ -829,15 +831,15 @@ function str_before(
     }
 
     $before = $last
-            ? \strrchr( $string, $needle, true )
-            : \strstr( $string, $needle, true );
+            ? \strrchr( $string, (string) $needle, true )
+            : \strstr( $string, (string) $needle, true );
 
     return $before ?: $string;
 }
 
 function str_after(
     null|string|Stringable $string,
-    string                 $needle,
+    null|string|Stringable $needle,
     bool                   $last = false,
 ) : string {
     if ( ! $string = (string) $string ) {
@@ -845,8 +847,8 @@ function str_after(
     }
 
     $before = $last
-            ? \strrchr( $string, $needle )
-            : \strstr( $string, $needle );
+            ? \strrchr( $string, (string) $needle )
+            : \strstr( $string, (string) $needle );
 
     return $before ?: $string;
 }
@@ -888,18 +890,29 @@ function str_replace_each(
             : \str_ireplace( $search, $replace, $content );
 }
 
-function mb_str_starts_with( string $haystack, string $needle ) : bool
-{
-    return \mb_stripos( $haystack, $needle, 0, 'UTF-8' ) === 0;
+function mb_str_starts_with(
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
+    return \mb_stripos( (string) $haystack, (string) $needle, 0, 'UTF-8' ) === 0;
 }
 
-function mb_str_ends_with( string $haystack, string $needle ) : bool
-{
+function mb_str_ends_with(
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
+    $haystack = (string) $haystack;
+    $needle   = (string) $needle;
     return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
 }
 
-function str_start( string $string, string $with ) : string
-{
+function str_start(
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
+    $string = (string) $string;
+    $with   = (string) $with;
+
     if ( \str_starts_with( $string, $with ) ) {
         return $string;
     }
@@ -907,8 +920,13 @@ function str_start( string $string, string $with ) : string
     return $with.$string;
 }
 
-function str_end( string $string, string $with ) : string
-{
+function str_end(
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
+    $string = (string) $string;
+    $with   = (string) $with;
+
     if ( \str_ends_with( $string, $with ) ) {
         return $string;
     }
@@ -916,8 +934,10 @@ function str_end( string $string, string $with ) : string
     return $string.$with;
 }
 
-function str_starts_with_any( null|string|Stringable $string, null|string|Stringable ...$needle ) : bool
-{
+function str_starts_with_any(
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
     if ( ! $string = (string) $string ) {
         return false;
     }
@@ -931,8 +951,10 @@ function str_starts_with_any( null|string|Stringable $string, null|string|String
     return false;
 }
 
-function str_ends_with_any( null|string|Stringable $string, null|string|Stringable ...$needle ) : bool
-{
+function str_ends_with_any(
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
     if ( ! $string = (string) $string ) {
         return false;
     }
