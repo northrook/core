@@ -1891,6 +1891,20 @@ function path_writable(
 
 // </editor-fold>
 
+// <editor-fold desc="Case Converters">
+
+function snakeToCamelCase( string $input ) : string
+{
+    return \lcfirst( \str_replace( '_', '', \ucwords( $input, '_' ) ) );
+}
+
+function kebabToCamelCase( string $input ) : string
+{
+    return \lcfirst( \str_replace( '-', '', \ucwords( $input, '-' ) ) );
+}
+
+// </editor-fold>
+
 // <editor-fold desc="Utility">
 /**
  * Get a boolean option from an array of options.
