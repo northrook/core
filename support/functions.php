@@ -822,6 +822,43 @@ function str_excludes(
 }
 
 /**
+ * @param null|string|Stringable       $string
+ * @param int                          $start
+ * @param int                          $end
+ * @param null|false|string|Stringable $replace
+ * @param string                       $encoding
+ *
+ * @return string
+ */
+function str_extract(
+    null|string|Stringable       $string,
+    int                          $start,
+    int                          $end,
+    false|null|string|Stringable $replace = false,
+    string                       $encoding = 'UTF-8',
+) : string {
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $end -= $start;
+
+    if ( $replace === false ) {
+        return \mb_substr( $string, $start, $end );
+    }
+
+    $replace = (string) $replace;
+
+    $before = \mb_substr( $string, 0, $start, $encoding );
+
+    $length = \mb_strlen( $before, $encoding ) + $end;
+
+    $after = \mb_substr( $string, $length, AUTO, $encoding );
+
+    return $before.$replace.$after;
+}
+
+/**
  * Split the provided `$string` in two, at the first or last `$substring`.
  *
  * - Always returns an array of `[string: before, null|string: after]`.
@@ -860,7 +897,7 @@ function str_excludes(
  * @param null|string|Stringable $string
  * @param null|string|Stringable $needle
  * @param bool                   $last
- * @param bool                   $include
+ * @param bool                   $needleLast
  *
  * @return array{string, string}
  */
@@ -868,7 +905,7 @@ function str_bisect(
     null|string|Stringable $string,
     null|string|Stringable $needle,
     bool                   $last = false,
-    bool                   $include = false,
+    bool                   $needleLast = false,
 ) : array {
     $string = (string) $string;
     $needle = (string) $needle;
@@ -884,12 +921,11 @@ function str_bisect(
     if ( $offset === false ) {
         return [$string, ''];
     }
-
     if ( $last ) {
-        $offset = $include ? $offset : $offset - \mb_strlen( $needle );
+        $offset = $needleLast ? $offset - \mb_strlen( $needle ) : $offset;
     }
     else {
-        $offset = $include ? $offset + \mb_strlen( $needle ) : $offset;
+        $offset = $needleLast ? $offset : $offset + \mb_strlen( $needle );
     }
 
     $before = \mb_substr( $string, 0, $offset );
