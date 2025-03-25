@@ -80,9 +80,38 @@ const FILTER_STRING_COMMENTS = [
 ];
 
 // @formatter:off
-const TAG_HEADING      = ['hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-const TAG_INLINE       = ['a', 'b', 'i', 's', 'em', 'small', 'strong', 'span', 'mark', 'cite', 'code', 'kbd', 'wbr'];
-const TAG_SELF_CLOSING = ['meta', 'link', 'img', 'input', 'wbr', 'hr', 'br', 'col', 'area', 'base', 'source', 'embed', 'track'];
+const TAG_STRUCTURE = [
+    'html', 'head', 'body', 'title', 'style', 'script',
+    'link', 'noscript', 'template', 'iframe',
+];
+const TAG_CONTENT = [
+    'header', 'footer', 'aside', 'main', 'section', 'article',
+    'div', 'p', 'address', 'blockquote', 'details', 'dialog', 'dl', 'hr',
+    // : Media
+    'svg', 'canvas', 'object', 'source', 'video', 'audio', 'embed', 'picture',
+    'figcaption', 'figure', 'caption', 'pre',
+    // : List
+    'ol', 'ul', 'li', 'nav', 'dropdown', 'menu', 'modal', 'tooltip',
+    // : Form
+    'form', 'field', 'fieldset', 'optgroup', 'input', 'label', 'legend',
+    'input', 'textarea', 'select', 'option', 'datalist', 'button',
+    'progress', 'meter', 'output',
+    // : Table
+    'table', 'thead', 'tbody', 'tfoot',
+    'td', 'th', 'tr', 'col', 'colgroup',
+];
+const TAG_HEADING = [
+    'hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+];
+const TAG_INLINE = [
+    'a', 'b', 'i', 's', 'em', 'u', 'small', 'strong', 'span',
+    'mark', 'code', 'kbd', 'var', 'samp', 'cite', 'q', 'abbr',
+    'dfn', 'time', 'data', 'wbr', 'sub', 'sup', 'bdi', 'bdo',
+];
+const TAG_SELF_CLOSING = [
+    'meta', 'link', 'img', 'input', 'wbr', 'hr', 'br',
+    'col', 'area', 'base', 'source', 'embed', 'track',
+];
 // @formatter:on
 
 // </editor-fold>
