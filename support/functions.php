@@ -800,6 +800,31 @@ function str_includes(
 }
 
 /**
+ * Determines if a given set of characters is fully included in a string.
+ *
+ * Checks whether all characters from the specified character set exist in the string,
+ * starting at an optional offset and considering an optional length.
+ *
+ * @param null|string|Stringable $string     the string to search within
+ * @param string                 $characters the set of characters to check for inclusion
+ * @param int                    $offset     The position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
+ *
+ * @return bool returns true if all characters from the set are found in the string, false otherwise
+ */
+function str_includes_any(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+    return \strpbrk( $string, $characters ) !== false;
+}
+
+/**
  * Checks if the given string excludes specific characters within an optional range.
  *
  * @param null|string|Stringable $string     the input string to evaluate
@@ -1153,6 +1178,8 @@ function num_closest( int $num, array $in, bool $returnKey = false ) : string|in
 }
 
 /**
+ * Calculate the difference in percentage `$from` `$to` given numbers.
+ *
  * @param float $from
  * @param float $to
  *
@@ -1164,6 +1191,28 @@ function num_percent( float $from, float $to ) : float
         return 0;
     }
     return (float) \number_format( ( $from - $to ) / $from * 100, 2 );
+}
+
+function num_byte_size( string|int|float $bytes ) : string
+{
+    $bytes = (float) ( \is_string( $bytes ) ? \mb_strlen( $bytes, '8bit' ) : $bytes );
+
+    $unitDecimalsByFactor = [
+        ['B', 0],  //     byte
+        ['KiB', 0], // kibibyte
+        ['MiB', 2], // mebibyte
+        ['GiB', 2], // gigabyte
+        ['TiB', 3], // mebibyte
+        ['PiB', 3], // mebibyte
+    ];
+
+    $factor = $bytes ? \floor( \log( (int) $bytes, 1_024 ) ) : 0;
+    $factor = (float) \min( $factor, \count( $unitDecimalsByFactor ) - 1 );
+
+    $value = \round( $bytes / ( 1_024 ** $factor ), (int) $unitDecimalsByFactor[$factor][1] );
+    $units = (string) $unitDecimalsByFactor[$factor][0];
+
+    return $value.$units;
 }
 
 // </editor-fold>
