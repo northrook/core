@@ -803,6 +803,20 @@ function str_squish( string|Stringable|null $string, bool $whitespaceOnly = fals
             : \preg_replace( "#\s+#", WHITESPACE, \trim( (string) $string ) ) );
 }
 
+function str_contains_only( string|Stringable|null $string, string $characters ) : bool
+{
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    if ( ! $characters ) {
+        $message = __FUNCTION__.' requires at least one character to look for.';
+        throw new InvalidArgumentException( $message );
+    }
+
+    return \strspn( $string, $characters ) === \strlen( $string );
+}
+
 /**
  * Determines if a given set of characters is fully included in a string.
  *
@@ -975,8 +989,9 @@ function str_bisect(
     if ( $offset === false ) {
         return [$string, ''];
     }
+
     if ( $last ) {
-        $offset = $needleLast ? $offset - \mb_strlen( $needle ) : $offset;
+        $offset = $needleLast ? $offset + \mb_strlen( $needle ) : $offset;
     }
     else {
         $offset = $needleLast ? $offset : $offset + \mb_strlen( $needle );
