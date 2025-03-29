@@ -1,5 +1,20 @@
 <?php
 
+namespace {
+
+    if ( ! defined( 'DIR_SEP' ) ) {
+        define( 'DIR_SEP', DIRECTORY_SEPARATOR );
+    }
+
+    if ( ! defined( 'TAB' ) ) {
+        define( 'TAB', "\t" );
+    }
+
+    if ( ! defined( 'NEWLINE' ) ) {
+        define( 'NEWLINE', "\n" );
+    }
+}
+
 namespace Time {
 
     const
