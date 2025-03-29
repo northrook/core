@@ -10,11 +10,11 @@ use Random\RandomException;
 use Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
-use voku\helper\ASCII;
 use BadMethodCallException;
 use RuntimeException;
 use Throwable;
 use SplFileInfo;
+use voku\helper\ASCII;
 
 // <editor-fold desc="Constants">
 
@@ -664,6 +664,262 @@ function is_iterable( mixed $value ) : bool
     return \is_iterable( $value ) || $value instanceof ArrayAccess;
 }
 
+/**
+ * Checks if a given value has a `path` structure.
+ *
+ * ⚠️ Does **NOT** validate the `path` in any capacity!
+ *
+ * @param string|Stringable $string
+ * @param string            $contains [..] optional `str_contains` check
+ * @param string            $illegal
+ *
+ * @return bool
+ */
+function is_path( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
+{
+    // Stringify scalars and Stringable objects
+    // Stringify
+    $string = \trim( (string) $string );
+
+    // Must be at least two characters long to be a path string
+    if ( ! $string || \strlen( $string ) < 2 ) {
+        return false;
+    }
+
+    if ( str_excludes( $string, '{}' ) ) {
+        return false;
+    }
+
+    // One or more slashes indicate this could be a path string
+    if ( \str_contains( $string, '/' ) || \str_contains( $string, '\\' ) ) {
+        return true;
+    }
+
+    // Any periods that aren't in the first 3 characters indicate this could be a `path/file.ext`
+    if ( \strrpos( $string, '.' ) > 2 ) {
+        return true;
+    }
+
+    // Indicates this could be a `.hidden` path
+    if ( $string[0] === '.' && \ctype_alpha( $string[1] ) ) {
+        return true;
+    }
+
+    return \str_contains( $string, $contains );
+}
+
+/**
+ * Checks if a given value has a `URL` structure.
+ *
+ * ⚠️ Does **NOT** validate the URL in any capacity!
+ *
+ * @param string|Stringable $string
+ * @param ?string           $requiredProtocol
+ *
+ * @return bool
+ */
+function is_url( string|Stringable $string, ?string $requiredProtocol = null ) : bool
+{
+    // Stringify
+    $string = \trim( (string) $string );
+
+    // Can not be an empty string
+    if ( ! $string ) {
+        return false;
+    }
+
+    // Must not start with a number
+    if ( \is_numeric( $string[0] ) ) {
+        return false;
+    }
+
+    /**
+     * Does the string resemble a URL-like structure?
+     *
+     * Ensures the string starts with a schema-like substring, and has a real-ish domain extension.
+     *
+     * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
+     */
+    if ( ! \preg_match( '#^([\w\-+]*?[:/]{2}).+\.[a-z0-9]{2,}#m', $string ) ) {
+        return false;
+    }
+
+    // Check for required protocol if requested
+    return ! ( $requiredProtocol && ! \str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ).'://' ) );
+}
+
+/**
+ * Check if the provided `$path` starts with a `/`.
+ *
+ * @param string|Stringable $path
+ *
+ * @return bool
+ */
+function is_relative_path( string|Stringable $path ) : bool
+{
+    return \str_starts_with( \str_replace( '\\', '/', (string) $path ), '/' );
+}
+
+function is_delimiter( string $string ) : bool
+{
+    return (bool) \preg_match( '#^[,;]+$#', $string );
+}
+
+function is_punctuation( string $string, bool $endingOnly = false ) : bool
+{
+    return (bool) ( $endingOnly
+            ? \preg_match( '#^[.!]+$#', $string )
+            : \preg_match( '#^[[:punct:]]+$#', $string ) );
+}
+
+/**
+ * @param null|string|Stringable $value
+ * @param string                 ...$enforceDomain
+ *
+ * @return bool
+ */
+function is_email( null|string|Stringable $value, string ...$enforceDomain ) : bool
+{
+    // Can not be null or an empty string
+    if ( ! $string = (string) $value ) {
+        return false;
+    }
+
+    // Emails are case-insensitive, lowercase the $value for processing
+    $string = \strtolower( $string );
+
+    // Must contain an [at] and at least one period
+    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
+        return false;
+    }
+
+    // Must end with a letter
+    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
+        return false;
+    }
+
+    // Must only contain valid characters
+    if ( \preg_match( '/[^'.URL_SAFE_CHARACTERS_UNICODE.']/u', $string ) ) {
+        return false;
+    }
+
+    // Validate domains, if specified
+    foreach ( $enforceDomain as $domain ) {
+        if ( \str_ends_with( $string, \strtolower( $domain ) ) ) {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+// </editor-fold>
+
+// <editor-fold desc="Hashes and Keys">
+
+/**
+ *  # Generate a deterministic hash key from a value.
+ *   ```
+ *   key_hash( 'xxh64', 'example', new stdClass(), true );
+ *   // => a0a42b9a3a72e14c
+ *   ```
+ *
+ * Recommended algorithms:
+ *
+ * - `xxh3` - `16` character
+ * - `xxh32` - `8` character `fastest`
+ * - `xxh64` - `16` characters `fastest`
+ * - `xxh128` - `32` character `fastest`
+ *
+ * @link https://github.com/Kovah/php-hashes?tab=readme-ov-file#sorted-by-execution-time
+ *
+ * @param 'xxh128'|'xxh32'|'xxh64'|string $algo
+ * @param mixed                           ...$value
+ *
+ * @return string
+ */
+function key_hash( string $algo, mixed ...$value ) : string
+{
+    foreach ( $value as $index => $segment ) {
+        if ( \is_null( $segment ) ) {
+            continue;
+        }
+
+        $value[$index] = match ( \gettype( $segment ) ) {
+            'string'  => $segment,
+            'boolean' => $segment ? 'true' : 'false',
+            'integer' => (string) $segment,
+            default   => \hash(
+                algo : 'xxh32',
+                data : \json_encode( $value ) ?: \serialize( $value ),
+            ),
+        };
+    }
+
+    return \hash( $algo, \implode( '', $value ) );
+}
+
+/**
+ * Create a string key from provided values.
+ *
+ * The default separator is `:`, set a trailing `separator: $sep` argument to override.
+ *
+ * ```
+ * key_hash( 'xxh64', 'example', new stdClass(), true, null );
+ * // => example:stdClass#42:true:NULL
+ * ```
+ *
+ * @param mixed ...$value
+ */
+function key_from( mixed ...$value ) : string
+{
+    $key = [];
+    $sep = ':';
+    if ( isset( $value['separator'] ) && ( ! $value['separator'] || \ctype_punct( $value['separator'] ) )
+    ) {
+        $sep = $value['separator'] ?: '';
+        unset( $value['separator'] );
+        \assert( \is_string( $sep ) );
+    }
+
+    foreach ( $value as $segment ) {
+        $key[] = match ( \gettype( $segment ) ) {
+            'NULL'    => 'NULL',
+            'string'  => $segment,
+            'boolean' => $segment ? 'true' : 'false',
+            'integer' => (string) $segment,
+            'array'   => '['.key_hash( 'xxh32', $segment ).']',
+            'object'  => $segment::class.'#'.\spl_object_id( $segment ),
+            default   => key_hash( 'xxh32', $value ),
+        };
+    }
+
+    return \trim( \implode( $sep, $key ), " \n\r\t\v\0{$sep}" );
+}
+
+/**
+ * Generate a random hashed string.
+ *
+ * - `xxh32` 8 characters
+ * - `xxh64` 16 characters
+ *
+ * @param 'xxh32'|'xxh64'|false $hash    [xxh64] raw bytes returned on `false`
+ * @param int<2,12>             $entropy [7]
+ *
+ * @return string
+ */
+function key_rand( false|string $hash = 'xxh64', int $entropy = 7 ) : string
+{
+    try {
+        $key = \random_bytes( $entropy );
+    }
+    catch ( RandomException ) {
+        $key = (string) \rand( 0, PHP_INT_MAX );
+    }
+
+    return $hash ? \hash( $hash, $key ) : $key;
+}
+
 // </editor-fold>
 
 // <editor-fold desc="Strings">
@@ -1260,245 +1516,6 @@ function num_byte_size( string|int|float $bytes ) : string
 // </editor-fold>
 
 /**
- * @param null|string|Stringable $string
- * @param string                 $separator
- * @param ?callable-string       $filter    {@see \strtolower} by default
- * @param string                 $language  [en]
- *
- * @return string
- */
-function slug(
-    null|string|Stringable $string,
-    string                 $separator = '-',
-    ?string                $filter = 'strtolower',
-    string                 $language = 'en',
-) : string {
-    if ( ! $string = \trim( (string) $string ) ) {
-        return EMPTY_STRING;
-    }
-
-    if ( \class_exists( ASCII::class ) ) {
-        /** @var ASCII::* $language */
-        $string = ASCII::to_ascii( $string, $language );
-    }
-
-    // Replace non-alphanumeric characters with the separator
-    $string = \trim(
-        (string) \preg_replace( "#[^a-z0-9{$separator}]+#i", $separator, $string ),
-        " \n\r\t\v\0{$separator}",
-    );
-
-    return \is_callable( $filter ) ? (string) $filter( $string ) : $string;
-}
-
-/**
- * # Generate a deterministic hash key from a value.
- *
- *  - `$value` will be stringified using `json_encode()` by default.
- *  - The value is hashed using `xxh3`.
- *  - The hash is not reversible.
- *
- * The $value can be stringified in one of the following ways:
- *
- * ## `json`
- * Often the fastest option when passing a large object.
- * Will fall back to `serialize` if `json_encode()` fails.
- *
- * ## `serialize`
- * Can sometimes be faster for arrays of strings.
- *
- * ## `implode`
- * Very fast for simple arrays of strings.
- * Requires the `$value` to be an `array` of `string|int|float|bool|Stringable`.
- * Nested arrays are not supported.
- *
- * ```
- * hashKey( [ 'example', new stdClass(), true ] );
- * // => a0a42b9a3a72e14c
- * ```
- *
- * @param mixed                        $value
- * @param 'implode'|'json'|'serialize' $encoder
- *
- * @return string 16 character hash of the value
- */
-#[Deprecated( 'Use `key_hash()` instead.' )]
-function hashKey(
-    mixed  $value,
-    string $encoder = 'json',
-) : string {
-    if ( ! \is_string( $value ) ) {
-        // Use serialize if defined
-        if ( $encoder === 'serialize' ) {
-            $value = \serialize( $value );
-        }
-        // Implode if defined and $value is an array
-        elseif ( $encoder === 'implode' && \is_array( $value ) ) {
-            $value = \implode( ':', $value );
-        }
-        // JSON as default, or as fallback
-        else {
-            $value = \json_encode( $value ) ?: \serialize( $value );
-        }
-    }
-
-    // Hash the $value to a 16 character string
-    return \hash( algo : 'xxh3', data : $value );
-}
-
-/**
- * Recommended algorithms:
- *
- * - `xxh3` - `16` character
- * - `xxh32` - `8` character `fastest`
- * - `xxh64` - `16` characters `fastest`
- * - `xxh128` - `32` character `fastest`
- *
- * @link https://github.com/Kovah/php-hashes?tab=readme-ov-file#sorted-by-execution-time
- *
- * @param 'xxh128'|'xxh32'|'xxh64'|string $algo
- * @param mixed                           ...$value
- *
- * @return string
- */
-function key_hash( string $algo, mixed ...$value ) : string
-{
-    foreach ( $value as $index => $segment ) {
-        if ( \is_null( $segment ) ) {
-            continue;
-        }
-
-        $value[$index] = match ( \gettype( $segment ) ) {
-            'string'  => $segment,
-            'boolean' => $segment ? 'true' : 'false',
-            'integer' => (string) $segment,
-            default   => \hash(
-                algo : 'xxh32',
-                data : \json_encode( $value ) ?: \serialize( $value ),
-            ),
-        };
-    }
-
-    return \hash( $algo, \implode( '', $value ) );
-}
-
-/**
- * @param mixed ...$value
- */
-function cacheKey( mixed ...$value ) : string
-{
-    $key = [];
-
-    foreach ( $value as $segment ) {
-        if ( \is_null( $segment ) ) {
-            continue;
-        }
-
-        $key[] = match ( \gettype( $segment ) ) {
-            'string'  => $segment,
-            'boolean' => $segment ? 'true' : 'false',
-            'integer' => (string) $segment,
-            default   => \hash(
-                algo : 'xxh32',
-                data : \json_encode( $value ) ?: \serialize( $value ),
-            ),
-        };
-    }
-
-    return \strtolower( \trim( \implode( ':', $key ) ) );
-}
-
-/**
- * Generate a random hashed string.
- *
- * - `xxh32` 8 characters
- * - `xxh64` 16 characters
- *
- * @param 'xxh32'|'xxh64' $algo    [xxh64]
- * @param int<2,12>       $entropy [7]
- *
- * @return string
- */
-function randKey( string $algo = 'xxh64', int $entropy = 7 ) : string
-{
-    try {
-        return \hash( $algo, data : \random_bytes( $entropy ) );
-    }
-    catch ( RandomException ) {
-        return \hash( $algo, data : (string) \rand( 0, PHP_INT_MAX ) );
-    }
-}
-
-function implodeKey( mixed $value = AUTO, string $separator = ':' ) : string
-{
-    $key = [];
-
-    if ( ! \is_iterable( $value ) ) {
-        $value = [$value];
-    }
-
-    foreach ( $value as $segment ) {
-        if ( \is_null( $segment ) ) {
-            continue;
-        }
-
-        $key[] = match ( \gettype( $segment ) ) {
-            'string'  => $segment,
-            'boolean' => $segment ? 'true' : 'false',
-            'integer' => (string) $segment,
-            'object'  => $segment::class.'#'.\spl_object_id( $segment ),
-            default   => \hash(
-                algo : 'xxh3',
-                data : \json_encode( $value ) ?: \serialize( $value ),
-            ),
-        };
-    }
-
-    return \implode( $separator, $key );
-}
-
-/**
- * @param null|string|Stringable $value
- * @param string                 ...$enforceDomain
- *
- * @return bool
- */
-function isEmail( null|string|Stringable $value, string ...$enforceDomain ) : bool
-{
-    // Can not be null or an empty string
-    if ( ! $string = (string) $value ) {
-        return false;
-    }
-
-    // Emails are case-insensitive, lowercase the $value for processing
-    $string = \strtolower( $string );
-
-    // Must contain an [at] and at least one period
-    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
-        return false;
-    }
-
-    // Must end with a letter
-    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
-        return false;
-    }
-
-    // Must only contain valid characters
-    if ( \preg_match( '/[^'.URL_SAFE_CHARACTERS_UNICODE.']/u', $string ) ) {
-        return false;
-    }
-
-    // Validate domains, if specified
-    foreach ( $enforceDomain as $domain ) {
-        if ( \str_ends_with( $string, \strtolower( $domain ) ) ) {
-            return true;
-        }
-    }
-
-    return true;
-}
-
-/**
  * Normalize all slashes in a string to `/`.
  *
  * @param string|Stringable $path
@@ -1583,37 +1600,10 @@ function normalizeUrl(
  *
  * @return bool
  */
+#[Deprecated( 'Use \Support\is_path()' )]
 function isPath( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
 {
-    // Stringify scalars and Stringable objects
-    // Stringify
-    $string = \trim( (string) $string );
-
-    // Must be at least two characters long to be a path string
-    if ( ! $string || \strlen( $string ) < 2 ) {
-        return false;
-    }
-
-    if ( str_excludes( $string, '{}' ) ) {
-        return false;
-    }
-
-    // One or more slashes indicate this could be a path string
-    if ( \str_contains( $string, '/' ) || \str_contains( $string, '\\' ) ) {
-        return true;
-    }
-
-    // Any periods that aren't in the first 3 characters indicate this could be a `path/file.ext`
-    if ( \strrpos( $string, '.' ) > 2 ) {
-        return true;
-    }
-
-    // Indicates this could be a `.hidden` path
-    if ( $string[0] === '.' && \ctype_alpha( $string[1] ) ) {
-        return true;
-    }
-
-    return \str_contains( $string, $contains );
+    return is_path( $string, $contains, $illegal );
 }
 
 /**
@@ -1626,58 +1616,10 @@ function isPath( string|Stringable $string, string $contains = '..', string $ill
  *
  * @return bool
  */
+#[Deprecated( 'Use \Support\is_url()' )]
 function isUrl( string|Stringable $string, ?string $requiredProtocol = null ) : bool
 {
-    // Stringify
-    $string = \trim( (string) $string );
-
-    // Can not be an empty string
-    if ( ! $string ) {
-        return false;
-    }
-
-    // Must not start with a number
-    if ( \is_numeric( $string[0] ) ) {
-        return false;
-    }
-
-    /**
-     * Does the string resemble a URL-like structure?
-     *
-     * Ensures the string starts with a schema-like substring, and has a real-ish domain extension.
-     *
-     * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
-     */
-    if ( ! \preg_match( '#^([\w\-+]*?[:/]{2}).+\.[a-z0-9]{2,}#m', $string ) ) {
-        return false;
-    }
-
-    // Check for required protocol if requested
-    return ! ( $requiredProtocol && ! \str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ).'://' ) );
-}
-
-/**
- * Check if the provided `$path` starts with a `/`.
- *
- * @param string|Stringable $path
- *
- * @return bool
- */
-function isRelativePath( string|Stringable $path ) : bool
-{
-    return \str_starts_with( \str_replace( '\\', '/', (string) $path ), '/' );
-}
-
-function isDelimiter( string $string ) : bool
-{
-    return (bool) \preg_match( '#^[,;]+$#', $string );
-}
-
-function isPunctuation( string $string, bool $endingOnly = false ) : bool
-{
-    return (bool) ( $endingOnly
-            ? \preg_match( '#^[.!]+$#', $string )
-            : \preg_match( '#^[[:punct:]]+$#', $string ) );
+    return is_url( $string, $requiredProtocol );
 }
 
 /**
@@ -1881,6 +1823,38 @@ function escapeICal( null|string|Stringable $value ) : string
 // </editor-fold>
 
 // <editor-fold desc="Normalizers">
+
+/**
+ * @param null|string|Stringable $string
+ * @param string                 $separator
+ * @param ?callable-string       $filter    {@see \strtolower} by default
+ * @param string                 $language  [en]
+ *
+ * @return string
+ */
+function slug(
+    null|string|Stringable $string,
+    string                 $separator = '-',
+    ?string                $filter = 'strtolower',
+    string                 $language = 'en',
+) : string {
+    if ( ! $string = \trim( (string) $string ) ) {
+        return EMPTY_STRING;
+    }
+
+    if ( \class_exists( ASCII::class ) ) {
+        /** @var ASCII::* $language */
+        $string = ASCII::to_ascii( $string, $language );
+    }
+
+    // Replace non-alphanumeric characters with the separator
+    $string = \trim(
+        (string) \preg_replace( "#[^a-z0-9{$separator}]+#i", $separator, $string ),
+        " \n\r\t\v\0{$separator}",
+    );
+
+    return \is_callable( $filter ) ? (string) $filter( $string ) : $string;
+}
 
 /**
  * Normalize repeated whitespace, newlines and indentation, to a single white space.
