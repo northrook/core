@@ -187,6 +187,20 @@ function file_save(
     }
 }
 
+/**
+ * Removes a file or directory, including nested files.
+ *
+ * @param string $path
+ *
+ * @return bool
+ */
+function file_purge( string $path ) : bool
+{
+    return \is_file( $path )
+            ? @\unlink( $path )
+            : \array_map( __FUNCTION__, \glob( $path.'/*' ) ?: [] ) == @\rmdir( $path );
+}
+
 // </editor-fold>
 
 // <editor-fold desc="Get">
