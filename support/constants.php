@@ -2,17 +2,128 @@
 
 namespace {
 
-    if ( ! defined( 'DIR_SEP' ) ) {
-        define( 'DIR_SEP', DIRECTORY_SEPARATOR );
-    }
+    defined( 'CHARSET' )      || define( 'CHARSET', 'UTF-8' );
+    defined( 'DIR_SEP' )      || define( 'DIR_SEP', DIRECTORY_SEPARATOR );
+    defined( 'TAB' )          || define( 'TAB', "\t" );
+    defined( 'NEWLINE' )      || define( 'NEWLINE', "\n" );
+    defined( 'EMPTY_STRING' ) || define( 'EMPTY_STRING', '' );
+    defined( 'WHITESPACE' )   || define( 'WHITESPACE', ' ' );
+}
 
-    if ( ! defined( 'TAB' ) ) {
-        define( 'TAB', "\t" );
-    }
+namespace Support {
 
-    if ( ! defined( 'NEWLINE' ) ) {
-        define( 'NEWLINE', "\n" );
-    }
+    /** Indicates a `default` value will be used unless provided */
+    const AUTO = null;
+
+    /** Value is `required`, but can be inferred at runtime if none is provided */
+    const INFER = null;
+
+    /** Line Feed  */
+    const LF = "\n";
+    /** Carriage Return */
+    const CR = "\r";
+    /** Carriage Return and Line Feed */
+    const CRLF = "\r\n";
+
+    const PLACEHOLDER_ARGS   = [[]];
+    const PLACEHOLDER_ARG    = [];
+    const PLACEHOLDER_ARRAY  = [];
+    const PLACEHOLDER_STRING = '';
+    const PLACEHOLDER_NULL   = null;
+    const PLACEHOLDER_BOOL   = false;
+    const PLACEHOLDER_INT    = 0;
+    const PLACEHOLDER_FLOAT  = 0;
+
+    /**
+     * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
+     */
+    const LOG_LEVEL = [
+        'debug'     => 100,
+        'info'      => 200,
+        'notice'    => 250,
+        'warning'   => 300,
+        'error'     => 400,
+        'critical'  => 500,
+        'alert'     => 550,
+        'emergency' => 600,
+    ];
+
+    /** Do not cache at all */
+    const CACHE_DISABLED = -2;
+    /** In-memory runtime cache */
+    const CACHE_EPHEMERAL = -1;
+    /** Follow Adapter rules */
+    const CACHE_AUTO = null;
+    /** CNo expiration time */
+    const CACHE_FOREVER = 0;
+
+    /** Space */
+    const ENCODED_SPACE = '&#32;';
+    /** Horizontal Tab `\t` */
+    const ENCODED_TAB = '&#9;';
+    /** Line Feed `\n` */
+    const ENCODED_LF = '&#10;';
+    /** Carriage Return `\r` */
+    const ENCODED_CR = '&#13;';
+    /** Double quote `"` */
+    const ENCODED_QUOTE = '&#34;';
+    /** Single quote `'` */
+    const ENCODED_APOSTROPHE = '&#39;';
+    /** Backtick `` ` `` */
+    const ENCODED_BACKTICK = '&#96;';
+    /** Double quote `#` */
+    const ENCODED_HASHTAG = '&#35;';
+    /** Dollar `$` */
+    const ENCODED_DOLLAR = '&#36;';
+    /** Bang|Exclamation `!` */
+    const ENCODED_BANG = '&#33;';
+    /** Ampersand `&` */
+    const ENCODED_AMP = '&#38;';
+    /** Equals `=` */
+    const ENCODED_EQUALS = '&#61;';
+    /** Less-than `<` */
+    const ENCODED_LT = '&#60;';
+    /** Greater-than `>` */
+    const ENCODED_GT = '&#62;';
+    /** Slash `/` */
+    const ENCODED_SLASH = '&#47;';
+    /** Backslash `\` */
+    const ENCODED_BACKSLASH = '&#92;';
+
+    // @formatter:off
+    const TAG_STRUCTURE = [
+        'html', 'head', 'body', 'title', 'style', 'script',
+        'link', 'noscript', 'template', 'iframe',
+    ];
+    const TAG_CONTENT = [
+        'header', 'footer', 'aside', 'main', 'section', 'article',
+        'div', 'p', 'address', 'blockquote', 'details', 'dialog', 'dl', 'hr',
+        // : Media
+        'svg', 'canvas', 'object', 'source', 'video', 'audio', 'embed', 'picture',
+        'figcaption', 'figure', 'caption', 'pre',
+        // : List
+        'ol', 'ul', 'li', 'nav', 'dropdown', 'menu', 'modal', 'tooltip',
+        // : Form
+        'form', 'field', 'fieldset', 'optgroup', 'input', 'label', 'legend',
+        'input', 'textarea', 'select', 'option', 'datalist', 'button',
+        'progress', 'meter', 'output',
+        // : Table
+        'table', 'thead', 'tbody', 'tfoot',
+        'td', 'th', 'tr', 'col', 'colgroup',
+    ];
+    const TAG_HEADING = [
+        'hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    ];
+    const TAG_INLINE = [
+        'a', 'b', 'i', 's', 'em', 'u', 'small', 'strong', 'span',
+        'mark', 'code', 'kbd', 'var', 'samp', 'cite', 'q', 'abbr',
+        'dfn', 'time', 'data', 'wbr', 'sub', 'sup', 'bdi', 'bdo',
+    ];
+    const TAG_SELF_CLOSING = [
+        'meta', 'link', 'img', 'input', 'wbr', 'hr', 'br',
+        'col', 'area', 'base', 'source', 'embed', 'track',
+    ];
+    // @formatter:on
 }
 
 namespace Time {

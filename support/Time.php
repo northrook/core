@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Support;
 
-use DateTimeImmutable;
-use DateTimeInterface;
-use DateTimeZone;
-use Exception;
 use Stringable;
+use DateTimeImmutable, DateTimeInterface, DateTimeZone;
+use Exception;
 
 /**
  * @author  Martin Nielsen <mn@northrook.com>

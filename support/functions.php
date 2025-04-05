@@ -4,65 +4,16 @@ declare(strict_types=1);
 
 namespace Support;
 
-use JetBrains\PhpStorm\Deprecated;
-use OverflowException;
-use Random\RandomException;
-use Stringable, ArrayAccess;
-use DateTimeImmutable, DateTimeZone, DateTimeInterface;
-use Exception, InvalidArgumentException, BadFunctionCallException, LengthException;
-use BadMethodCallException;
-use RuntimeException;
-use Throwable;
-use SplFileInfo;
 use voku\helper\ASCII;
+use SplFileInfo, Stringable, ArrayAccess;
+use DateTimeImmutable, DateTimeZone, DateTimeInterface;
+use Throwable, Exception,
+LengthException, InvalidArgumentException,
+BadMethodCallException, BadFunctionCallException,
+RuntimeException, OverflowException;
+use Random\RandomException;
 
 // <editor-fold desc="Constants">
-
-/**
- * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
- */
-const LOG_LEVEL = [
-    'debug'     => 100,
-    'info'      => 200,
-    'notice'    => 250,
-    'warning'   => 300,
-    'error'     => 400,
-    'critical'  => 500,
-    'alert'     => 550,
-    'emergency' => 600,
-];
-
-const
-    CACHE_DISABLED  = -2,
-    CACHE_EPHEMERAL = -1,
-    CACHE_AUTO      = null,
-    CACHE_FOREVER   = 0;
-
-/** Indicates a `default` value will be used unless provided */
-const AUTO = null;
-
-/** Value is `required`, but can be inferred at runtime if none is provided */
-const INFER = null;
-
-const
-    TAB          = "\t",
-    EMPTY_STRING = '',
-    WHITESPACE   = ' ',
-    NEWLINE      = "\n";
-
-/** Line Feed  */
-const LF = "\n";
-/** Carriage Return */
-const CR = "\r";
-/** Carriage Return and Line Feed */
-const CRLF = "\r\n";
-
-const PLACEHOLDER_ARGS   = [[]];
-const PLACEHOLDER_ARG    = [];
-const PLACEHOLDER_ARRAY  = [];
-const PLACEHOLDER_STRING = '';
-const PLACEHOLDER_NULL   = null;
-const PLACEHOLDER_INT    = 0;
 
 const URL_SAFE_CHARACTERS_UNICODE = "\w.,_~:;@!$&*?#=%()+\-\[\]\'\/";
 const URL_SAFE_CHARACTERS         = "A-Za-z0-9.,_~:;@!$&*?#=%()+\-\[\]\'\/";
@@ -78,41 +29,6 @@ const FILTER_STRING_COMMENTS = [
     '{{-- ' => '<!-- ', // Blade
     ' --}}' => ' -->',
 ];
-
-// @formatter:off
-const TAG_STRUCTURE = [
-    'html', 'head', 'body', 'title', 'style', 'script',
-    'link', 'noscript', 'template', 'iframe',
-];
-const TAG_CONTENT = [
-    'header', 'footer', 'aside', 'main', 'section', 'article',
-    'div', 'p', 'address', 'blockquote', 'details', 'dialog', 'dl', 'hr',
-    // : Media
-    'svg', 'canvas', 'object', 'source', 'video', 'audio', 'embed', 'picture',
-    'figcaption', 'figure', 'caption', 'pre',
-    // : List
-    'ol', 'ul', 'li', 'nav', 'dropdown', 'menu', 'modal', 'tooltip',
-    // : Form
-    'form', 'field', 'fieldset', 'optgroup', 'input', 'label', 'legend',
-    'input', 'textarea', 'select', 'option', 'datalist', 'button',
-    'progress', 'meter', 'output',
-    // : Table
-    'table', 'thead', 'tbody', 'tfoot',
-    'td', 'th', 'tr', 'col', 'colgroup',
-];
-const TAG_HEADING = [
-    'hgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-];
-const TAG_INLINE = [
-    'a', 'b', 'i', 's', 'em', 'u', 'small', 'strong', 'span',
-    'mark', 'code', 'kbd', 'var', 'samp', 'cite', 'q', 'abbr',
-    'dfn', 'time', 'data', 'wbr', 'sub', 'sup', 'bdi', 'bdo',
-];
-const TAG_SELF_CLOSING = [
-    'meta', 'link', 'img', 'input', 'wbr', 'hr', 'br',
-    'col', 'area', 'base', 'source', 'embed', 'track',
-];
-// @formatter:on
 
 // </editor-fold>
 
@@ -1528,113 +1444,6 @@ function num_byte_size( string|int|float $bytes ) : string
 }
 
 // </editor-fold>
-
-/**
- * Normalize all slashes in a string to `/`.
- *
- * @param string|Stringable $path
- *
- * @return string
- */
-#[Deprecated( 'Use \Support\normalize_slashes()' )]
-function normalizeSlashes( string|Stringable $path ) : string
-{
-    return normalize_slashes( $path );
-}
-
-/**
- * Normalize repeated whitespace, newlines and indentation, to a single white space.
- *
- * @param null|string|Stringable $string
- *
- * @return string
- */
-#[Deprecated( 'Use \Support\normalize_whitespace()' )]
-function normalizeWhitespace( string|Stringable|null $string ) : string
-{
-    return normalize_whitespace( $string );
-}
-
-/**
- * @param null|string|Stringable $string
- *
- * @return string
- */
-#[Deprecated( 'Use \Support\normalize_newline()' )]
-function normalizeNewline( string|Stringable|null $string ) : string
-{
-    return normalize_newline( $string );
-}
-
-/**
- * # Normalise a `string` or `string[]`, assuming it is a `path`.
- *
- * - If an array of strings is passed, they will be joined using the directory separator.
- * - Normalises slashes to system separator.
- * - Removes repeated separators.
- * - Will throw a {@see ValueError} if the resulting string exceeds {@see PHP_MAXPATHLEN}.
- *
- * ```
- * normalizePath( './assets\\\/scripts///example.js' );
- * // => '.\assets\scripts\example.js'
- * ```
- *
- * @param ?string ...$path
- */
-#[Deprecated( 'Use \Support\normalize_path()' )]
-function normalizePath( ?string ...$path ) : string
-{
-    return normalize_path( ...$path );
-}
-
-/**
- * @param array<int, ?string>|string $path                 the string to normalize
- * @param false|string               $substituteWhitespace [-]
- * @param bool                       $trailingSlash
- *
- * @return string
- */
-#[Deprecated( 'Use \Support\normalize_url()' )]
-function normalizeUrl(
-    string|array $path,
-    false|string $substituteWhitespace = '-',
-    bool         $trailingSlash = false,
-) : string {
-    return normalize_url( $path, $substituteWhitespace, $trailingSlash );
-}
-
-/**
- * Checks if a given value has a `path` structure.
- *
- * ⚠️ Does **NOT** validate the `path` in any capacity!
- *
- * @param string|Stringable $string
- * @param string            $contains [..] optional `str_contains` check
- * @param string            $illegal
- *
- * @return bool
- */
-#[Deprecated( 'Use \Support\is_path()' )]
-function isPath( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
-{
-    return is_path( $string, $contains, $illegal );
-}
-
-/**
- * Checks if a given value has a `URL` structure.
- *
- * ⚠️ Does **NOT** validate the URL in any capacity!
- *
- * @param string|Stringable $string
- * @param ?string           $requiredProtocol
- *
- * @return bool
- */
-#[Deprecated( 'Use \Support\is_url()' )]
-function isUrl( string|Stringable $string, ?string $requiredProtocol = null ) : bool
-{
-    return is_url( $string, $requiredProtocol );
-}
 
 /**
  * This function tries very hard to return a string from any given `$value`.
