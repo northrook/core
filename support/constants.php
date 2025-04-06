@@ -2,12 +2,13 @@
 
 namespace {
 
-    defined( 'CHARSET' )      || define( 'CHARSET', 'UTF-8' );
-    defined( 'DIR_SEP' )      || define( 'DIR_SEP', DIRECTORY_SEPARATOR );
-    defined( 'TAB' )          || define( 'TAB', "\t" );
-    defined( 'NEWLINE' )      || define( 'NEWLINE', "\n" );
-    defined( 'EMPTY_STRING' ) || define( 'EMPTY_STRING', '' );
-    defined( 'WHITESPACE' )   || define( 'WHITESPACE', ' ' );
+    defined( 'CHARSET' )                || define( 'CHARSET', 'UTF-8' );
+    defined( 'DIR_SEP' )                || define( 'DIR_SEP', DIRECTORY_SEPARATOR );
+    defined( 'TAB' )                    || define( 'TAB', "\t" );
+    defined( 'NEWLINE' )                || define( 'NEWLINE', "\n" );
+    defined( 'EMPTY_STRING' )           || define( 'EMPTY_STRING', '' );
+    defined( 'WHITESPACE' )             || define( 'WHITESPACE', ' ' );
+    defined( 'ARRAY_FILTER_USE_VALUE' ) || define( 'ARRAY_FILTER_USE_VALUE', 0 );
 }
 
 namespace Support {
