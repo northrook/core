@@ -1480,7 +1480,7 @@ function arr_filter_recursive(
 /**
  * @param array<array-key, mixed> $array
  * @param mixed                   $match
- * @param int-mask<0,2>           $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param int<0,2>                $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return null|int|string
  */
@@ -1525,9 +1525,9 @@ function arr_search(
  * @param int|string              $match
  * @param array<array-key, mixed> $array
  *
- * @return null|string
+ * @return null|int|string
  */
-function arr_closest( int|string $match, array $array ) : ?string
+function arr_closest( int|string $match, array $array ) : null|int|string
 {
     // TODO : Match key/value toggle
     // TODO : closest int/float round up/down
@@ -1546,7 +1546,7 @@ function arr_closest( int|string $match, array $array ) : ?string
              || \abs( (int) $match - (int) $closest )
                 > \abs( (int) $item - (int) $match )
         ) {
-            $closest = $item;
+            $closest = (int) $item;
         }
     }
     return $closest;
