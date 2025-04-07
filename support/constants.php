@@ -3,7 +3,7 @@
 namespace {
 
     defined( 'CHARSET' )                || define( 'CHARSET', 'UTF-8' );
-    defined( 'DIR_SEP' )                || define( 'DIR_SEP', DIRECTORY_SEPARATOR );
+    defined( 'DIR_SEP' )                || define( 'DIR_SEP', '/' );
     defined( 'TAB' )                    || define( 'TAB', "\t" );
     defined( 'NEWLINE' )                || define( 'NEWLINE', "\n" );
     defined( 'EMPTY_STRING' )           || define( 'EMPTY_STRING', '' );
