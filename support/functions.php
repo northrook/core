@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Support;
 
+use Core\Exception\MissingPropertyException;
 use voku\helper\ASCII;
 use SplFileInfo, Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
@@ -12,6 +13,9 @@ LengthException, InvalidArgumentException,
 BadMethodCallException, BadFunctionCallException,
 RuntimeException, OverflowException;
 use Random\RandomException;
+use ReflectionNamedType;
+use ReflectionProperty;
+use ReflectionUnionType;
 
 // <editor-fold desc="Constants">
 
@@ -231,6 +235,64 @@ function ob_get( callable $callback, mixed ...$args ) : string
 // </editor-fold>
 
 // <editor-fold desc="Class Functions">
+
+/**
+ * @wip
+ *
+ * @param class-string|object $class
+ * @param string              $property
+ * @param ?string             $type
+ * @param null|mixed          $from
+ *
+ * @return bool
+ */
+function match_property_type(
+    object|string $class,
+    string        $property,
+    ?string       $type = AUTO,
+    mixed         $from = null,
+) : bool {
+    $type ??= \gettype( $from );
+
+    \assert( \class_exists( \is_object( $class ) ? $class::class : $class ) );
+
+    if ( ! \property_exists( $class, $property ) ) {
+        throw new MissingPropertyException( $property, $type, $class );
+    }
+
+    $classProperty = new ReflectionProperty( $class, $property );
+    $propertyType  = $classProperty->getType();
+
+    $allowedTypes = [];
+
+    if ( $propertyType->allowsNull() ) {
+        $allowedTypes['null'] = 'NULL';
+    }
+
+    if ( $propertyType instanceof ReflectionNamedType ) {
+        $typeName = $propertyType->getName();
+
+        $allowedTypes[$typeName] ??= $typeName;
+    }
+    elseif ( $propertyType instanceof ReflectionUnionType ) {
+        foreach ( $propertyType->getTypes() as $unionType ) {
+            $allowedTypes[$unionType->getName()] ??= $unionType->getName();
+        }
+    }
+
+    foreach ( $allowedTypes as $match ) {
+        if ( $type === match ( $match ) {
+            'int'   => 'integer',
+            'null'  => 'NULL',
+            default => $match,
+        } ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * @param class-string|object|string $class
  *
