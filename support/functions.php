@@ -265,7 +265,7 @@ function match_property_type(
 
     $allowedTypes = [];
 
-    if ( $propertyType->allowsNull() ) {
+    if ( $propertyType?->allowsNull() ) {
         $allowedTypes['null'] = 'NULL';
     }
 
@@ -276,7 +276,12 @@ function match_property_type(
     }
     elseif ( $propertyType instanceof ReflectionUnionType ) {
         foreach ( $propertyType->getTypes() as $unionType ) {
-            $allowedTypes[$unionType->getName()] ??= $unionType->getName();
+            if ( $unionType instanceof ReflectionNamedType ) {
+                $allowedTypes[$unionType->getName()] ??= $unionType->getName();
+            }
+            else {
+                dump( $unionType );
+            }
         }
     }
 
