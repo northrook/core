@@ -260,7 +260,7 @@ function match_property_type(
     \assert( \class_exists( \is_object( $class ) ? $class::class : $class ) );
 
     if ( ! \property_exists( $class, $property ) ) {
-        throw new MissingPropertyException( $property, $type, class_name( $class ) );
+        throw new MissingPropertyException( $property, $type, $class );
     }
 
     $classProperty = new ReflectionProperty( $class, $property );
@@ -1747,8 +1747,8 @@ function as_string(
     $value = match ( true ) {
         \is_bool( $value )           => $value ? 'true' : 'false',
         \is_null( $value )           => $nullable ? null : EMPTY_STRING,
-        $value instanceof UnitEnum   => $value->name,
         $value instanceof BackedEnum => $value->value,
+        $value instanceof UnitEnum   => $value->name,
         $value instanceof Printable  => $value->toString(),
         \is_scalar( $value ),
         $value instanceof Stringable => (string) $value,
@@ -1793,12 +1793,13 @@ function as_array( mixed $value, bool $is_list = false ) : array
 }
 
 /**
- * @param array $get_defined_vars
+ * @param array<array-key, mixed> $get_defined_vars
  *
- * @return array
+ * @return array<array-key, mixed>
  */
 function variadic_argument( array $get_defined_vars ) : array
 {
+    // @phpstan-ignore-next-line
     return [...\array_pop( $get_defined_vars ), ...$get_defined_vars];
 }
 

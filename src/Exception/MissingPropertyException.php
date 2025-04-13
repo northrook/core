@@ -9,17 +9,17 @@ use LogicException, Throwable;
 class MissingPropertyException extends LogicException
 {
     /**
-     * @param string         $property
-     * @param ?string        $type
-     * @param ?class-string  $class
-     * @param null|string    $message
-     * @param int            $code
-     * @param null|Throwable $previous
+     * @param string                   $property
+     * @param ?string                  $type
+     * @param null|class-string|object $class
+     * @param null|string              $message
+     * @param int                      $code
+     * @param null|Throwable           $previous
      */
     public function __construct(
         public readonly string $property,
         ?string                $type = null,
-        ?string                $class = null,
+        null|object|string     $class = null,
         ?string                $message = null,
         int                    $code = 500,
         ?Throwable             $previous = null,
@@ -28,6 +28,7 @@ class MissingPropertyException extends LogicException
             $property = $type ? "'\${$property}' of type '{$type}'" : "'{$property}'";
             $message  = "Property {$property} does not exist";
             if ( $class ) {
+                $class = \is_object( $class ) ? $class::class : $class;
                 $message .= " in class '{$class}'.";
             }
             else {
