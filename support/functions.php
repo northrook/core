@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Support;
 
 use Core\Exception\MissingPropertyException;
+use Core\Interface\Printable;
 use voku\helper\ASCII;
 use SplFileInfo, Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
@@ -16,6 +17,8 @@ use Random\RandomException;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
+use BackedEnum;
+use UnitEnum;
 
 // <editor-fold desc="Constants">
 
@@ -1742,10 +1745,14 @@ function as_string(
     bool  $serialize = true,
 ) : ?string {
     $value = match ( true ) {
-        \is_bool( $value ) => $value ? 'true' : 'false',
-        \is_null( $value ) => $nullable ? null : EMPTY_STRING,
-        \is_scalar( $value ), $value instanceof Stringable => (string) $value,
-        default => $value,
+        \is_bool( $value )           => $value ? 'true' : 'false',
+        \is_null( $value )           => $nullable ? null : EMPTY_STRING,
+        $value instanceof UnitEnum   => $value->name,
+        $value instanceof BackedEnum => $value->value,
+        $value instanceof Printable  => $value->toString(),
+        \is_scalar( $value ),
+        $value instanceof Stringable => (string) $value,
+        default                      => $value,
     };
 
     if ( is_iterable( $value ) ) {
@@ -1783,6 +1790,16 @@ function as_array( mixed $value, bool $is_list = false ) : array
         \assert( \array_is_list( $value ) );
     }
     return $value;
+}
+
+/**
+ * @param array $get_defined_vars
+ *
+ * @return array
+ */
+function variadic_argument( array $get_defined_vars ) : array
+{
+    return [...\array_pop( $get_defined_vars ), ...$get_defined_vars];
 }
 
 // <editor-fold desc="Filters and Escapes">
