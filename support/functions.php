@@ -260,7 +260,7 @@ function match_property_type(
     \assert( \class_exists( \is_object( $class ) ? $class::class : $class ) );
 
     if ( ! \property_exists( $class, $property ) ) {
-        throw new MissingPropertyException( $property, $type, $class );
+        throw new MissingPropertyException( $property, $type, class_name( $class ) );
     }
 
     $classProperty = new ReflectionProperty( $class, $property );
