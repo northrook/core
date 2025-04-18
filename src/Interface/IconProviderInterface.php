@@ -2,8 +2,10 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
 use UnitEnum;
 
+#[Deprecated]
 interface IconProviderInterface extends ProviderInterface
 {
     public function has( string $icon ) : bool;
