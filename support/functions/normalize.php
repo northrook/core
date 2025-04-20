@@ -124,7 +124,7 @@ function normalize_newline( string|Stringable|null $string ) : string
  */
 function normalize_slashes( string|Stringable $string ) : string
 {
-    return \str_replace( '\\', '/', (string) $string );
+    return \strtr( (string) $string, '\\', '/' );
 }
 
 /**
@@ -137,26 +137,37 @@ function normalize_slashes( string|Stringable $string ) : string
  *
  * ```
  * normalizePath( './assets\\\/scripts///example.js' );
- * // => '.\assets\scripts\example.js'
+ * // => './assets/scripts/example.js'
  * ```
  *
  * @param ?string ...$path
  */
 function normalize_path( ?string ...$path ) : string
 {
+    $path = \implode( DIR_SEP, \array_filter( $path ) );
+
+    if ( ! $path ) {
+        return EMPTY_STRING;
+    }
+
     // Normalize separators
-    $normalized = \str_replace( ['\\', '/'], DIR_SEP, \array_filter( $path ) );
+    $path = \strtr( $path, '\\', DIR_SEP );
 
-    $isRelative = $normalized[0][0] === DIR_SEP;
-
-    // Implode->Explode for separator deduplication
-    $exploded = \explode( DIR_SEP, \implode( DIR_SEP, $normalized ) );
+    // Check for starting separator
+    $relative = match ( true ) {
+        $path[0] === DIR_SEP                     => DIR_SEP,
+        $path[0] === '.' && $path[1] === DIR_SEP => '.'.DIR_SEP,
+        default                                  => null,
+    };
 
     // Ensure each part does not start or end with illegal characters
-    $exploded = \array_map( static fn( $item ) => \trim( $item, " \n\r\t\v\0\\/" ), $exploded );
+    $exploded = \array_map(
+        static fn( $item ) => \trim( $item, " \n\r\t\v\0\\/" ),
+        \explode( DIR_SEP, $path ),
+    );
 
-    // Filter the exploded path, and implode using the directory separator
-    $path = \implode( DIR_SEP, \array_filter( $exploded ) );
+    // Implode, preserving intended relative paths
+    $path = $relative.\implode( DIR_SEP, \array_filter( $exploded ) );
 
     if ( ( $length = \mb_strlen( $path ) ) > ( $limit = PHP_MAXPATHLEN - 2 ) ) {
         $method  = __METHOD__;
@@ -165,11 +176,6 @@ function normalize_path( ?string ...$path ) : string
         $message = "{$method} resulted in a string of {$length}, exceeding the {$limit} character limit.";
         $result  = 'Operation was halted to prevent overflow.';
         throw new LengthException( $message.PHP_EOL.$result );
-    }
-
-    // Preserve intended relative paths
-    if ( $isRelative ) {
-        $path = DIR_SEP.$path;
     }
 
     return $path;

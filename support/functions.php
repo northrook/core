@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Support;
 
@@ -10,8 +10,8 @@ use JetBrains\PhpStorm\Deprecated;
 use SplFileInfo, Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
 use Throwable, Exception, InvalidArgumentException,
-        BadMethodCallException, BadFunctionCallException,
-        RuntimeException;
+BadMethodCallException, BadFunctionCallException,
+RuntimeException;
 use Random\RandomException;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -24,16 +24,16 @@ use UnitEnum;
 const URL_SAFE_CHARACTERS_UNICODE = "\w.,_~:;@!$&*?#=%()+\-\[\]\'\/";
 const URL_SAFE_CHARACTERS         = "A-Za-z0-9.,_~:;@!$&*?#=%()+\-\[\]\'\/";
 
-const ENCODE_ESCAPE_JSON            = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+const ENCODE_ESCAPE_JSON            = JSON_UNESCAPED_UNICODE       | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 const ENCODE_PARTIAL_UNESCAPED_JSON = JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE;
 
 const FILTER_STRING_COMMENTS = [
-        '{* '   => '<!-- ', // Latte
-        ' *}'   => ' -->',
-        '{# '   => '<!-- ', // Twig
-        ' #}'   => ' -->',
-        '{{-- ' => '<!-- ', // Blade
-        ' --}}' => ' -->',
+    '{* '   => '<!-- ', // Latte
+    ' *}'   => ' -->',
+    '{# '   => '<!-- ', // Twig
+    ' #}'   => ' -->',
+    '{{-- ' => '<!-- ', // Blade
+    ' --}}' => ' -->',
 ];
 
 // </editor-fold>
@@ -54,14 +54,14 @@ function isOPcacheEnabled() : bool
 {
     // Ensure OPcache is installed and not disabled
     if (
-            !\function_exists( 'opcache_invalidate' )
-            || !\ini_get( 'opcache.enable' )
+        ! \function_exists( 'opcache_invalidate' )
+        || ! \ini_get( 'opcache.enable' )
     ) {
         return false;
     }
 
     // If called from CLI, check accordingly, otherwise true
-    return !isCLI() || \ini_get( 'opcache.enable_cli' );
+    return ! isCLI() || \ini_get( 'opcache.enable_cli' );
 }
 
 // </editor-fold>
@@ -69,36 +69,35 @@ function isOPcacheEnabled() : bool
 // <editor-fold desc="Filesystem">
 
 /**
- * @param string  $filename
- * @param mixed   $data
- * @param bool    $overwrite
- * @param bool    $append
+ * @param string $filename
+ * @param mixed  $data
+ * @param bool   $overwrite
+ * @param bool   $append
  *
  * @return void
  */
 function file_save(
-        null | string | Stringable $filename,
-        mixed                      $data,
-        bool                       $overwrite = true,
-        bool                       $append = false,
-) : void
-{
-    if ( !$filename ) {
+    null|string|Stringable $filename,
+    mixed                  $data,
+    bool                   $overwrite = true,
+    bool                   $append = false,
+) : void {
+    if ( ! $filename ) {
         throw new RuntimeException( 'No filename specified.' );
     }
 
     $path = new SplFileInfo( (string) $filename );
 
-    if ( !$overwrite && $path->isReadable() ) {
+    if ( ! $overwrite && $path->isReadable() ) {
         return;
     }
 
-    if ( !\file_exists( $path->getPath() ) ) {
+    if ( ! \file_exists( $path->getPath() ) ) {
         \mkdir( $path->getPath(), 0777, true );
     }
 
-    if ( !\is_writable( $path->getPath() ) ) {
-        throw new RuntimeException( message : 'The file ' . $path->getPathname() . ' is not writable.' );
+    if ( ! \is_writable( $path->getPath() ) ) {
+        throw new RuntimeException( message : 'The file '.$path->getPathname().' is not writable.' );
     }
 
     $mode = $append ? FILE_APPEND : LOCK_EX;
@@ -106,14 +105,14 @@ function file_save(
     $status = \file_put_contents( $path->getPathname(), $data, $mode );
 
     if ( $status === false ) {
-        throw new RuntimeException( message : 'Unable to write to file ' . $path->getPathname() );
+        throw new RuntimeException( message : 'Unable to write to file '.$path->getPathname() );
     }
 }
 
 /**
  * Removes a file or directory, including nested files.
  *
- * @param string  $path
+ * @param string $path
  *
  * @return bool
  */
@@ -121,7 +120,7 @@ function file_purge( string $path ) : bool
 {
     return \is_file( $path )
             ? @\unlink( $path )
-            : \array_map( __FUNCTION__, \glob( $path . '/*' ) ?: [] ) == @\rmdir( $path );
+            : \array_map( __FUNCTION__, \glob( $path.'/*' ) ?: [] ) == @\rmdir( $path );
 }
 
 // </editor-fold>
@@ -129,16 +128,15 @@ function file_purge( string $path ) : bool
 // <editor-fold desc="Get">
 
 /**
- * @param DateTimeInterface|int|string  $when
- * @param null|DateTimeZone|string      $timezone  [UTC]
+ * @param DateTimeInterface|int|string $when
+ * @param null|DateTimeZone|string     $timezone [UTC]
  *
  * @return DateTimeImmutable
  */
 function datetime(
-        int | string | DateTimeInterface $when = 'now',
-        string | DateTimeZone | null     $timezone = AUTO,
-) : DateTimeImmutable
-{
+    int|string|DateTimeInterface $when = 'now',
+    string|DateTimeZone|null     $timezone = AUTO,
+) : DateTimeImmutable {
     $fromDateTime = $when instanceof DateTimeInterface;
     $datetime     = $fromDateTime ? $when->getTimestamp() : $when;
 
@@ -156,7 +154,7 @@ function datetime(
         return new DateTimeImmutable( $datetime, $timezone );
     }
     catch ( Exception $exception ) {
-        $message = 'Unable to create a new DateTimeImmutable object: ' . $exception->getMessage();
+        $message = 'Unable to create a new DateTimeImmutable object: '.$exception->getMessage();
         throw new InvalidArgumentException( $message, 500, $exception );
     }
 }
@@ -172,18 +170,17 @@ function getProjectDirectory() : string
 {
     static $projectDirectory = null;
 
-    return $projectDirectory ??= ( static function() : string
-    {
+    return $projectDirectory ??= ( static function() : string {
         // Split the current directory into an array of directory segments
         $segments = \explode( DIRECTORY_SEPARATOR, __DIR__ );
 
         // Ensure the directory array has at least 5 segments and a valid vendor value
-        if ( ( \count( $segments ) >= 5 && $segments[ \count( $segments ) - 4 ] === 'vendor' ) ) {
+        if ( ( \count( $segments ) >= 5 && $segments[\count( $segments ) - 4] === 'vendor' ) ) {
             // Remove the last 4 segments (vendor, package name, and Composer structure)
             $rootSegments = \array_slice( $segments, 0, -4 );
         }
         else {
-            $message = __FUNCTION__ . ' was unable to determine a valid root. Current path: ' . __DIR__;
+            $message = __FUNCTION__.' was unable to determine a valid root. Current path: '.__DIR__;
             throw new BadFunctionCallException( $message );
         }
 
@@ -202,11 +199,10 @@ function getProjectDirectory() : string
 function getSystemCacheDirectory() : string
 {
     static $cacheDirectory = null;
-    return $cacheDirectory ??= ( static function() : string
-    {
+    return $cacheDirectory ??= ( static function() : string {
         return normalize_path(
-                \sys_get_temp_dir(),
-                \hash( 'xxh32', getProjectDirectory() ),
+            \sys_get_temp_dir(),
+            \hash( 'xxh32', getProjectDirectory() ),
         );
     } )();
 }
@@ -216,8 +212,8 @@ function getSystemCacheDirectory() : string
  *
  * - Will throw a {@see RuntimeException} if the `callback` throws any exceptions.
  *
- * @param callable  $callback
- * @param mixed     ...$args
+ * @param callable $callback
+ * @param mixed    ...$args
  *
  * @return string
  */
@@ -230,9 +226,9 @@ function ob_get( callable $callback, mixed ...$args ) : string
     catch ( Throwable $exception ) {
         \ob_end_clean();
         throw new RuntimeException(
-                message  : 'An error occurred while capturinb the callback.',
-                code     : 500,
-                previous : $exception,
+            message  : 'An error occurred while capturinb the callback.',
+            code     : 500,
+            previous : $exception,
         );
     }
     return \ob_get_clean() ?: '';
@@ -245,25 +241,24 @@ function ob_get( callable $callback, mixed ...$args ) : string
 /**
  * @wip
  *
- * @param class-string|object  $class
- * @param string               $property
- * @param ?string              $type
- * @param null|mixed           $from
+ * @param class-string|object $class
+ * @param string              $property
+ * @param ?string             $type
+ * @param null|mixed          $from
  *
  * @return bool
  */
 function match_property_type(
-        object | string $class,
-        string          $property,
-        ?string         $type = AUTO,
-        mixed           $from = null,
-) : bool
-{
+    object|string $class,
+    string        $property,
+    ?string       $type = AUTO,
+    mixed         $from = null,
+) : bool {
     $type ??= \gettype( $from );
 
     \assert( \class_exists( \is_object( $class ) ? $class::class : $class ) );
 
-    if ( !\property_exists( $class, $property ) ) {
+    if ( ! \property_exists( $class, $property ) ) {
         throw new MissingPropertyException( $property, $type, $class );
     }
 
@@ -273,18 +268,18 @@ function match_property_type(
     $allowedTypes = [];
 
     if ( $propertyType?->allowsNull() ) {
-        $allowedTypes[ 'null' ] = 'NULL';
+        $allowedTypes['null'] = 'NULL';
     }
 
     if ( $propertyType instanceof ReflectionNamedType ) {
         $typeName = $propertyType->getName();
 
-        $allowedTypes[ $typeName ] ??= $typeName;
+        $allowedTypes[$typeName] ??= $typeName;
     }
     elseif ( $propertyType instanceof ReflectionUnionType ) {
         foreach ( $propertyType->getTypes() as $unionType ) {
             if ( $unionType instanceof ReflectionNamedType ) {
-                $allowedTypes[ $unionType->getName() ] ??= $unionType->getName();
+                $allowedTypes[$unionType->getName()] ??= $unionType->getName();
             }
             else {
                 dump( $unionType );
@@ -294,10 +289,10 @@ function match_property_type(
 
     foreach ( $allowedTypes as $match ) {
         if ( $type === match ( $match ) {
-                    'int'   => 'integer',
-                    'null'  => 'NULL',
-                    default => $match,
-                } ) {
+            'int'   => 'integer',
+            'null'  => 'NULL',
+            default => $match,
+        } ) {
             return true;
         }
     }
@@ -306,11 +301,11 @@ function match_property_type(
 }
 
 /**
- * @param class-string|object|string  $class
+ * @param class-string|object|string $class
  *
  * @return string
  */
-function class_string( object | string $class ) : string
+function class_string( object|string $class ) : string
 {
     return \is_object( $class ) ? $class::class : $class;
 }
@@ -322,12 +317,12 @@ function class_string( object | string $class ) : string
  * classBasename( $class ) => 'Env'
  * ```
  *
- * @param class-string|object|string                                $class
- * @param null|'strtolower'|'strtoupper'|'ucfirst'|callable-string  $callable
+ * @param class-string|object|string                               $class
+ * @param null|'strtolower'|'strtoupper'|'ucfirst'|callable-string $callable
  *
  * @return string
  */
-function class_basename( string | object $class, ?string $callable = null ) : string
+function class_basename( string|object $class, ?string $callable = null ) : string
 {
     $namespaced = \explode( '\\', \is_object( $class ) ? $class::class : $class );
     $basename   = \end( $namespaced );
@@ -342,16 +337,16 @@ function class_basename( string | object $class, ?string $callable = null ) : st
 /**
  * Returns the name of an object or callable.
  *
- * @param callable|callable-string|class-string|string  $from
- * @param bool                                          $validate  [optional] ensure the `class_exists`
+ * @param callable|callable-string|class-string|string $from
+ * @param bool                                         $validate [optional] ensure the `class_exists`
  *
  * @return ($validate is true ? class-string : ?string)
  */
 function class_name( mixed $from, bool $validate = false ) : ?string
 {
     // array callables [new SomeClass, 'method']
-    if ( \is_array( $from ) && isset( $from[ 0 ] ) && \is_object( $from[ 0 ] ) ) {
-        $from = $from[ 0 ]::class;
+    if ( \is_array( $from ) && isset( $from[0] ) && \is_object( $from[0] ) ) {
+        $from = $from[0]::class;
     }
 
     // Handle direct objects
@@ -360,20 +355,20 @@ function class_name( mixed $from, bool $validate = false ) : ?string
     }
 
     // The [callable] type should have been handled by the two previous checks
-    if ( !\is_string( $from ) ) {
+    if ( ! \is_string( $from ) ) {
         if ( $validate ) {
-            $message = __METHOD__ . ' was passed an unresolvable class of type ' . \gettype( $from ) . '.';
+            $message = __METHOD__.' was passed an unresolvable class of type '.\gettype( $from ).'.';
             throw new InvalidArgumentException( $message );
         }
         return null;
     }
 
     // Handle class strings
-    $class = \str_contains( $from, '::' ) ? \explode( '::', $from, 2 )[ 0 ] : $from;
+    $class = \str_contains( $from, '::' ) ? \explode( '::', $from, 2 )[0] : $from;
 
     // Check existence if $validate is true
-    if ( $validate && !\class_exists( $class ) ) {
-        throw new InvalidArgumentException( message : 'Class ' . $class . ' does not exists.' );
+    if ( $validate && ! \class_exists( $class ) ) {
+        throw new InvalidArgumentException( message : 'Class '.$class.' does not exists.' );
     }
 
     return $class;
@@ -386,36 +381,36 @@ function class_name( mixed $from, bool $validate = false ) : ?string
  * \Namespace\ClassName::42
  * ```
  *
- * @param object  $class
- * @param bool    $normalize
+ * @param object $class
+ * @param bool   $normalize
  *
  * @return string `FQCN::#` or `f.q.cn.#` when normalized
  */
 function class_id( object $class, bool $normalize = false ) : string
 {
     if ( $normalize ) {
-        return \strtolower( \trim( \str_replace( '\\', '.', $class::class ), '.' ) . '.' . \spl_object_id( $class ) );
+        return \strtolower( \trim( \str_replace( '\\', '.', $class::class ), '.' ).'.'.\spl_object_id( $class ) );
     }
 
-    return $class::class . '::' . \spl_object_id( $class );
+    return $class::class.'::'.\spl_object_id( $class );
 }
 
 /**
  * Returns the name of an object or callable.
  *
- * @param mixed  $callable
- * @param bool   $validate  [optional] ensure the `class_exists`
+ * @param mixed $callable
+ * @param bool  $validate [optional] ensure the `class_exists`
  *
  * @return ($validate is true ? array{0: class-string, 1: string} : array{0: string, 1: string})
  */
 function explode_class_callable( mixed $callable, bool $validate = false ) : array
 {
     if ( \is_array( $callable ) && \count( $callable ) === 2 ) {
-        $class  = $callable[ 0 ];
-        $method = $callable[ 1 ];
+        $class  = $callable[0];
+        $method = $callable[1];
     }
     elseif ( \is_string( $callable ) && \str_contains( $callable, '::' ) ) {
-        [ $class, $method ] = \explode( '::', $callable );
+        [$class, $method] = \explode( '::', $callable );
     }
     else {
         throw new InvalidArgumentException( 'The provided callable must be a string or an array.' );
@@ -424,23 +419,23 @@ function explode_class_callable( mixed $callable, bool $validate = false ) : arr
     \assert( \is_string( $class ) && \is_string( $method ) );
 
     // Check existence if $validate is true
-    if ( $validate && !\class_exists( $class ) ) {
-        throw new InvalidArgumentException( message : 'Class ' . $class . ' does not exists.' );
+    if ( $validate && ! \class_exists( $class ) ) {
+        throw new InvalidArgumentException( message : 'Class '.$class.' does not exists.' );
     }
 
     return [
-            $class,
-            $method,
+        $class,
+        $method,
     ];
 }
 
 /**
- * @param object|string  $class
- * @param bool           $autoload
+ * @param object|string $class
+ * @param bool          $autoload
  *
  * @return array<class-string, class-string>
  */
-function class_composition( object | string $class, bool $autoload = true ) : array
+function class_composition( object|string $class, bool $autoload = true ) : array
 {
     $composition = \class_parents( $class, $autoload ) ?: [];
 
@@ -455,12 +450,12 @@ function class_composition( object | string $class, bool $autoload = true ) : ar
 }
 
 /**
- * @param object|string  $class
- * @param object|string  ...$adopts
+ * @param object|string $class
+ * @param object|string ...$adopts
  *
  * @return bool
  */
-function class_adopts_any( object | string $class, object | string ...$adopts ) : bool
+function class_adopts_any( object|string $class, object|string ...$adopts ) : bool
 {
     $composition = class_composition( $class );
 
@@ -474,17 +469,17 @@ function class_adopts_any( object | string $class, object | string ...$adopts ) 
 }
 
 /**
- * @param object|string  $class
- * @param object|string  ...$adopts
+ * @param object|string $class
+ * @param object|string ...$adopts
  *
  * @return bool
  */
-function class_adopts_all( object | string $class, object | string ...$adopts ) : bool
+function class_adopts_all( object|string $class, object|string ...$adopts ) : bool
 {
     $composition = class_composition( $class );
 
     foreach ( $adopts as $has ) {
-        if ( !\array_key_exists( \is_object( $has ) ? $has::class : $has, $composition ) ) {
+        if ( ! \array_key_exists( \is_object( $has ) ? $has::class : $has, $composition ) ) {
             return false;
         }
     }
@@ -495,22 +490,22 @@ function class_adopts_all( object | string $class, object | string ...$adopts ) 
 /**
  * @template T of object
  *
- * @param class-string     $class      Check if this class implements a given Interface
- * @param class-string<T>  $interface  The Interface to check against
+ * @param class-string    $class     Check if this class implements a given Interface
+ * @param class-string<T> $interface The Interface to check against
  *
  * @return bool
  */
-function implements_interface( object | string $class, string $interface ) : bool
+function implements_interface( object|string $class, string $interface ) : bool
 {
     $class = \is_object( $class ) ? $class::class : $class;
 
-    if ( !\class_exists( $class, false ) || !\interface_exists( $interface ) ) {
+    if ( ! \class_exists( $class, false ) || ! \interface_exists( $interface ) ) {
         return false;
     }
 
     $interfaces = \class_implements( $class );
 
-    if ( !$interfaces || !\in_array( $interface, $interfaces, true ) ) {
+    if ( ! $interfaces || ! \in_array( $interface, $interfaces, true ) ) {
         return false;
     }
 
@@ -518,13 +513,13 @@ function implements_interface( object | string $class, string $interface ) : boo
 }
 
 /**
- * @param class-string|object|string  $class      Check if this class uses a given Trait
- * @param class-string|object|string  $trait      The Trait to check against
- * @param bool                        $recursive  [false] Also check for Traits using Traits
+ * @param class-string|object|string $class     Check if this class uses a given Trait
+ * @param class-string|object|string $trait     The Trait to check against
+ * @param bool                       $recursive [false] Also check for Traits using Traits
  *
  * @return bool
  */
-function uses_trait( string | object $class, string | object $trait, bool $recursive = false ) : bool
+function uses_trait( string|object $class, string|object $trait, bool $recursive = false ) : bool
 {
     if ( \is_object( $trait ) ) {
         $trait = $trait::class;
@@ -542,11 +537,11 @@ function uses_trait( string | object $class, string | object $trait, bool $recur
 }
 
 /**
- * @param class-string|object|string  $class
+ * @param class-string|object|string $class
  *
  * @return array<string, class-string>
  */
-function get_traits( string | object $class ) : array
+function get_traits( string|object $class ) : array
 {
     if ( \is_object( $class ) ) {
         $class = $class::class;
@@ -564,38 +559,37 @@ function get_traits( string | object $class ) : array
 /**
  * # Get all the classes, traits, and interfaces used by a class.
  *
- * @param class-string|object|string  $class
- * @param bool                        $includeSelf
- * @param bool                        $includeInterface
- * @param bool                        $includeTrait
- * @param bool                        $namespace
- * @param bool                        $details
+ * @param class-string|object|string $class
+ * @param bool                       $includeSelf
+ * @param bool                       $includeInterface
+ * @param bool                       $includeTrait
+ * @param bool                       $namespace
+ * @param bool                       $details
  *
  * @return array<array-key, string>
  */
 function class_extends(
-        string | object $class,
-        bool            $includeSelf = true,
-        bool            $includeInterface = true,
-        bool            $includeTrait = true,
-        bool            $namespace = true,
-        bool            $details = false,
-) : array
-{
+    string|object $class,
+    bool          $includeSelf = true,
+    bool          $includeInterface = true,
+    bool          $includeTrait = true,
+    bool          $namespace = true,
+    bool          $details = false,
+) : array {
     $class = \is_object( $class ) ? $class::class : $class;
 
-    $classes = $includeSelf ? [ $class => 'self' ] : [];
+    $classes = $includeSelf ? [$class => 'self'] : [];
 
-    $parent  = \class_parents( $class ) ?: [];
+    $parent = \class_parents( $class ) ?: [];
     $classes += \array_fill_keys( $parent, 'parent' );
 
     if ( $includeInterface ) {
         $interfaces = \class_implements( $class ) ?: [];
-        $classes    += \array_fill_keys( $interfaces, 'interface' );
+        $classes += \array_fill_keys( $interfaces, 'interface' );
     }
 
     if ( $includeTrait ) {
-        $traits  = \class_uses( $class ) ?: [];
+        $traits = \class_uses( $class ) ?: [];
         $classes += \array_fill_keys( $traits, 'trait' );
     }
 
@@ -607,7 +601,7 @@ function class_extends(
 
     if ( $namespace ) {
         foreach ( $classes as $key => $class ) {
-            $classes[ $key ] = class_basename( $class );
+            $classes[$key] = class_basename( $class );
         }
     }
 
@@ -623,7 +617,7 @@ function class_extends(
  *
  * @phpstan-assert-if-true scalar $value
  *
- * @param mixed                   $value
+ * @param mixed $value
  *
  * @return bool
  */
@@ -646,7 +640,7 @@ function is_empty( mixed $value ) : bool
  *
  * @phpstan-assert-if-true scalar|\Stringable|null $value
  *
- * @param mixed                                    $value
+ * @param mixed $value
  *
  * @return bool
  */
@@ -660,7 +654,7 @@ function is_stringable( mixed $value ) : bool
  *
  * @phpstan-assert-if-true iterable|\Traversable $value
  *
- * @param mixed                                  $value
+ * @param mixed $value
  *
  * @return bool
  */
@@ -674,20 +668,20 @@ function is_iterable( mixed $value ) : bool
  *
  * ⚠️ Does **NOT** validate the `path` in any capacity!
  *
- * @param string|Stringable  $string
- * @param string             $contains  [..] optional `str_contains` check
- * @param string             $illegal
+ * @param string|Stringable $string
+ * @param string            $contains [..] optional `str_contains` check
+ * @param string            $illegal
  *
  * @return bool
  */
-function is_path( string | Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
+function is_path( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
 {
     // Stringify scalars and Stringable objects
     // Stringify
     $string = \trim( (string) $string );
 
     // Must be at least two characters long to be a path string
-    if ( !$string || \strlen( $string ) < 2 ) {
+    if ( ! $string || \strlen( $string ) < 2 ) {
         return false;
     }
 
@@ -706,7 +700,7 @@ function is_path( string | Stringable $string, string $contains = '..', string $
     }
 
     // Indicates this could be a `.hidden` path
-    if ( $string[ 0 ] === '.' && \ctype_alpha( $string[ 1 ] ) ) {
+    if ( $string[0] === '.' && \ctype_alpha( $string[1] ) ) {
         return true;
     }
 
@@ -718,23 +712,23 @@ function is_path( string | Stringable $string, string $contains = '..', string $
  *
  * ⚠️ Does **NOT** validate the URL in any capacity!
  *
- * @param string|Stringable  $string
- * @param ?string            $requiredProtocol
+ * @param string|Stringable $string
+ * @param ?string           $requiredProtocol
  *
  * @return bool
  */
-function is_url( string | Stringable $string, ?string $requiredProtocol = null ) : bool
+function is_url( string|Stringable $string, ?string $requiredProtocol = null ) : bool
 {
     // Stringify
     $string = \trim( (string) $string );
 
     // Can not be an empty string
-    if ( !$string ) {
+    if ( ! $string ) {
         return false;
     }
 
     // Must not start with a number
-    if ( \is_numeric( $string[ 0 ] ) ) {
+    if ( \is_numeric( $string[0] ) ) {
         return false;
     }
 
@@ -745,22 +739,22 @@ function is_url( string | Stringable $string, ?string $requiredProtocol = null )
      *
      * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
      */
-    if ( !\preg_match( '#^([\w\-+]*?[:/]{2}).+\.[a-z0-9]{2,}#m', $string ) ) {
+    if ( ! \preg_match( '#^([\w\-+]*?[:/]{2}).+\.[a-z0-9]{2,}#m', $string ) ) {
         return false;
     }
 
     // Check for required protocol if requested
-    return !( $requiredProtocol && !\str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ) . '://' ) );
+    return ! ( $requiredProtocol && ! \str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ).'://' ) );
 }
 
 /**
  * Check if the provided `$path` starts with a `/`.
  *
- * @param string|Stringable  $path
+ * @param string|Stringable $path
  *
  * @return bool
  */
-function is_relative_path( string | Stringable $path ) : bool
+function is_relative_path( string|Stringable $path ) : bool
 {
     return \str_starts_with( \str_replace( '\\', '/', (string) $path ), '/' );
 }
@@ -778,15 +772,15 @@ function is_punctuation( string $string, bool $endingOnly = false ) : bool
 }
 
 /**
- * @param null|string|Stringable  $value
- * @param string                  ...$enforceDomain
+ * @param null|string|Stringable $value
+ * @param string                 ...$enforceDomain
  *
  * @return bool
  */
-function is_email( null | string | Stringable $value, string ...$enforceDomain ) : bool
+function is_email( null|string|Stringable $value, string ...$enforceDomain ) : bool
 {
     // Can not be null or an empty string
-    if ( !$string = (string) $value ) {
+    if ( ! $string = (string) $value ) {
         return false;
     }
 
@@ -794,17 +788,17 @@ function is_email( null | string | Stringable $value, string ...$enforceDomain )
     $string = \strtolower( $string );
 
     // Must contain an [at] and at least one period
-    if ( !\str_contains( $string, '@' ) || !\str_contains( $string, '.' ) ) {
+    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
         return false;
     }
 
     // Must end with a letter
-    if ( !\preg_match( '/[a-z]/', $string[ -1 ] ) ) {
+    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
         return false;
     }
 
     // Must only contain valid characters
-    if ( \preg_match( '/[^' . URL_SAFE_CHARACTERS_UNICODE . ']/u', $string ) ) {
+    if ( \preg_match( '/[^'.URL_SAFE_CHARACTERS_UNICODE.']/u', $string ) ) {
         return false;
     }
 
@@ -838,8 +832,8 @@ function is_email( null | string | Stringable $value, string ...$enforceDomain )
  *
  * @link https://github.com/Kovah/php-hashes?tab=readme-ov-file#sorted-by-execution-time
  *
- * @param 'xxh128'|'xxh32'|'xxh64'|string  $algo
- * @param mixed                            ...$value
+ * @param 'xxh128'|'xxh32'|'xxh64'|string $algo
+ * @param mixed                           ...$value
  *
  * @return string
  */
@@ -850,13 +844,13 @@ function key_hash( string $algo, mixed ...$value ) : string
             continue;
         }
 
-        $value[ $index ] = match ( \gettype( $segment ) ) {
+        $value[$index] = match ( \gettype( $segment ) ) {
             'string'  => $segment,
             'boolean' => $segment ? 'true' : 'false',
             'integer' => (string) $segment,
             default   => \hash(
-                    algo : 'xxh32',
-                    data : \json_encode( $value ) ?: \serialize( $value ),
+                algo : 'xxh32',
+                data : \json_encode( $value ) ?: \serialize( $value ),
             ),
         };
     }
@@ -874,16 +868,16 @@ function key_hash( string $algo, mixed ...$value ) : string
  * // => example:stdClass#42:true:NULL
  * ```
  *
- * @param mixed  ...$value
+ * @param mixed ...$value
  */
 function key_from( mixed ...$value ) : string
 {
     $key = [];
     $sep = ':';
-    if ( isset( $value[ 'separator' ] ) && ( !$value[ 'separator' ] || \ctype_punct( $value[ 'separator' ] ) )
+    if ( isset( $value['separator'] ) && ( ! $value['separator'] || \ctype_punct( $value['separator'] ) )
     ) {
-        $sep = $value[ 'separator' ] ?: '';
-        unset( $value[ 'separator' ] );
+        $sep = $value['separator'] ?: '';
+        unset( $value['separator'] );
         \assert( \is_string( $sep ) );
     }
 
@@ -893,8 +887,8 @@ function key_from( mixed ...$value ) : string
             'string'  => $segment,
             'boolean' => $segment ? 'true' : 'false',
             'integer' => (string) $segment,
-            'array'   => '[' . key_hash( 'xxh32', $segment ) . ']',
-            'object'  => $segment::class . '#' . \spl_object_id( $segment ),
+            'array'   => '['.key_hash( 'xxh32', $segment ).']',
+            'object'  => $segment::class.'#'.\spl_object_id( $segment ),
             default   => key_hash( 'xxh32', $value ),
         };
     }
@@ -908,12 +902,12 @@ function key_from( mixed ...$value ) : string
  * - `xxh32` 8 characters
  * - `xxh64` 16 characters
  *
- * @param 'xxh32'|'xxh64'|false  $hash     [xxh64] raw bytes returned on `false`
- * @param int<2,12>              $entropy  [7]
+ * @param 'xxh32'|'xxh64'|false $hash    [xxh64] raw bytes returned on `false`
+ * @param int<2,12>             $entropy [7]
  *
  * @return string
  */
-function key_rand( false | string $hash = 'xxh64', int $entropy = 7 ) : string
+function key_rand( false|string $hash = 'xxh64', int $entropy = 7 ) : string
 {
     try {
         $key = \random_bytes( $entropy );
@@ -936,34 +930,33 @@ require 'functions/strings.php';
  *
  *⚠️ This function can be expensive.
  *
- * @param null|string|Stringable  $string
- * @param false|int<2,4>          $tabSize   [4]
- * @param null|non-empty-string   $encoding  [UTF-8]
+ * @param null|string|Stringable $string
+ * @param false|int<2,4>         $tabSize  [4]
+ * @param null|non-empty-string  $encoding [UTF-8]
  *
  * @return string
  */
 #[Deprecated]
 function str_normalize(
-        string | Stringable | null $string,
-        false | int                $tabSize = 4,
-        ?string                    $encoding = AUTO,
-) : string
-{
+    string|Stringable|null $string,
+    false|int              $tabSize = 4,
+    ?string                $encoding = AUTO,
+) : string {
     trigger_deprecation(
-            'Support\str_normalize',
-            '_dev',
-            __METHOD__ . ' deprecated, use \Support\normalize_string(..) instead.',
+        'Support\str_normalize',
+        '_dev',
+        __METHOD__.' deprecated, use \Support\normalize_string(..) instead.',
     );
 
     return normalize_string( $string, $tabSize, $encoding );
 }
 
-function str_contains_only( string | Stringable | null $string, string $characters ) : bool
+function str_contains_only( string|Stringable|null $string, string $characters ) : bool
 {
     $string = (string) $string;
 
-    if ( !$characters ) {
-        $message = __FUNCTION__ . ' requires at least one character to look for.';
+    if ( ! $characters ) {
+        $message = __FUNCTION__.' requires at least one character to look for.';
         throw new InvalidArgumentException( $message );
     }
 
@@ -976,21 +969,20 @@ function str_contains_only( string | Stringable | null $string, string $characte
  * Checks whether all characters from the specified character set exist in the string,
  * starting at an optional offset and considering an optional length.
  *
- * @param null|string|Stringable  $string      the string to search within
- * @param string                  $characters  the set of characters to check for inclusion
- * @param int                     $offset      The position in the string to start the search. Defaults to 0.
- * @param ?int                    $length      The length of the substring to consider. If null, the entire string is used from the offset.
+ * @param null|string|Stringable $string     the string to search within
+ * @param string                 $characters the set of characters to check for inclusion
+ * @param int                    $offset     The position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
  *
  * @return bool returns true if all characters from the set are found in the string, false otherwise
  */
 function str_includes(
-        null | string | Stringable $string,
-        string                     $characters,
-        int                        $offset = 0,
-        ?int                       $length = null,
-) : bool
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
         return false;
     }
     return \strlen( $characters ) === \strspn( $characters, $string, $offset, $length );
@@ -1002,21 +994,20 @@ function str_includes(
  * Checks whether all characters from the specified character set exist in the string,
  * starting at an optional offset and considering an optional length.
  *
- * @param null|string|Stringable  $string      the string to search within
- * @param string                  $characters  the set of characters to check for inclusion
- * @param int                     $offset      The position in the string to start the search. Defaults to 0.
- * @param ?int                    $length      The length of the substring to consider. If null, the entire string is used from the offset.
+ * @param null|string|Stringable $string     the string to search within
+ * @param string                 $characters the set of characters to check for inclusion
+ * @param int                    $offset     The position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
  *
  * @return bool returns true if all characters from the set are found in the string, false otherwise
  */
 function str_includes_any(
-        null | string | Stringable $string,
-        string                     $characters,
-        int                        $offset = 0,
-        ?int                       $length = null,
-) : bool
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
         return false;
     }
     return \strpbrk( $string, $characters ) !== false;
@@ -1025,44 +1016,42 @@ function str_includes_any(
 /**
  * Checks if the given string excludes specific characters within an optional range.
  *
- * @param null|string|Stringable  $string      the input string to evaluate
- * @param string                  $characters  a list of characters to check for exclusion
- * @param int                     $offset      the starting position for the check (default is 0)
- * @param ?int                    $length      the length of the substring to check (default is null, meaning until the end of the string)
+ * @param null|string|Stringable $string     the input string to evaluate
+ * @param string                 $characters a list of characters to check for exclusion
+ * @param int                    $offset     the starting position for the check (default is 0)
+ * @param ?int                   $length     the length of the substring to check (default is null, meaning until the end of the string)
  *
  * @return bool returns true if the string excludes all specified characters, false otherwise
  */
 function str_excludes(
-        null | string | Stringable $string,
-        string                     $characters,
-        int                        $offset = 0,
-        ?int                       $length = null,
-) : bool
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
         return true;
     }
     return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
 }
 
 /**
- * @param null|string|Stringable        $string
- * @param int                           $start
- * @param int                           $end
- * @param null|false|string|Stringable  $replace
- * @param string                        $encoding
+ * @param null|string|Stringable       $string
+ * @param int                          $start
+ * @param int                          $end
+ * @param null|false|string|Stringable $replace
+ * @param string                       $encoding
  *
  * @return string
  */
 function str_extract(
-        null | string | Stringable         $string,
-        int                                $start,
-        int                                $end,
-        false | null | string | Stringable $replace = false,
-        string                             $encoding = 'UTF-8',
-) : string
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable       $string,
+    int                          $start,
+    int                          $end,
+    false|null|string|Stringable $replace = false,
+    string                       $encoding = 'UTF-8',
+) : string {
+    if ( ! $string = (string) $string ) {
         return EMPTY_STRING;
     }
 
@@ -1080,7 +1069,7 @@ function str_extract(
 
     $after = \mb_substr( $string, $length, AUTO, $encoding );
 
-    return $before . $replace . $after;
+    return $before.$replace.$after;
 }
 
 /**
@@ -1119,25 +1108,24 @@ function str_extract(
  *  ]
  * ```
  *
- * @param null|string|Stringable  $string
- * @param null|string|Stringable  $needle
- * @param bool                    $last
- * @param bool                    $needleLast
+ * @param null|string|Stringable $string
+ * @param null|string|Stringable $needle
+ * @param bool                   $last
+ * @param bool                   $needleLast
  *
  * @return array{string, string}
  */
 function str_bisect(
-        null | string | Stringable $string,
-        null | string | Stringable $needle,
-        bool                       $last = false,
-        bool                       $needleLast = false,
-) : array
-{
+    null|string|Stringable $string,
+    null|string|Stringable $needle,
+    bool                   $last = false,
+    bool                   $needleLast = false,
+) : array {
     $string = (string) $string;
     $needle = (string) $needle;
 
-    if ( !$string || !$needle ) {
-        return [ $string, '' ];
+    if ( ! $string || ! $needle ) {
+        return [$string, ''];
     }
 
     $offset = $last
@@ -1145,7 +1133,7 @@ function str_bisect(
             : \mb_stripos( $string, $needle );
 
     if ( $offset === false ) {
-        return [ $string, '' ];
+        return [$string, ''];
     }
 
     if ( $last ) {
@@ -1159,35 +1147,34 @@ function str_bisect(
     $after  = \mb_substr( $string, $offset );
 
     return [
-            $before,
-            $after,
+        $before,
+        $after,
     ];
 }
 
 /**
  * Replace each key from `$map` with its value, when found in `$content`.
  *
- * @param array<string,null|string|Stringable>  $map
- * @param string[]                              $content
- * @param bool                                  $caseSensitive
+ * @param array<string,null|string|Stringable> $map
+ * @param string[]                             $content
+ * @param bool                                 $caseSensitive
  *
  * @return ($content is string ? string : string[])
  */
 function str_replace_each(
-        array          $map,
-        string | array $content,
-        bool           $caseSensitive = true,
-) : string | array
-{
+    array        $map,
+    string|array $content,
+    bool         $caseSensitive = true,
+) : string|array {
     // Bail early on empty content
-    if ( !$content ) {
+    if ( ! $content ) {
         return $content;
     }
 
     // Validate and normalize the $map
     foreach ( $map as $match => $replace ) {
-        \assert( \is_string( $match ), __METHOD__ . ' does not accept empty match keys' );
-        $map[ $match ] = (string) $replace;
+        \assert( \is_string( $match ), __METHOD__.' does not accept empty match keys' );
+        $map[$match] = (string) $replace;
     }
 
     $search  = \array_keys( $map );
@@ -1203,28 +1190,25 @@ function str_replace_each(
 }
 
 function mb_str_starts_with(
-        null | string | Stringable $haystack,
-        null | string | Stringable $needle,
-) : bool
-{
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
     return \mb_stripos( (string) $haystack, (string) $needle, 0, 'UTF-8' ) === 0;
 }
 
 function mb_str_ends_with(
-        null | string | Stringable $haystack,
-        null | string | Stringable $needle,
-) : bool
-{
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
     $haystack = (string) $haystack;
     $needle   = (string) $needle;
     return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
 }
 
 function str_start(
-        null | string | Stringable $string,
-        null | string | Stringable $with,
-) : string
-{
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
     $string = (string) $string;
     $with   = (string) $with;
 
@@ -1232,14 +1216,13 @@ function str_start(
         return $string;
     }
 
-    return $with . $string;
+    return $with.$string;
 }
 
 function str_end(
-        null | string | Stringable $string,
-        null | string | Stringable $with,
-) : string
-{
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
     $string = (string) $string;
     $with   = (string) $with;
 
@@ -1247,15 +1230,14 @@ function str_end(
         return $string;
     }
 
-    return $string . $with;
+    return $string.$with;
 }
 
 function str_starts_with_any(
-        null | string | Stringable $string,
-        null | string | Stringable ...$needle,
-) : bool
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
+    if ( ! $string = (string) $string ) {
         return false;
     }
 
@@ -1269,11 +1251,10 @@ function str_starts_with_any(
 }
 
 function str_ends_with_any(
-        null | string | Stringable $string,
-        null | string | Stringable ...$needle,
-) : bool
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
+    if ( ! $string = (string) $string ) {
         return false;
     }
 
@@ -1292,18 +1273,17 @@ function str_ends_with_any(
 /**
  * Ensures the provided array contains all keys.
  *
- * @param array<array-key, mixed>  $array
- * @param array-key                ...$keys
+ * @param array<array-key, mixed> $array
+ * @param array-key               ...$keys
  *
  * @return bool
  */
 function arr_has_keys(
-        array        $array,
-        int | string ...$keys,
-) : bool
-{
+    array         $array,
+    int|string ...$keys,
+) : bool {
     foreach ( $keys as $key ) {
-        if ( !\array_key_exists( $key, $array ) ) {
+        if ( ! \array_key_exists( $key, $array ) ) {
             return false;
         }
     }
@@ -1312,65 +1292,61 @@ function arr_has_keys(
 }
 
 /**
- * @param array<array-key, mixed>  $array
- * @param array-key                $key
- * @param array-key                $replacement
+ * @param array<array-key, mixed> $array
+ * @param array-key               $key
+ * @param array-key               $replacement
  *
  * @return array<array-key, mixed>
  */
 function arr_replace_key(
-        array        $array,
-        int | string $key,
-        int | string $replacement,
-) : array
-{
+    array      $array,
+    int|string $key,
+    int|string $replacement,
+) : array {
     $keys  = \array_keys( $array );
     $index = \array_search( $key, $keys, true );
 
     if ( $index !== false ) {
-        $keys[ $index ] = $replacement;
-        $array          = \array_combine( $keys, $array );
+        $keys[$index] = $replacement;
+        $array        = \array_combine( $keys, $array );
     }
 
     return $array;
 }
 
 /**
- * @param array<array-key, mixed>  $array
- * @param bool                     $preserveKeys
- * @param bool                     $filter
- * @param int<0,2>                 $filterMode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param array<array-key, mixed> $array
+ * @param bool                    $preserveKeys
+ * @param bool                    $filter
+ * @param int<0,2>                $filterMode   ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return array<array-key, mixed>
  */
 function arr_flatten(
-        array           $array,
-        bool            $preserveKeys = false,
-        bool | callable $filter = false,
-        int             $filterMode = ARRAY_FILTER_USE_VALUE,
-) : array
-{
+    array         $array,
+    bool          $preserveKeys = false,
+    bool|callable $filter = false,
+    int           $filterMode = ARRAY_FILTER_USE_VALUE,
+) : array {
     $result = [];
 
     \array_walk_recursive(
-            $array,
-            match ( $preserveKeys ) {
-                true  => function( $v, $k ) use ( &$result ) : void
-                {
-                    $result[ $k ] = $v;
-                },
-                false => function( $v ) use ( &$result ) : void
-                {
-                    $result[] = $v;
-                },
+        $array,
+        match ( $preserveKeys ) {
+            true => function( $v, $k ) use ( &$result ) : void {
+                $result[$k] = $v;
             },
+            false => function( $v ) use ( &$result ) : void {
+                $result[] = $v;
+            },
+        },
     );
 
     if ( $filter === false ) {
         return $result;
     }
 
-    $callback = $filter === true ? static fn( $v ) => !is_empty( $v ) : $filter;
+    $callback = $filter === true ? static fn( $v ) => ! is_empty( $v ) : $filter;
 
     return \array_filter( $result, $callback, $filterMode );
 }
@@ -1381,19 +1357,18 @@ function arr_flatten(
  * Default:
  * - Removes `null` and `empty` type values, retains `0` and `false`.
  *
- * @param array<TKey, TValue>  $array
- * @param ?callable            $callback
- * @param int-mask<0,2>        $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param array<TKey, TValue> $array
+ * @param ?callable           $callback
+ * @param int-mask<0,2>       $mode     ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return array<TKey, TValue>
  */
 function arr_filter(
-        array     $array,
-        ?callable $callback = null,
-        int       $mode = ARRAY_FILTER_USE_VALUE,
-) : array
-{
-    $callback ??= static fn( $v ) => !is_empty( $v );
+    array     $array,
+    ?callable $callback = null,
+    int       $mode = ARRAY_FILTER_USE_VALUE,
+) : array {
+    $callback ??= static fn( $v ) => ! is_empty( $v );
     return \array_filter( $array, $callback, $mode );
 }
 
@@ -1401,32 +1376,31 @@ function arr_filter(
  * Default:
  * - Removes `null` and `empty` type values, retains `0` and `false`.
  *
- * @param array<array-key, mixed>  $array
- * @param ?callable                $callback
- * @param int-mask<0,2>            $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param array<array-key, mixed> $array
+ * @param ?callable               $callback
+ * @param int-mask<0,2>           $mode     ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return array<array-key, mixed>
  */
 function arr_filter_recursive(
-        array     $array,
-        ?callable $callback = null,
-        int       $mode = ARRAY_FILTER_USE_VALUE,
-) : array
-{
+    array     $array,
+    ?callable $callback = null,
+    int       $mode = ARRAY_FILTER_USE_VALUE,
+) : array {
     trigger_deprecation(
-            'Support\Arr',
-            '_dev',
-            __METHOD__ . ' deprecated',
+        'Support\Arr',
+        '_dev',
+        __METHOD__.' deprecated',
     );
 
     foreach ( $array as $key => $value ) {
         if ( \is_array( $value ) ) {
-            $array[ $key ] = !$value
+            $array[$key] = ! $value
                     ? arr_filter_recursive( $value, $callback, $mode )
                     : arr_filter( $value, $callback, $mode );
         }
         else {
-            $array[ $key ] = $value;
+            $array[$key] = $value;
         }
     }
 
@@ -1434,30 +1408,29 @@ function arr_filter_recursive(
 }
 
 /**
- * @param array<array-key, mixed>  $array
- * @param mixed                    $match
- * @param int<0,2>                 $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param array<array-key, mixed> $array
+ * @param mixed                   $match
+ * @param int<0,2>                $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return null|int|string
  */
 function arr_search(
-        array $array,
-        mixed $match,
-        int   $mode = ARRAY_FILTER_USE_VALUE,
-) : string | int | null
-{
+    array $array,
+    mixed $match,
+    int   $mode = ARRAY_FILTER_USE_VALUE,
+) : string|int|null {
     trigger_deprecation(
-            'Support\Arr',
-            '_dev',
-            __METHOD__ . ' deprecated',
+        'Support\Arr',
+        '_dev',
+        __METHOD__.' deprecated',
     );
 
     foreach ( $array as $key => $value ) {
         if ( \is_callable( $match ) && match ( $mode ) {
-                    ARRAY_FILTER_USE_VALUE => $match( $value ),
-                    ARRAY_FILTER_USE_KEY   => $match( $key ),
-                    ARRAY_FILTER_USE_BOTH  => $match( $value, $key ),
-                } ) {
+            ARRAY_FILTER_USE_VALUE => $match( $value ),
+            ARRAY_FILTER_USE_KEY   => $match( $key ),
+            ARRAY_FILTER_USE_BOTH  => $match( $value, $key ),
+        } ) {
             return $key;
         }
 
@@ -1479,12 +1452,12 @@ function arr_search(
  * @wip
  * @link https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array
  *
- * @param int|string               $match
- * @param array<array-key, mixed>  $array
+ * @param int|string              $match
+ * @param array<array-key, mixed> $array
  *
  * @return null|int|string
  */
-function arr_closest( int | string $match, array $array ) : null | int | string
+function arr_closest( int|string $match, array $array ) : null|int|string
 {
     // TODO : Match key/value toggle
     // TODO : closest int/float round up/down
@@ -1496,7 +1469,7 @@ function arr_closest( int | string $match, array $array ) : null | int | string
     $closest = null;
 
     foreach ( $array as $item ) {
-        if ( !\is_numeric( $item ) ) {
+        if ( ! \is_numeric( $item ) ) {
             throw new InvalidArgumentException( 'Array item must be numeric.' );
         }
         if ( $closest === null
@@ -1516,58 +1489,57 @@ function arr_closest( int | string $match, array $array ) : null | int | string
 /**
  * Calculate the greatest common divisor between `$a` and `$b`.
  *
- * @param int  $a
- * @param int  $b
+ * @param int $a
+ * @param int $b
  *
  * @return int
  */
 function num_gcd( int $a, int $b ) : int
 {
     while ( $b !== 0 ) {
-        [ $a, $b ] = [ $b, $a % $b ];
+        [$a, $b] = [$b, $a % $b];
     }
 
     return $a;
 }
 
 /**
- * @param float|int  $num
- * @param float|int  $min
- * @param float|int  $max
+ * @param float|int $num
+ * @param float|int $min
+ * @param float|int $max
  *
  * @return bool
  */
-function num_within( float | int $num, float | int $min, float | int $max ) : bool
+function num_within( float|int $num, float|int $min, float|int $max ) : bool
 {
     return $num >= $min && $num <= $max;
 }
 
 /**
- * @param float|int  $num
- * @param float|int  $min
- * @param float|int  $max
+ * @param float|int $num
+ * @param float|int $min
+ * @param float|int $max
  *
  * @return float|int
  */
 function num_clamp(
-        float | int $num,
-        float | int $min,
-        float | int $max,
-) : float | int
-{
+    float|int $num,
+    float|int $min,
+    float|int $max,
+) : float|int {
     return \max( $min, \min( $num, $max ) );
 }
 
 /**
  * @see https://stackoverflow.com/questions/5464919/find-a-matching-or-closest-value-in-an-array stackoverflow
  *
- * @param int    $num
- * @param int[]  $in
- * @param bool   $returnKey
+ * @param int   $num
+ * @param int[] $in
+ * @param bool  $returnKey
  *
  * @return null|int|string
  */
-function num_closest( int $num, array $in, bool $returnKey = false ) : string | int | null
+function num_closest( int $num, array $in, bool $returnKey = false ) : string|int|null
 {
     foreach ( $in as $key => $value ) {
         if ( $num <= $value ) {
@@ -1581,39 +1553,39 @@ function num_closest( int $num, array $in, bool $returnKey = false ) : string | 
 /**
  * Calculate the difference in percentage `$from` `$to` given numbers.
  *
- * @param float  $from
- * @param float  $to
+ * @param float $from
+ * @param float $to
  *
  * @return float
  */
 function num_percent( float $from, float $to ) : float
 {
-    if ( !$from || $from === $to ) {
+    if ( ! $from || $from === $to ) {
         return 0;
     }
     return (float) \number_format( ( $from - $to ) / $from * 100, 2 );
 }
 
-function num_byte_size( string | int | float $bytes ) : string
+function num_byte_size( string|int|float $bytes ) : string
 {
     $bytes = (float) ( \is_string( $bytes ) ? \mb_strlen( $bytes, '8bit' ) : $bytes );
 
     $unitDecimalsByFactor = [
-            [ 'B', 0 ],  //     byte
-            [ 'KiB', 0 ], // kibibyte
-            [ 'MiB', 2 ], // mebibyte
-            [ 'GiB', 2 ], // gigabyte
-            [ 'TiB', 3 ], // mebibyte
-            [ 'PiB', 3 ], // mebibyte
+        ['B', 0],  //     byte
+        ['KiB', 0], // kibibyte
+        ['MiB', 2], // mebibyte
+        ['GiB', 2], // gigabyte
+        ['TiB', 3], // mebibyte
+        ['PiB', 3], // mebibyte
     ];
 
     $factor = $bytes ? \floor( \log( (int) $bytes, 1_024 ) ) : 0;
     $factor = (float) \min( $factor, \count( $unitDecimalsByFactor ) - 1 );
 
-    $value = \round( $bytes / ( 1_024 ** $factor ), (int) $unitDecimalsByFactor[ $factor ][ 1 ] );
-    $units = (string) $unitDecimalsByFactor[ $factor ][ 0 ];
+    $value = \round( $bytes / ( 1_024 ** $factor ), (int) $unitDecimalsByFactor[$factor][1] );
+    $units = (string) $unitDecimalsByFactor[$factor][0];
 
-    return $value . $units;
+    return $value.$units;
 }
 
 // </editor-fold>
@@ -1621,27 +1593,26 @@ function num_byte_size( string | int | float $bytes ) : string
 /**
  * This function tries very hard to return a string from any given `$value`.
  *
- * @param mixed  $value
- * @param bool   $nullable
- * @param bool   $serialize
+ * @param mixed $value
+ * @param bool  $nullable
+ * @param bool  $serialize
  *
  * @return ($nullable is true ? null|string : string)
  */
 function as_string(
-        mixed $value,
-        bool  $nullable = false,
-        bool  $serialize = true,
-) : ?string
-{
+    mixed $value,
+    bool  $nullable = false,
+    bool  $serialize = true,
+) : ?string {
     $value = match ( true ) {
-        \is_bool( $value )                   => $value ? 'true' : 'false',
-        \is_null( $value )                   => $nullable ? null : EMPTY_STRING,
-        $value instanceof BackedEnum         => $value->value,
-        $value instanceof UnitEnum           => $value->name,
-        $value instanceof Printable          => $value->toString(),
+        \is_bool( $value )           => $value ? 'true' : 'false',
+        \is_null( $value )           => $nullable ? null : EMPTY_STRING,
+        $value instanceof BackedEnum => $value->value,
+        $value instanceof UnitEnum   => $value->name,
+        $value instanceof Printable  => $value->toString(),
         \is_scalar( $value ),
-                $value instanceof Stringable => (string) $value,
-        default                              => $value,
+        $value instanceof Stringable => (string) $value,
+        default                      => $value,
     };
 
     if ( is_iterable( $value ) ) {
@@ -1662,8 +1633,8 @@ function as_string(
 }
 
 /**
- * @param mixed  $value
- * @param bool   $is_list
+ * @param mixed $value
+ * @param bool  $is_list
  *
  * @return ($is_list is true ? array<int, mixed> : array<array-key, mixed>)
  */
@@ -1672,7 +1643,7 @@ function as_array( mixed $value, bool $is_list = false ) : array
     $value = match ( true ) {
         \is_array( $value )    => $value,
         \is_iterable( $value ) => \iterator_to_array( $value ),
-        default                => [ $value ],
+        default                => [$value],
     };
 
     if ( $is_list ) {
@@ -1682,34 +1653,33 @@ function as_array( mixed $value, bool $is_list = false ) : array
 }
 
 /**
- * @param array<array-key, mixed>  $get_defined_vars
+ * @param array<array-key, mixed> $get_defined_vars
  *
  * @return array<array-key, mixed>
  */
 function variadic_argument( array $get_defined_vars ) : array
 {
     // @phpstan-ignore-next-line
-    return [ ...\array_pop( $get_defined_vars ), ...$get_defined_vars ];
+    return [...\array_pop( $get_defined_vars ), ...$get_defined_vars];
 }
 
 // <editor-fold desc="Filters and Escapes">
 
 /**
- * @param null|string|Stringable  $string
- * @param bool                    $comments
- * @param string                  $encoding
- * @param int                     $flags
+ * @param null|string|Stringable $string
+ * @param bool                   $comments
+ * @param string                 $encoding
+ * @param int                    $flags
  *
  * @return string
  */
 function escape_html(
-        null | string | Stringable $string,
-        bool                       $comments = false,
-        string                     $encoding = 'UTF-8',
-        int                        $flags = ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
-) : string
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable $string,
+    bool                   $comments = false,
+    string                 $encoding = 'UTF-8',
+    int                    $flags = ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+) : string {
+    if ( ! $string = (string) $string ) {
         return $string;
     }
 
@@ -1728,17 +1698,16 @@ function escape_html(
  * - Preserves Unicode characters.
  * - Removes tags by default.
  *
- * @param null|string|Stringable  $string        $string
- * @param bool                    $preserveTags  [false]
+ * @param null|string|Stringable $string       $string
+ * @param bool                   $preserveTags [false]
  *
  * @return string
  */
 function escape_url(
-        null | string | Stringable $string,
-        bool                       $preserveTags = false,
-) : string
-{
-    if ( !$string = (string) $string ) {
+    null|string|Stringable $string,
+    bool                   $preserveTags = false,
+) : string {
+    if ( ! $string = (string) $string ) {
         return $string;
     }
 
@@ -1749,18 +1718,18 @@ function escape_url(
     }
 
     $filtered = (string) ( \preg_replace(
-                                   pattern     : "/[^{$safeCharacters}]/u",
-                                   replacement : EMPTY_STRING,
-                                   subject     : $string,
-                           ) ?? EMPTY_STRING );
+        pattern     : "/[^{$safeCharacters}]/u",
+        replacement : EMPTY_STRING,
+        subject     : $string,
+    ) ?? EMPTY_STRING );
 
     // Escape special characters including tags
     return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
 }
 
 /**
- * @param null|string|Stringable  $string  $string
- * @param bool                    $preserveTags
+ * @param null|string|Stringable $string       $string
+ * @param bool                   $preserveTags
  *
  * @return string
  * @deprecated `\Support\Escape::url( .., .., )`
@@ -1770,9 +1739,9 @@ function escape_url(
  * - Preserves Unicode characters.
  * - Removes tags by default.
  */
-function filterUrl( null | string | Stringable $string, bool $preserveTags = false ) : string
+function filterUrl( null|string|Stringable $string, bool $preserveTags = false ) : string
 {
-    throw new BadMethodCallException( __FUNCTION__ . ' no longer supported.' );
+    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
     // Can not be null or an empty string
     // if ( ! $string = (string) $string ) {
     //     return EMPTY_STRING;
@@ -1798,12 +1767,11 @@ function filterUrl( null | string | Stringable $string, bool $preserveTags = fal
 }
 
 function stripTags(
-        null | string | Stringable $string,
-        string                     $replacement = ' ',
-        ?string                    ...$allowed_tags,
-) : string
-{
-    throw new BadMethodCallException( __FUNCTION__ . ' no longer supported.' );
+    null|string|Stringable $string,
+    string                 $replacement = ' ',
+    ?string             ...$allowed_tags,
+) : string {
+    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
     // return \str_replace(
     //     '  ',
     //     ' ',
@@ -1816,14 +1784,14 @@ function stripTags(
 /**
  * Escapes string for use inside iCal template.
  *
- * @param null|string|Stringable  $value
+ * @param null|string|Stringable $value
  *
  * @return string
  */
-function escapeICal( null | string | Stringable $value ) : string
+function escapeICal( null|string|Stringable $value ) : string
 {
     // Can not be null or an empty string
-    if ( !( $string = (string) $value ) ) {
+    if ( ! ( $string = (string) $value ) ) {
         return EMPTY_STRING;
     }
 
@@ -1846,18 +1814,17 @@ require 'functions/normalize.php';
 // <editor-fold desc="Path">
 
 /**
- * @param string                         $path
- * @param bool                           $throw
- * @param null|InvalidArgumentException  $exception
+ * @param string                        $path
+ * @param bool                          $throw
+ * @param null|InvalidArgumentException $exception
  *
  * @return bool
  */
 function path_valid(
-        string                   $path,
-        bool                     $throw = false,
-        InvalidArgumentException &$exception = null,
-) : bool
-{
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
     // Ensure we are not receiving any previously set exceptions
     $exception = null;
 
@@ -1874,7 +1841,7 @@ function path_valid(
     $type = \is_dir( $path ) ? 'dir' : ( \is_file( $path ) ? 'file' : false );
 
     // Handle non-existent paths
-    if ( !$type ) {
+    if ( ! $type ) {
         $exception = new InvalidArgumentException( "The '{$path}' does not exist." );
         if ( $throw ) {
             throw $exception;
@@ -1884,9 +1851,9 @@ function path_valid(
 
     $isWritable = \is_writable( $path );
 
-    $error = ( !$isWritable && !$isReadable ) ? ' is not readable nor writable.' : null;
-    $error ??= ( !$isReadable ) ? ' not writable.' : null;
-    $error ??= ( !$isReadable ) ? ' not unreadable.' : null;
+    $error = ( ! $isWritable && ! $isReadable ) ? ' is not readable nor writable.' : null;
+    $error ??= ( ! $isReadable ) ? ' not writable.' : null;
+    $error ??= ( ! $isReadable ) ? ' not unreadable.' : null;
     $error ??= ' encountered a filesystem error. The cause could not be determined.';
 
     // Create exception message
@@ -1900,79 +1867,77 @@ function path_valid(
 }
 
 /**
- * @param string                         $path
- * @param bool                           $throw  [false]
- * @param null|InvalidArgumentException  $exception
+ * @param string                        $path
+ * @param bool                          $throw     [false]
+ * @param null|InvalidArgumentException $exception
  *
  * @return bool
  */
 function path_readable(
-        string                   $path,
-        bool                     $throw = false,
-        InvalidArgumentException &$exception = null,
-) : bool
-{
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
     $exception = null;
 
-    if ( !\file_exists( $path ) ) {
+    if ( ! \file_exists( $path ) ) {
         $exception = new InvalidArgumentException(
-                'The file at "' . $path . '" does not exist.',
-                500,
+            'The file at "'.$path.'" does not exist.',
+            500,
         );
         if ( $throw ) {
             throw $exception;
         }
     }
 
-    if ( !\is_readable( $path ) ) {
+    if ( ! \is_readable( $path ) ) {
         $exception = new InvalidArgumentException(
-                \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-                500,
+            \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
+            500,
         );
         if ( $throw ) {
             throw $exception;
         }
     }
 
-    return !$exception;
+    return ! $exception;
 }
 
 /**
- * @param string                         $path
- * @param bool                           $throw  [false]
- * @param null|InvalidArgumentException  $exception
+ * @param string                        $path
+ * @param bool                          $throw     [false]
+ * @param null|InvalidArgumentException $exception
  *
  * @return bool
  */
 function path_writable(
-        string                   $path,
-        bool                     $throw = false,
-        InvalidArgumentException &$exception = null,
-) : bool
-{
+    string                   $path,
+    bool                     $throw = false,
+    InvalidArgumentException & $exception = null,
+) : bool {
     $exception = null;
 
-    if ( !\file_exists( $path ) ) {
+    if ( ! \file_exists( $path ) ) {
         $exception = new InvalidArgumentException(
-                'The file at "' . $path . '" does not exist.',
-                500,
+            'The file at "'.$path.'" does not exist.',
+            500,
         );
         if ( $throw ) {
             throw $exception;
         }
     }
 
-    if ( !\is_writable( $path ) ) {
+    if ( ! \is_writable( $path ) ) {
         $exception = new InvalidArgumentException(
-                \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-                500,
+            \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
+            500,
         );
         if ( $throw ) {
             throw $exception;
         }
     }
 
-    return !$exception;
+    return ! $exception;
 }
 
 // </editor-fold>
@@ -2003,8 +1968,8 @@ function kebabToCamelCase( string $input ) : string
  * - `false` options set all others to true.
  * - Use the `$default` parameter to set value for all if none are set.
  *
- * @param array<string, ?bool>  $array    Array of options, `get_defined_vars()` is recommended
- * @param bool                  $default  Default value for all options
+ * @param array<string, ?bool> $array   Array of options, `get_defined_vars()` is recommended
+ * @param bool                 $default Default value for all options
  *
  * @return array<string, bool>
  */
@@ -2021,8 +1986,8 @@ function booleanValues( array $array, bool $default = true ) : array
     // If any option is false, set all others to true
     if ( \in_array( false, $array, true ) ) {
         return \array_map(
-                static fn( ?bool $option ) => $option !== false,
-                $array,
+            static fn( ?bool $option ) => $option !== false,
+            $array,
         );
     }
 
