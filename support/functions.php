@@ -185,7 +185,7 @@ function getProjectDirectory() : string
         }
 
         // Normalize and return the project path
-        return normalize_path( ...$rootSegments );
+        return normalize_path( $rootSegments );
     } )();
 }
 
@@ -200,10 +200,7 @@ function getSystemCacheDirectory() : string
 {
     static $cacheDirectory = null;
     return $cacheDirectory ??= ( static function() : string {
-        return normalize_path(
-            \sys_get_temp_dir(),
-            \hash( 'xxh32', getProjectDirectory() ),
-        );
+        return normalize_path( [\sys_get_temp_dir(), \hash( 'xxh32', getProjectDirectory() )] );
     } )();
 }
 

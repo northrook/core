@@ -5,6 +5,8 @@ namespace Support;
 use voku\helper\ASCII;
 use LengthException;
 use Stringable;
+use InvalidArgumentException;
+use LogicException;
 
 /**
  * @param null|string|Stringable $string
@@ -140,15 +142,28 @@ function normalize_slashes( string|Stringable $string ) : string
  * // => './assets/scripts/example.js'
  * ```
  *
- * @param ?string ...$path
+ * @param null|array|null[]|string|string[]|Stringable|Stringable[] $path
+ * @param bool                                                      $traversal
+ * @param bool                                                      $throwOnFault
+ *
+ * @return string
  */
-function normalize_path( ?string ...$path ) : string
-{
-    $path = \implode( DIR_SEP, \array_filter( $path ) );
-
+function normalize_path(
+    null|string|Stringable|array $path,
+    bool                         $traversal = false,
+    bool                         $throwOnFault = false,
+) : string {
+    // Return early on empty $path
     if ( ! $path ) {
-        return EMPTY_STRING;
+        return $throwOnFault
+                ? throw new InvalidArgumentException(
+                    'The provided path is empty: '.\var_export( $path, true ),
+                )
+                : EMPTY_STRING;
     }
+
+    // Resolve provided $path
+    $path = \is_array( $path ) ? \implode( DIR_SEP, \array_filter( $path ) ) : (string) $path;
 
     // Normalize separators
     $path = \strtr( $path, '\\', DIR_SEP );
@@ -160,22 +175,53 @@ function normalize_path( ?string ...$path ) : string
         default                                  => null,
     };
 
-    // Ensure each part does not start or end with illegal characters
-    $exploded = \array_map(
-        static fn( $item ) => \trim( $item, " \n\r\t\v\0\\/" ),
-        \explode( DIR_SEP, $path ),
-    );
+    if ( $traversal && $relative ) {
+        $traversal = $throwOnFault && throw new LogicException(
+            'Cannot traverse relative path: '.\var_export( $path, true ),
+        );
+    }
+
+    $fragments = [];
+
+    // Deduplicate separators and handle traversal
+    foreach ( \explode( DIR_SEP, $path ) as $fragment ) {
+        // Ensure each part does not start or end with illegal characters
+        $fragment = \trim( $fragment, " \n\r\t\v\0\\/" );
+
+        if ( ! $fragment ) {
+            continue;
+        }
+
+        if ( $traversal // if we are allowed to traverse
+             && $fragment === '..' // and this fragment traverses
+             && $fragments // and we have at least one parent
+             && \end( $fragments ) !== '..' // and the parent isn't traversing
+        ) {
+            \array_pop( $fragments );
+        }
+        elseif ( $fragment !== '.' ) {
+            $fragments[] = $fragment;
+        }
+    }
 
     // Implode, preserving intended relative paths
-    $path = $relative.\implode( DIR_SEP, \array_filter( $exploded ) );
+    $path = $relative.\implode( DIR_SEP, $fragments );
 
-    if ( ( $length = \mb_strlen( $path ) ) > ( $limit = PHP_MAXPATHLEN - 2 ) ) {
+    if ( ( $length = \mb_strlen( $path ) ) > ( $limit = PHP_MAXPATHLEN ) ) {
         $method  = __METHOD__;
         $length  = (string) $length;
         $limit   = (string) $limit;
         $message = "{$method} resulted in a string of {$length}, exceeding the {$limit} character limit.";
         $result  = 'Operation was halted to prevent overflow.';
         throw new LengthException( $message.PHP_EOL.$result );
+    }
+
+    if ( ! $path ) {
+        return $throwOnFault
+                ? throw new InvalidArgumentException(
+                    'The provided path is empty: '.\var_export( $path, true ),
+                )
+                : EMPTY_STRING;
     }
 
     return $path;
