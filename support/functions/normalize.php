@@ -142,9 +142,9 @@ function normalize_slashes( string|Stringable $string ) : string
  * // => './assets/scripts/example.js'
  * ```
  *
- * @param null|array|null[]|string|string[]|Stringable|Stringable[] $path
- * @param bool                                                      $traversal
- * @param bool                                                      $throwOnFault
+ * @param null|array<array-key,null|string|Stringable>|string|Stringable $path
+ * @param bool                                                           $traversal
+ * @param bool                                                           $throwOnFault
  *
  * @return string
  */

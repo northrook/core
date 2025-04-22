@@ -13,8 +13,8 @@ namespace Core\Interface;
  * }
  * ```
  *
- * @method __invoke()
+ * @require-method  __invoke()
  *
- * @author Martin Nielsen <mn@northrook.com>
+ * @author          Martin Nielsen <mn@northrook.com>
  */
 interface ActionInterface {}

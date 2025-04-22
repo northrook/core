@@ -14,7 +14,7 @@ class NotImplementedException extends BadMethodCallException
         ?string                $message = null,
         ?Throwable             $previous = null,
     ) {
-        parent::__construct( $this->generateMessage( $message ), 500, $previous );
+        parent::__construct( $this->generateMessage( $message ), E_USER_ERROR, $previous );
     }
 
     private function generateMessage( ?string $message = null ) : string

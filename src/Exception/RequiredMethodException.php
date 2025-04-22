@@ -1,30 +1,29 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Core\Exception;
 
-use LogicException, Throwable;
+use LogicException;
+use Throwable;
 
-class MissingPropertyException extends LogicException
+final class RequiredMethodException extends LogicException
 {
     /**
-     * @param string                   $property
+     * @param string                   $method
      * @param ?string                  $type
      * @param null|class-string|object $class
      * @param null|string              $message
      * @param null|Throwable           $previous
      */
     public function __construct(
-        public readonly string $property,
+        public readonly string $method,
         ?string                $type = null,
         null|object|string     $class = null,
         ?string                $message = null,
         ?Throwable             $previous = null,
     ) {
         if ( ! $message ) {
-            $property = $type ? "'\${$property}' of type '{$type}'" : "'{$property}'";
-            $message  = "Property {$property} does not exist";
+            $method  = $type ? "'\${$method}' of type '{$type}'" : "'{$method}'";
+            $message = "Required method {$method} does not exist";
             if ( $class ) {
                 $class = \is_object( $class ) ? $class::class : $class;
                 $message .= " in class '{$class}'.";

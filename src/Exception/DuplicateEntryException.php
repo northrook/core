@@ -21,6 +21,6 @@ class DuplicateEntryException extends LogicException
             $message = "The value '{$value}' already exists.";
         }
 
-        parent::__construct( (string) $message, 500, $previous );
+        parent::__construct( (string) $message, E_ERROR, $previous );
     }
 }

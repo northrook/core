@@ -36,7 +36,7 @@ final class RegexpException extends RuntimeException
 
         parent::__construct(
             $message,
-            500,
+            E_ERROR,
             $previous,
         );
     }
