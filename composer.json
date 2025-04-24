@@ -9,6 +9,9 @@
       "Support\\": "support"
     },
     "files": [
+      "functions/core.php",
+      "functions/normalize.php",
+      "functions/strings.php",
       "support/constants.php",
       "support/functions.php"
     ]

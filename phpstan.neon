@@ -1,6 +1,7 @@
 parameters:
 	level: 9
 	paths:
+		- functions
 		- src
 		- support
 	treatPhpDocTypesAsCertain: false

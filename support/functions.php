@@ -9,7 +9,7 @@ use Core\Interface\Printable;
 use JetBrains\PhpStorm\Deprecated;
 use SplFileInfo, Stringable, ArrayAccess;
 use DateTimeImmutable, DateTimeZone, DateTimeInterface;
-use Throwable, Exception, InvalidArgumentException,
+use Exception, InvalidArgumentException,
 BadMethodCallException, BadFunctionCallException,
 RuntimeException;
 use Random\RandomException;
@@ -42,16 +42,28 @@ const FILTER_STRING_COMMENTS = [
 /**
  * Check whether the script is being executed from a command line.
  */
+#[Deprecated]
 function isCLI() : bool
 {
+    trigger_deprecation(
+        'Support\isCLI',
+        '_dev',
+        __METHOD__.' deprecated, use \Support\is_cli() instead.',
+    );
     return PHP_SAPI === 'cli' || \defined( 'STDIN' );
 }
 
 /**
  * Checks whether OPcache is installed and enabled for the given environment.
  */
+#[Deprecated]
 function isOPcacheEnabled() : bool
 {
+    trigger_deprecation(
+        'Support\isOPcacheEnabled',
+        '_dev',
+        __METHOD__.' deprecated, use \Support\opcache_enabled() instead.',
+    );
     // Ensure OPcache is installed and not disabled
     if (
         ! \function_exists( 'opcache_invalidate' )
@@ -202,33 +214,6 @@ function getSystemCacheDirectory() : string
     return $cacheDirectory ??= ( static function() : string {
         return normalize_path( [\sys_get_temp_dir(), \hash( 'xxh32', getProjectDirectory() )] );
     } )();
-}
-
-/**
- * Capture the output buffer from a provided `callback`.
- *
- * - Will throw a {@see RuntimeException} if the `callback` throws any exceptions.
- *
- * @param callable $callback
- * @param mixed    ...$args
- *
- * @return string
- */
-function ob_get( callable $callback, mixed ...$args ) : string
-{
-    \ob_start();
-    try {
-        $callback( ...$args );
-    }
-    catch ( Throwable $exception ) {
-        \ob_end_clean();
-        throw new RuntimeException(
-            message  : 'An error occurred while capturinb the callback.',
-            code     : 500,
-            previous : $exception,
-        );
-    }
-    return \ob_get_clean() ?: '';
 }
 
 // </editor-fold>
@@ -919,8 +904,6 @@ function key_rand( false|string $hash = 'xxh64', int $entropy = 7 ) : string
 // </editor-fold>
 
 // <editor-fold desc="Strings">
-
-require 'functions/strings.php';
 
 /**
  * Ensures the appropriate string encoding.
@@ -1799,12 +1782,6 @@ function escapeICal( null|string|Stringable $value ) : string
 
     return \addcslashes( (string) $string, "\";\\,:\n" );
 }
-
-// </editor-fold>
-
-// <editor-fold desc="Normalizers">
-
-require 'functions/normalize.php';
 
 // </editor-fold>
 
