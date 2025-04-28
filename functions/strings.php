@@ -52,32 +52,48 @@ function str_before(
     null|string|Stringable $string,
     null|string|Stringable $needle,
     bool                   $last = false,
+    bool                   $includeNeedle = false,
 ) : string {
-    if ( ! $string = (string) $string ) {
-        return EMPTY_STRING;
+    $string = (string) $string;
+    $needle = (string) $needle;
+
+    if ( $string === '' || $needle === '' ) {
+        return $string;
     }
 
-    $before = $last
-            ? str_last( $string, (string) $needle, true )
-            : \strstr( $string, (string) $needle, true );
+    $pos = $last ? \strrpos( $string, $needle ) : \strpos( $string, $needle );
 
-    return $before ?: $string;
+    if ( $pos === false ) {
+        return $string;
+    }
+
+    return $includeNeedle
+            ? \substr( $string, 0, $pos + \strlen( $needle ) )
+            : \substr( $string, 0, $pos );
 }
 
 function str_after(
     null|string|Stringable $string,
     null|string|Stringable $needle,
     bool                   $last = false,
+    bool                   $includeNeedle = false,
 ) : string {
-    if ( ! $string = (string) $string ) {
-        return EMPTY_STRING;
+    $string = (string) $string;
+    $needle = (string) $needle;
+
+    if ( $string === '' || $needle === '' ) {
+        return $string;
     }
 
-    $before = $last
-            ? \strrchr( $string, (string) $needle )
-            : \strstr( $string, (string) $needle );
+    $pos = $last ? \strrpos( $string, $needle ) : \strpos( $string, $needle );
 
-    return $before ?: $string;
+    if ( $pos === false ) {
+        return $string;
+    }
+
+    return $includeNeedle
+            ? \substr( $string, $pos )
+            : \substr( $string, $pos + \strlen( $needle ) );
 }
 
 /**
@@ -90,10 +106,17 @@ function str_after(
  * @return false|string
  */
 function str_last(
-    string $haystack,
-    string $needle,
-    bool   $before = false,
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+    bool                   $before = false,
 ) : string|false {
+    $haystack = (string) $haystack;
+    $needle   = (string) $needle;
+
+    if ( $haystack === '' || $needle === '' ) {
+        return $haystack;
+    }
+
     $pos = \strrpos( $haystack, $needle );
 
     if ( $pos === false ) {

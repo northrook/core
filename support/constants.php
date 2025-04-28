@@ -119,6 +119,7 @@ namespace Support {
         'a', 'b', 'i', 's', 'em', 'u', 'small', 'strong', 'span',
         'mark', 'code', 'kbd', 'var', 'samp', 'cite', 'q', 'abbr',
         'dfn', 'time', 'data', 'wbr', 'sub', 'sup', 'bdi', 'bdo',
+        'wbr', 'br',
     ];
     const TAG_SELF_CLOSING = [
         'meta', 'link', 'img', 'input', 'wbr', 'hr', 'br',
