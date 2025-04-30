@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace Support;
 
 use Core\Exception\MissingPropertyException;
-use Core\Interface\Printable;
 use JetBrains\PhpStorm\Deprecated;
-use SplFileInfo, Stringable, ArrayAccess;
-use DateTimeImmutable, DateTimeZone, DateTimeInterface;
-use Exception, InvalidArgumentException,
-BadMethodCallException, BadFunctionCallException,
-RuntimeException;
+use Stringable, ArrayAccess;
+use InvalidArgumentException, BadMethodCallException, BadFunctionCallException;
 use Random\RandomException;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
-use BackedEnum;
-use UnitEnum;
 
 // <editor-fold desc="Constants">
 
@@ -38,138 +32,7 @@ const FILTER_STRING_COMMENTS = [
 
 // </editor-fold>
 
-// <editor-fold desc="System">
-/**
- * Check whether the script is being executed from a command line.
- */
-#[Deprecated]
-function isCLI() : bool
-{
-    trigger_deprecation(
-        'Support\isCLI',
-        '_dev',
-        __METHOD__.' deprecated, use \Support\is_cli() instead.',
-    );
-    return PHP_SAPI === 'cli' || \defined( 'STDIN' );
-}
-
-/**
- * Checks whether OPcache is installed and enabled for the given environment.
- */
-#[Deprecated]
-function isOPcacheEnabled() : bool
-{
-    trigger_deprecation(
-        'Support\isOPcacheEnabled',
-        '_dev',
-        __METHOD__.' deprecated, use \Support\opcache_enabled() instead.',
-    );
-    // Ensure OPcache is installed and not disabled
-    if (
-        ! \function_exists( 'opcache_invalidate' )
-        || ! \ini_get( 'opcache.enable' )
-    ) {
-        return false;
-    }
-
-    // If called from CLI, check accordingly, otherwise true
-    return ! isCLI() || \ini_get( 'opcache.enable_cli' );
-}
-
-// </editor-fold>
-
-// <editor-fold desc="Filesystem">
-
-/**
- * @param string $filename
- * @param mixed  $data
- * @param bool   $overwrite
- * @param bool   $append
- *
- * @return void
- */
-function file_save(
-    null|string|Stringable $filename,
-    mixed                  $data,
-    bool                   $overwrite = true,
-    bool                   $append = false,
-) : void {
-    if ( ! $filename ) {
-        throw new RuntimeException( 'No filename specified.' );
-    }
-
-    $path = new SplFileInfo( (string) $filename );
-
-    if ( ! $overwrite && $path->isReadable() ) {
-        return;
-    }
-
-    if ( ! \file_exists( $path->getPath() ) ) {
-        \mkdir( $path->getPath(), 0777, true );
-    }
-
-    if ( ! \is_writable( $path->getPath() ) ) {
-        throw new RuntimeException( message : 'The file '.$path->getPathname().' is not writable.' );
-    }
-
-    $mode = $append ? FILE_APPEND : LOCK_EX;
-
-    $status = \file_put_contents( $path->getPathname(), $data, $mode );
-
-    if ( $status === false ) {
-        throw new RuntimeException( message : 'Unable to write to file '.$path->getPathname() );
-    }
-}
-
-/**
- * Removes a file or directory, including nested files.
- *
- * @param string $path
- *
- * @return bool
- */
-function file_purge( string $path ) : bool
-{
-    return \is_file( $path )
-            ? @\unlink( $path )
-            : \array_map( __FUNCTION__, \glob( $path.'/*' ) ?: [] ) == @\rmdir( $path );
-}
-
-// </editor-fold>
-
 // <editor-fold desc="Get">
-
-/**
- * @param DateTimeInterface|int|string $when
- * @param null|DateTimeZone|string     $timezone [UTC]
- *
- * @return DateTimeImmutable
- */
-function datetime(
-    int|string|DateTimeInterface $when = 'now',
-    string|DateTimeZone|null     $timezone = AUTO,
-) : DateTimeImmutable {
-    $fromDateTime = $when instanceof DateTimeInterface;
-    $datetime     = $fromDateTime ? $when->getTimestamp() : $when;
-
-    if ( \is_int( $datetime ) ) {
-        $datetime = "@{$datetime}";
-    }
-
-    $timezone = match ( true ) {
-        \is_null( $timezone )   => $fromDateTime ? $when->getTimezone() : \timezone_open( 'UTC' ),
-        \is_string( $timezone ) => \timezone_open( $timezone ),
-        default                 => $timezone,
-    } ?: null;
-
-    try {
-        return new DateTimeImmutable( $datetime, $timezone );
-    }
-    catch ( Exception $exception ) {
-        $message = 'Unable to create a new DateTimeImmutable object: '.$exception->getMessage();
-        throw new InvalidArgumentException( $message, 500, $exception );
-    }
-}
 
 /**
  * Retrieves the project root directory.
@@ -595,7 +458,7 @@ function class_extends(
 // <editor-fold desc="Checks">
 
 /**
- * False if passed value is considered `null` and `empty` type values, retains `0` and `false`.
+ * False if the passed value is considered `null` and `empty` type values, retains `0` and `false`.
  *
  * @phpstan-assert-if-true scalar $value
  *
@@ -738,7 +601,7 @@ function is_url( string|Stringable $string, ?string $requiredProtocol = null ) :
  */
 function is_relative_path( string|Stringable $path ) : bool
 {
-    return \str_starts_with( \str_replace( '\\', '/', (string) $path ), '/' );
+    return \str_starts_with( \strtr( (string) $path, '\\', '/' ), '/' );
 }
 
 function is_delimiter( string $string ) : bool
@@ -761,7 +624,7 @@ function is_punctuation( string $string, bool $endingOnly = false ) : bool
  */
 function is_email( null|string|Stringable $value, string ...$enforceDomain ) : bool
 {
-    // Can not be null or an empty string
+    // Cannot be null or an empty string
     if ( ! $string = (string) $value ) {
         return false;
     }
@@ -1570,79 +1433,6 @@ function num_byte_size( string|int|float $bytes ) : string
 
 // </editor-fold>
 
-/**
- * This function tries very hard to return a string from any given `$value`.
- *
- * @param mixed $value
- * @param bool  $nullable
- * @param bool  $serialize
- *
- * @return ($nullable is true ? null|string : string)
- */
-function as_string(
-    mixed $value,
-    bool  $nullable = false,
-    bool  $serialize = true,
-) : ?string {
-    $value = match ( true ) {
-        \is_bool( $value )           => $value ? 'true' : 'false',
-        \is_null( $value )           => $nullable ? null : EMPTY_STRING,
-        $value instanceof BackedEnum => $value->value,
-        $value instanceof UnitEnum   => $value->name,
-        $value instanceof Printable  => $value->toString(),
-        \is_scalar( $value ),
-        $value instanceof Stringable => (string) $value,
-        default                      => $value,
-    };
-
-    if ( is_iterable( $value ) ) {
-        $value = \iterator_to_array( $value );
-    }
-
-    if ( \is_array( $value ) ) {
-        $value = \json_encode( $value, ENCODE_ESCAPE_JSON );
-    }
-
-    if ( \is_object( $value ) && $serialize ) {
-        $value = \serialize( $value );
-    }
-
-    \assert( \is_string( $value ) || ( $nullable && \is_null( $value ) ) );
-
-    return $value;
-}
-
-/**
- * @param mixed $value
- * @param bool  $is_list
- *
- * @return ($is_list is true ? array<int, mixed> : array<array-key, mixed>)
- */
-function as_array( mixed $value, bool $is_list = false ) : array
-{
-    $value = match ( true ) {
-        \is_array( $value )    => $value,
-        \is_iterable( $value ) => \iterator_to_array( $value ),
-        default                => [$value],
-    };
-
-    if ( $is_list ) {
-        \assert( \array_is_list( $value ) );
-    }
-    return $value;
-}
-
-/**
- * @param array<array-key, mixed> $get_defined_vars
- *
- * @return array<array-key, mixed>
- */
-function variadic_argument( array $get_defined_vars ) : array
-{
-    // @phpstan-ignore-next-line
-    return [...\array_pop( $get_defined_vars ), ...$get_defined_vars];
-}
-
 // <editor-fold desc="Filters and Escapes">
 
 /**
@@ -1770,7 +1560,7 @@ function stripTags(
  */
 function escapeICal( null|string|Stringable $value ) : string
 {
-    // Can not be null or an empty string
+    // Cannot be null or an empty string
     if ( ! ( $string = (string) $value ) ) {
         return EMPTY_STRING;
     }
@@ -1781,137 +1571,6 @@ function escapeICal( null|string|Stringable $value ) : string
     $string = \preg_replace( '#[\x00-\x08\x0B-\x1F]#', "\u{FFFD}", (string) $string );
 
     return \addcslashes( (string) $string, "\";\\,:\n" );
-}
-
-// </editor-fold>
-
-// <editor-fold desc="Path">
-
-/**
- * @param string                        $path
- * @param bool                          $throw
- * @param null|InvalidArgumentException $exception
- *
- * @return bool
- */
-function path_valid(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
-) : bool {
-    // Ensure we are not receiving any previously set exceptions
-    $exception = null;
-
-    // Check if path exists and is readable
-    $isReadable = \is_readable( $path );
-    $exists     = \file_exists( $path ) && $isReadable;
-
-    // Return early
-    if ( $exists ) {
-        return true;
-    }
-
-    // Determine path type
-    $type = \is_dir( $path ) ? 'dir' : ( \is_file( $path ) ? 'file' : false );
-
-    // Handle non-existent paths
-    if ( ! $type ) {
-        $exception = new InvalidArgumentException( "The '{$path}' does not exist." );
-        if ( $throw ) {
-            throw $exception;
-        }
-        return false;
-    }
-
-    $isWritable = \is_writable( $path );
-
-    $error = ( ! $isWritable && ! $isReadable ) ? ' is not readable nor writable.' : null;
-    $error ??= ( ! $isReadable ) ? ' not writable.' : null;
-    $error ??= ( ! $isReadable ) ? ' not unreadable.' : null;
-    $error ??= ' encountered a filesystem error. The cause could not be determined.';
-
-    // Create exception message
-    $exception = new InvalidArgumentException( "The path '{$path}' {$error}" );
-
-    if ( $throw ) {
-        throw $exception;
-    }
-
-    return false;
-}
-
-/**
- * @param string                        $path
- * @param bool                          $throw     [false]
- * @param null|InvalidArgumentException $exception
- *
- * @return bool
- */
-function path_readable(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
-) : bool {
-    $exception = null;
-
-    if ( ! \file_exists( $path ) ) {
-        $exception = new InvalidArgumentException(
-            'The file at "'.$path.'" does not exist.',
-            500,
-        );
-        if ( $throw ) {
-            throw $exception;
-        }
-    }
-
-    if ( ! \is_readable( $path ) ) {
-        $exception = new InvalidArgumentException(
-            \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-            500,
-        );
-        if ( $throw ) {
-            throw $exception;
-        }
-    }
-
-    return ! $exception;
-}
-
-/**
- * @param string                        $path
- * @param bool                          $throw     [false]
- * @param null|InvalidArgumentException $exception
- *
- * @return bool
- */
-function path_writable(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
-) : bool {
-    $exception = null;
-
-    if ( ! \file_exists( $path ) ) {
-        $exception = new InvalidArgumentException(
-            'The file at "'.$path.'" does not exist.',
-            500,
-        );
-        if ( $throw ) {
-            throw $exception;
-        }
-    }
-
-    if ( ! \is_writable( $path ) ) {
-        $exception = new InvalidArgumentException(
-            \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-            500,
-        );
-        if ( $throw ) {
-            throw $exception;
-        }
-    }
-
-    return ! $exception;
 }
 
 // </editor-fold>
@@ -1928,44 +1587,4 @@ function kebabToCamelCase( string $input ) : string
     return \lcfirst( \str_replace( '-', '', \ucwords( $input, '-' ) ) );
 }
 
-// </editor-fold>
-
-// <editor-fold desc="Utility">
-/**
- * Get a boolean option from an array of options.
- *
- * ⚠️ Be careful if passing other nullable values, as they will be converted to booleans.
- *
- * - Pass an array of options, `get_defined_vars()` is recommended.
- * - All 'nullable' values will be converted to booleans.
- * - `true` options set all others to false.
- * - `false` options set all others to true.
- * - Use the `$default` parameter to set value for all if none are set.
- *
- * @param array<string, ?bool> $array   Array of options, `get_defined_vars()` is recommended
- * @param bool                 $default Default value for all options
- *
- * @return array<string, bool>
- */
-function booleanValues( array $array, bool $default = true ) : array
-{
-    // Isolate the options
-    $array = \array_filter( $array, static fn( $value ) => \is_bool( $value ) );
-
-    // If any option is true, set all others to false
-    if ( \in_array( true, $array, true ) ) {
-        return \array_map( static fn( $option ) => $option === true, $array );
-    }
-
-    // If any option is false, set all others to true
-    if ( \in_array( false, $array, true ) ) {
-        return \array_map(
-            static fn( ?bool $option ) => $option !== false,
-            $array,
-        );
-    }
-
-    // If none are true or false, set all to the default
-    return \array_map( static fn( $option ) => $default, $array );
-}
 // </editor-fold>

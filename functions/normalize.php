@@ -61,9 +61,11 @@ function slug(
  *
  * ⚠️ This function can be expensive.
  *
+ * 💡 Cache the result when possible.
+ *
  * @param null|string|Stringable $string
  * @param false|int<2,4>         $tabSize  [4]
- * @param null|non-empty-string  $encoding [UTF-8]
+ * @param null|non-empty-string  $encoding [CHARSET]
  *
  * @return string
  */
@@ -153,7 +155,7 @@ function normalize_path(
     bool                         $traversal = false,
     bool                         $throwOnFault = false,
 ) : string {
-    // Return early on empty $path
+    // Return early on an empty $path
     if ( ! $path ) {
         return $throwOnFault
                 ? throw new InvalidArgumentException(
@@ -294,7 +296,7 @@ function normalize_url(
         $fragment            = "#{$fragment}";
     }
 
-    // Remove duplicate separators, and lowercase the $path
+    // Remove duplicate separators and lowercase the $path
     $path = \strtolower( \implode( '/', \array_filter( \explode( '/', $string ) ) ) );
 
     // Prepend trailing separator if needed

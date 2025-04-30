@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace Support;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
+use InvalidArgumentException;
 use Psr\Log\{LogLevel, LoggerInterface};
 use Throwable;
 use RuntimeException;
+use Exception;
 
 /**
  * @template Value
@@ -83,4 +88,36 @@ function opcache_enabled() : bool
 
     // If called from CLI, check accordingly, otherwise true
     return ! is_cli() || \ini_get( 'opcache.enable_cli' );
+}
+
+/**
+ * @param DateTimeInterface|int|string $when
+ * @param null|DateTimeZone|string     $timezone [UTC]
+ *
+ * @return DateTimeImmutable
+ */
+function datetime(
+    int|string|DateTimeInterface $when = 'now',
+    string|DateTimeZone|null     $timezone = AUTO,
+) : DateTimeImmutable {
+    $fromDateTime = $when instanceof DateTimeInterface;
+    $datetime     = $fromDateTime ? $when->getTimestamp() : $when;
+
+    if ( \is_int( $datetime ) ) {
+        $datetime = "@{$datetime}";
+    }
+
+    $timezone = match ( true ) {
+        \is_null( $timezone )   => $fromDateTime ? $when->getTimezone() : \timezone_open( 'UTC' ),
+        \is_string( $timezone ) => \timezone_open( $timezone ),
+        default                 => $timezone,
+    } ?: null;
+
+    try {
+        return new DateTimeImmutable( $datetime, $timezone );
+    }
+    catch ( Exception $exception ) {
+        $message = 'Unable to create a new DateTimeImmutable object: '.$exception->getMessage();
+        throw new InvalidArgumentException( $message, 500, $exception );
+    }
 }
