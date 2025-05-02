@@ -147,6 +147,7 @@ function normalize_slashes( string|Stringable $string ) : string
  * @param null|array<array-key,null|string|Stringable>|string|Stringable $path
  * @param bool                                                           $traversal
  * @param bool                                                           $throwOnFault
+ * @param string                                                         $separator
  *
  * @return string
  */
@@ -154,6 +155,7 @@ function normalize_path(
     null|string|Stringable|array $path,
     bool                         $traversal = false,
     bool                         $throwOnFault = false,
+    string                       $separator = DIR_SEP,
 ) : string {
     // Return early on an empty $path
     if ( ! $path ) {
@@ -165,16 +167,16 @@ function normalize_path(
     }
 
     // Resolve provided $path
-    $path = \is_array( $path ) ? \implode( DIR_SEP, \array_filter( $path ) ) : (string) $path;
+    $path = \is_array( $path ) ? \implode( $separator, \array_filter( $path ) ) : (string) $path;
 
     // Normalize separators
-    $path = \strtr( $path, '\\', DIR_SEP );
+    $path = \strtr( $path, '\\', $separator );
 
     // Check for starting separator
     $relative = match ( true ) {
-        $path[0] === DIR_SEP                     => DIR_SEP,
-        $path[0] === '.' && $path[1] === DIR_SEP => '.'.DIR_SEP,
-        default                                  => null,
+        $path[0] === $separator                     => $separator,
+        $path[0] === '.' && $path[1] === $separator => '.'.$separator,
+        default                                     => null,
     };
 
     if ( $traversal && $relative ) {
@@ -186,7 +188,7 @@ function normalize_path(
     $fragments = [];
 
     // Deduplicate separators and handle traversal
-    foreach ( \explode( DIR_SEP, $path ) as $fragment ) {
+    foreach ( \explode( $separator, $path ) as $fragment ) {
         // Ensure each part does not start or end with illegal characters
         $fragment = \trim( $fragment, " \n\r\t\v\0\\/" );
 
@@ -207,7 +209,7 @@ function normalize_path(
     }
 
     // Implode, preserving intended relative paths
-    $path = $relative.\implode( DIR_SEP, $fragments );
+    $path = $relative.\implode( $separator, $fragments );
 
     if ( ( $length = \mb_strlen( $path ) ) > ( $limit = PHP_MAXPATHLEN ) ) {
         $method  = __METHOD__;
