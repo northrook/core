@@ -34,6 +34,43 @@ function str_encode( null|string|Stringable $string, ?string $encoding = CHARSET
 }
 
 /**
+ * Replace each key from `$map` with its value when found in `$content`.
+ *
+ * @param array<string,null|string|Stringable> $map
+ * @param string[]                             $content
+ * @param bool                                 $caseSensitive
+ *
+ * @return ($content is string ? string : string[])
+ */
+function str_replace_each(
+    array        $map,
+    string|array $content,
+    bool         $caseSensitive = true,
+) : string|array {
+    // Bail early on empty content
+    if ( ! $content ) {
+        return $content;
+    }
+
+    // Validate and normalize the $map
+    foreach ( $map as $match => $replace ) {
+        \assert( \is_string( $match ), __METHOD__.' does not accept empty match keys' );
+        $map[$match] = (string) $replace;
+    }
+
+    $search  = \array_keys( $map );
+    $replace = \array_values( $map );
+
+    /**
+     * @var string[] $search
+     * @var string[] $replace
+     * */
+    return $caseSensitive
+            ? \str_replace( $search, $replace, $content )
+            : \str_ireplace( $search, $replace, $content );
+}
+
+/**
  * Compress a string by replacing consecutive whitespace characters with a single one.
  *
  * @param null|string|Stringable $string         $string
@@ -94,6 +131,34 @@ function str_after(
     return $includeNeedle
             ? \substr( $string, $pos )
             : \substr( $string, $pos + \strlen( $needle ) );
+}
+
+function str_start(
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
+    $string = (string) $string;
+    $with   = (string) $with;
+
+    if ( \str_starts_with( $string, $with ) ) {
+        return $string;
+    }
+
+    return $with.$string;
+}
+
+function str_end(
+    null|string|Stringable $string,
+    null|string|Stringable $with,
+) : string {
+    $string = (string) $string;
+    $with   = (string) $with;
+
+    if ( \str_ends_with( $string, $with ) ) {
+        return $string;
+    }
+
+    return $string.$with;
 }
 
 /**

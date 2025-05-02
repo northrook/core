@@ -513,17 +513,21 @@ function is_iterable( mixed $value ) : bool
  *
  * ⚠️ Does **NOT** validate the `path` in any capacity!
  *
- * @param string|Stringable $string
- * @param string            $contains [..] optional `str_contains` check
- * @param string            $illegal
+ * @param mixed  $value
+ * @param string $contains [..] optional `str_contains` check
+ * @param string $illegal
  *
  * @return bool
  */
-function is_path( string|Stringable $string, string $contains = '..', string $illegal = '{}' ) : bool
+function is_path( mixed $value, string $contains = '..', string $illegal = '{}' ) : bool
 {
-    // Stringify scalars and Stringable objects
+    // Bail early on non-stringable values
+    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
+        return false;
+    }
+
     // Stringify
-    $string = \trim( (string) $string );
+    $string = \trim( (string) $value );
 
     // Must be at least two characters long to be a path string
     if ( ! $string || \strlen( $string ) < 2 ) {
@@ -557,18 +561,20 @@ function is_path( string|Stringable $string, string $contains = '..', string $il
  *
  * ⚠️ Does **NOT** validate the URL in any capacity!
  *
- * @param string|Stringable $string
- * @param ?string           $requiredProtocol
+ * @param mixed   $value
+ * @param ?string $requiredProtocol
  *
  * @return bool
  */
-function is_url( string|Stringable $string, ?string $requiredProtocol = null ) : bool
+function is_url( mixed $value, ?string $requiredProtocol = null ) : bool
 {
-    // Stringify
-    $string = \trim( (string) $string );
+    // Bail early on non-stringable values
+    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
+        return false;
+    }
 
-    // Can not be an empty string
-    if ( ! $string ) {
+    // Cannot be null or an empty string
+    if ( ! $string = (string) $value ) {
         return false;
     }
 
@@ -580,7 +586,7 @@ function is_url( string|Stringable $string, ?string $requiredProtocol = null ) :
     /**
      * Does the string resemble a URL-like structure?
      *
-     * Ensures the string starts with a schema-like substring, and has a real-ish domain extension.
+     * Ensures the string starts with a schema-like substring and has a real-ish domain extension.
      *
      * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
      */
@@ -588,7 +594,7 @@ function is_url( string|Stringable $string, ?string $requiredProtocol = null ) :
         return false;
     }
 
-    // Check for required protocol if requested
+    // Check for the required protocol if requested
     return ! ( $requiredProtocol && ! \str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ).'://' ) );
 }
 
@@ -617,13 +623,18 @@ function is_punctuation( string $string, bool $endingOnly = false ) : bool
 }
 
 /**
- * @param null|string|Stringable $value
- * @param string                 ...$enforceDomain
+ * @param mixed  $value
+ * @param string ...$enforceDomain
  *
  * @return bool
  */
-function is_email( null|string|Stringable $value, string ...$enforceDomain ) : bool
+function is_email( mixed $value, string ...$enforceDomain ) : bool
 {
+    // Bail early on non-stringable values
+    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
+        return false;
+    }
+
     // Cannot be null or an empty string
     if ( ! $string = (string) $value ) {
         return false;
@@ -767,32 +778,6 @@ function key_rand( false|string $hash = 'xxh64', int $entropy = 7 ) : string
 // </editor-fold>
 
 // <editor-fold desc="Strings">
-
-/**
- * Ensures the appropriate string encoding.
- *
- *⚠️ This function can be expensive.
- *
- * @param null|string|Stringable $string
- * @param false|int<2,4>         $tabSize  [4]
- * @param null|non-empty-string  $encoding [UTF-8]
- *
- * @return string
- */
-#[Deprecated]
-function str_normalize(
-    string|Stringable|null $string,
-    false|int              $tabSize = 4,
-    ?string                $encoding = AUTO,
-) : string {
-    trigger_deprecation(
-        'Support\str_normalize',
-        '_dev',
-        __METHOD__.' deprecated, use \Support\normalize_string(..) instead.',
-    );
-
-    return normalize_string( $string, $tabSize, $encoding );
-}
 
 function str_contains_only( string|Stringable|null $string, string $characters ) : bool
 {
@@ -995,43 +980,6 @@ function str_bisect(
     ];
 }
 
-/**
- * Replace each key from `$map` with its value, when found in `$content`.
- *
- * @param array<string,null|string|Stringable> $map
- * @param string[]                             $content
- * @param bool                                 $caseSensitive
- *
- * @return ($content is string ? string : string[])
- */
-function str_replace_each(
-    array        $map,
-    string|array $content,
-    bool         $caseSensitive = true,
-) : string|array {
-    // Bail early on empty content
-    if ( ! $content ) {
-        return $content;
-    }
-
-    // Validate and normalize the $map
-    foreach ( $map as $match => $replace ) {
-        \assert( \is_string( $match ), __METHOD__.' does not accept empty match keys' );
-        $map[$match] = (string) $replace;
-    }
-
-    $search  = \array_keys( $map );
-    $replace = \array_values( $map );
-
-    /**
-     * @var string[] $search
-     * @var string[] $replace
-     * */
-    return $caseSensitive
-            ? \str_replace( $search, $replace, $content )
-            : \str_ireplace( $search, $replace, $content );
-}
-
 function mb_str_starts_with(
     null|string|Stringable $haystack,
     null|string|Stringable $needle,
@@ -1046,34 +994,6 @@ function mb_str_ends_with(
     $haystack = (string) $haystack;
     $needle   = (string) $needle;
     return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
-}
-
-function str_start(
-    null|string|Stringable $string,
-    null|string|Stringable $with,
-) : string {
-    $string = (string) $string;
-    $with   = (string) $with;
-
-    if ( \str_starts_with( $string, $with ) ) {
-        return $string;
-    }
-
-    return $with.$string;
-}
-
-function str_end(
-    null|string|Stringable $string,
-    null|string|Stringable $with,
-) : string {
-    $string = (string) $string;
-    $with   = (string) $with;
-
-    if ( \str_ends_with( $string, $with ) ) {
-        return $string;
-    }
-
-    return $string.$with;
 }
 
 function str_starts_with_any(
