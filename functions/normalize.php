@@ -87,14 +87,14 @@ function normalize_string(
 
                 // Replace $tabs with "\t", excess spaces discarded
                 // Otherwise leading whitespace is trimmed
-                return ( $tabs > 0 ) ? \str_repeat( "\t", $tabs ) : '';
+                return ( $tabs > 0 ) ? \str_repeat( TAB, $tabs ) : '';
             },
             $string,
         );
     }
 
     // Trim repeated whitespace, normalize line breaks
-    return (string) \preg_replace( ['# +#', '#\r\n#', '#\r#'], [' ', "\n"], \trim( $string ) );
+    return (string) \preg_replace( ['# +#', '#\r\n#', '#\r#'], [' ', NEWLINE], \trim( $string ) );
 }
 
 /**

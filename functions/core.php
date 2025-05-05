@@ -118,6 +118,10 @@ function datetime(
     }
     catch ( Exception $exception ) {
         $message = 'Unable to create a new DateTimeImmutable object: '.$exception->getMessage();
-        throw new InvalidArgumentException( $message, 500, $exception );
+        throw new InvalidArgumentException(
+            $message,
+            E_RECOVERABLE_ERROR,
+            $exception,
+        );
     }
 }
