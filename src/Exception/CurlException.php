@@ -12,15 +12,17 @@ final class CurlException extends Exception
     use ExceptionMethods;
 
     public function __construct(
-        int        $httpCode,
-        string     $curlError,
-        ?string    $message = null,
-        ?Throwable $previous = null,
+        public readonly int    $httpCode,
+        public readonly string $curlError,
+        ?string                $message = null,
+        ?Throwable             $previous = null,
     ) {
-        parent::__construct(
-            $message ?? $this->getThrowCall()." cURL [{$httpCode}] error: ".$curlError,
-            E_RECOVERABLE_ERROR,
-            $previous,
-        );
+        if ( ! $message ) {
+            $message = $this->getThrowCall();
+            $message = $message ? ' ' : '';
+            $message .= "[{$httpCode}] ".$curlError;
+        }
+
+        parent::__construct( $message, E_RECOVERABLE_ERROR, $previous );
     }
 }
