@@ -3,6 +3,12 @@
   "description": "Core implementation.",
   "type": "library",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Martin",
+      "email": "mn@northrook.com"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Core\\": "src",
@@ -10,25 +16,21 @@
     },
     "files": [
       "functions/arguments.php",
+      "functions/array.php",
       "functions/core.php",
       "functions/filesystem.php",
       "functions/normalize.php",
-      "functions/strings.php",
+      "functions/string.php",
       "support/constants.php",
       "support/functions.php"
     ]
   },
-  "authors": [
-    {
-      "name": "Martin",
-      "email": "mn@northrook.com"
-    }
-  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
     "php": ">=8.3",
-    "ext-ctype": "*"
+    "ext-ctype": "*",
+    "ext-curl": "*"
   },
   "require-dev": {
     "northrook/dev": "dev-main",

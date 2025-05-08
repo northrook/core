@@ -147,7 +147,7 @@ function normalize_slashes( string|Stringable $string ) : string
  * @param null|array<array-key,null|string|Stringable>|string|Stringable $path
  * @param bool                                                           $traversal
  * @param bool                                                           $throwOnFault
- * @param string                                                         $separator
+ * @param non-empty-string                                               $separator
  *
  * @return string
  */
@@ -186,6 +186,15 @@ function normalize_path(
     }
 
     $fragments = [];
+
+    if ( empty( $path ) ) {
+        return EMPTY_STRING;
+    }
+
+    \assert(
+        ! empty( $separator ),
+        __METHOD__.'( $separator ) must be a non-empty string',
+    );
 
     // Deduplicate separators and handle traversal
     foreach ( \explode( $separator, $path ) as $fragment ) {

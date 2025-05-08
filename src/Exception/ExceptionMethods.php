@@ -10,24 +10,27 @@ trait ExceptionMethods
     {
         $trace = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 );
 
-        if ( \count( $trace ) === 2 ) {
-            return "{$trace[1]['file']}:{$trace[1]['line']}";
-        }
-
         $caller = $trace[2] ?? null;
 
-        if ( $caller ) {
-            if ( isset( $caller['class'], $caller['function'] ) ) {
-                return "{$caller['class']}::{$caller['function']}";
+        if ( \count( $trace ) > 2 && $caller ) {
+            $class    = $caller['class'] ?? null;
+            $function = $caller['function'] ?: null;
+
+            if ( $class ) {
+                return "{$class}::{$function}";
             }
-            if ( isset( $caller['function'] ) ) {
-                return "{$caller['function']}";
-            }
-            if ( isset( $caller['file'] ) ) {
-                return "{$caller['file']}:{$caller['line']}";
+            if ( $function ) {
+                return $function;
             }
         }
 
-        return null;
+        $file = $trace[1]['file'] ?? null;
+        $line = $trace[1]['line'] ?? null;
+
+        if ( $line !== null ) {
+            $file .= ":{$line}";
+        }
+
+        return $file;
     }
 }
