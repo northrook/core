@@ -40,13 +40,21 @@ namespace Support {
      */
     const LOG_LEVEL = [
         'debug'     => 100,
+        100         => 'debug',
         'info'      => 200,
+        200         => 'info',
         'notice'    => 250,
+        250         => 'notice',
         'warning'   => 300,
+        300         => 'warning',
         'error'     => 400,
+        400         => 'error',
         'critical'  => 500,
+        500         => 'critical',
         'alert'     => 550,
+        550         => 'alert',
         'emergency' => 600,
+        600         => 'emergency',
     ];
 
     /** Do not cache at all */

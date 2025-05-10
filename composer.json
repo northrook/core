@@ -20,6 +20,7 @@
       "functions/core.php",
       "functions/filesystem.php",
       "functions/normalize.php",
+      "functions/regex.php",
       "functions/string.php",
       "support/constants.php",
       "support/functions.php"

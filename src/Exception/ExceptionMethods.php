@@ -6,9 +6,9 @@ namespace Core\Exception;
 
 trait ExceptionMethods
 {
-    final protected function getThrowCall() : ?string
+    final protected function getThrowCall( int $limit = 3 ) : ?string
     {
-        $trace = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 );
+        $trace = \debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, $limit );
 
         $caller = $trace[2] ?? null;
 

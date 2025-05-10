@@ -9,7 +9,7 @@ interface Printable extends Stringable
     /**
      * Prepare a string of HTML for front-end use.
      *
-     * Must handle all parsing, optimization, escaping, and encoding.
+     * Must handle parsing, optimization, escaping, and encoding.
      *
      * Strings returned will be regarded as safe for front-end use.
      *
@@ -20,7 +20,7 @@ interface Printable extends Stringable
     public function toString() : ?string;
 
     /**
-     * Echo the resulting HTML, or nothing if the element does not pass validation.
+     * Echo the resulting HTML or nothing if the element does not pass validation.
      *
      * ⚠️ Assumes the {@see __toString()} handles all parsing, optimization, escaping, and encoding.
      *
