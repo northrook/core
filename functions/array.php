@@ -9,7 +9,7 @@ use InvalidArgumentException;
  *
  * @param array<array-key,mixed> $array
  *
- * @phpstan-assert-if-true array<string, mixed> $array
+ * @phpstan-assert-if-true array<non-empty-string, mixed> $array
  * @return bool
  */
 function array_is_associative( array $array ) : bool

@@ -6,26 +6,25 @@ use Attribute;
 use ReflectionAttribute, ReflectionClass;
 use ReflectionException, InvalidArgumentException;
 use function Support\array_is_associative;
-use const Support\AUTO;
 
 #[Attribute( Attribute::TARGET_METHOD )]
-final class OnBuild
+class Hook
 {
-    /** @var array<string, array<int, array{0: non-empty-string, 1: array<string,mixed>}>> */
+    /** @var array<string, array<int, array{0: non-empty-string, 1: array<non-empty-string,mixed>}>> */
     private static array $cache = [];
 
-    /** @var array<string, mixed> */
+    /** @var array<non-empty-string, mixed> */
     public readonly array $arguments;
 
     /**
-     * @param ?int  $buildPriority Higher priority methods executed first
      * @param mixed ...$arguments
      */
-    public function __construct(
-        public readonly ?int $buildPriority = AUTO,
-        mixed             ...$arguments,
-    ) {
-        \assert( array_is_associative( $arguments ) );
+    public function __construct( mixed ...$arguments )
+    {
+        \assert(
+            array_is_associative( $arguments ),
+            $this::class.' only accepts named arguments.',
+        );
         $this->arguments = $arguments;
     }
 
@@ -49,7 +48,7 @@ final class OnBuild
      *
      * @param class-string $className
      *
-     * @return array<int, array{0: non-empty-string, 1: array<string,mixed>}>
+     * @return array<int, array{0: non-empty-string, 1: array<non-empty-string,mixed>}>
      */
     final public static function resolve( string $className ) : array
     {
@@ -66,17 +65,17 @@ final class OnBuild
 
         foreach ( ( new ReflectionClass( $className ) )->getMethods() as $method ) {
             $attribute = $method->getAttributes(
-                OnBuild::class,
+                Hook::class,
                 ReflectionAttribute::IS_INSTANCEOF,
             )[0] ?? null;
 
             $onBuild = $attribute?->newInstance();
 
-            if ( ! $onBuild instanceof OnBuild ) {
+            if ( ! $onBuild instanceof Hook ) {
                 continue;
             }
 
-            $priority = $onBuild->buildPriority ?? \count( $onBuildMethods );
+            $priority = $onBuild->_priority ?? \count( $onBuildMethods );
             while ( isset( $onBuildMethods[$priority] ) ) {
                 $priority++;
             }
@@ -102,8 +101,6 @@ final class OnBuild
 
             $onBuildMethods[$priority] = [$methodName, $parameters];
         }
-
-        \ksort( $onBuildMethods );
 
         return self::$cache[$className] = $onBuildMethods;
     }
