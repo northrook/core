@@ -9,10 +9,14 @@ use InvalidArgumentException;
  *
  * @param array<array-key,mixed> $array
  *
+ * @phpstan-assert-if-true array<string, mixed> $array
  * @return bool
  */
 function array_is_associative( array $array ) : bool
 {
+    if ( empty( $array ) ) {
+        return true;
+    }
     return (bool) \count( \array_filter( \array_keys( $array ), '\is_string' ) );
 }
 
