@@ -16,7 +16,7 @@ use const Support\LOG_LEVEL;
  */
 trait LogHandler
 {
-    protected ?LoggerInterface $logger = null;
+    private ?LoggerInterface $logger = null;
 
     /**
      * @param null|LoggerInterface $logger
