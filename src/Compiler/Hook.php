@@ -65,13 +65,13 @@ class Hook
 
         foreach ( ( new ReflectionClass( $className ) )->getMethods() as $method ) {
             $attribute = $method->getAttributes(
-                Hook::class,
+                self::class,
                 ReflectionAttribute::IS_INSTANCEOF,
             )[0] ?? null;
 
             $onBuild = $attribute?->newInstance();
 
-            if ( ! $onBuild instanceof Hook ) {
+            if ( ! $onBuild instanceof self ) {
                 continue;
             }
 
