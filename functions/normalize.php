@@ -248,10 +248,14 @@ function normalize_path(
  * @return string
  */
 function normalize_url(
-    string|array $path,
-    false|string $substituteWhitespace = '-',
-    bool         $trailingSlash = false,
+    null|string|Stringable|array $path,
+    false|string                 $substituteWhitespace = '-',
+    bool                         $trailingSlash = false,
 ) : string {
+    // Return early on an empty $path
+    if ( ! $path ) {
+        return EMPTY_STRING;
+    }
     $string = \is_array( $path ) ? \implode( '/', $path ) : $path;
 
     // Normalize slashes
