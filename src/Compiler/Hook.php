@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Compiler;
 
 use Attribute;
 use ReflectionAttribute, ReflectionClass;
 use ReflectionException, InvalidArgumentException;
 use function Support\array_is_associative;
+use const Support\AUTO;
 
 #[Attribute( Attribute::TARGET_METHOD )]
 class Hook
@@ -17,10 +20,15 @@ class Hook
     public readonly array $arguments;
 
     /**
-     * @param mixed ...$arguments
+     * @param ?string                 $name
+     * @param array<array-key, mixed> $arguments
+     * @param bool                    $bind
      */
-    public function __construct( mixed ...$arguments )
-    {
+    public function __construct(
+        public readonly ?string $name = AUTO,
+        array                   $arguments = [],
+        public readonly bool    $bind = false,
+    ) {
         \assert(
             array_is_associative( $arguments ),
             $this::class.' only accepts named arguments.',
@@ -46,12 +54,14 @@ class Hook
      *  }
      *  ```
      *
-     * @param class-string $className
+     * @param class-string<object>|object $class
      *
      * @return array<int, array{0: non-empty-string, 1: array<non-empty-string,mixed>}>
      */
-    final public static function resolve( string $className ) : array
+    final public static function resolve( string|object $class ) : array
     {
+        $className = \is_object( $class ) ? $class::class : \gettype( $class );
+
         if ( isset( self::$cache[$className] ) ) {
             return self::$cache[$className];
         }
@@ -74,14 +84,10 @@ class Hook
             if ( ! $onBuild instanceof self ) {
                 continue;
             }
-
-            $priority = $onBuild->_priority ?? \count( $onBuildMethods );
-            while ( isset( $onBuildMethods[$priority] ) ) {
-                $priority++;
-            }
-
             $methodName = $method->getName();
             $parameters = [];
+
+            $name = $onBuild->name ?? $methodName;
 
             foreach ( $method->getParameters() as $parameter ) {
                 $argument = $parameter->getName();
@@ -99,7 +105,7 @@ class Hook
                 $parameters[$argument] = $value;
             }
 
-            $onBuildMethods[$priority] = [$methodName, $parameters];
+            $onBuildMethods[$name] = [$methodName, $parameters];
         }
 
         return self::$cache[$className] = $onBuildMethods;
