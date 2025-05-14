@@ -16,7 +16,13 @@ use const Support\LOG_LEVEL;
  */
 trait LogHandler
 {
-    private ?LoggerInterface $logger = null;
+    /**
+     * Use {@see self::log()}.
+     *
+     * @internal
+     * @var null|LoggerInterface
+     */
+    protected ?LoggerInterface $logger = null;
 
     /**
      * @param null|LoggerInterface $logger
