@@ -23,14 +23,17 @@ final class TypeException extends InvalidArgumentException
         ?string                $message = null,
         ?Throwable             $previous = null,
     ) {
-        $type       = \gettype( $argument );
+        $type = \is_object( $argument )
+                ? $argument::class
+                : \gettype( $argument );
+
         $this->type = match ( $type ) {
             'boolean' => 'bool',
             'integer' => 'int',
             'double'  => 'float',
-            'object'  => ( \class_exists( $argument, false ) && \is_object( $argument ) ) ? $argument::class : 'object',
             default   => $type,
         };
+
         $message ??= "Expected '{$this->expected}', but got '{$this->type}'";
         parent::__construct( $message, 0, $previous );
     }

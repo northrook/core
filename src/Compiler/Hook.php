@@ -9,11 +9,12 @@ use ReflectionAttribute, ReflectionClass;
 use ReflectionException, InvalidArgumentException;
 use function Support\array_is_associative;
 use const Support\AUTO;
+use LogicException;
 
 #[Attribute( Attribute::TARGET_METHOD )]
 class Hook
 {
-    /** @var array<string, array<int, array{0: non-empty-string, 1: array<non-empty-string,mixed>}>> */
+    /** @var array<string, array<string,HookClosure>> */
     private static array $cache = [];
 
     /** @var array<non-empty-string, mixed> */
@@ -36,6 +37,46 @@ class Hook
         $this->arguments = $arguments;
     }
 
+    final public static function trigger( object $class, string ...$hook ) : void
+    {
+        foreach ( Hook::get( $class, ...$hook ) as $closure ) {
+            $closure();
+        }
+    }
+
+    final public static function fire( object $class, string ...$hook ) : void
+    {
+        foreach ( Hook::get( $class, ...$hook ) as $closure ) {
+            if ( $closure->fired ) {
+                continue;
+            }
+            $closure();
+        }
+    }
+
+    /**
+     * @param object $class
+     * @param string $hook
+     *
+     * @return HookClosure[]
+     */
+    final public static function get( object $class, string ...$hook ) : array
+    {
+        if ( ! $hook ) {
+            return Hook::resolve( $class );
+        }
+
+        $hooks = [];
+
+        foreach ( Hook::resolve( $class ) as $call ) {
+            if ( \in_array( $call->name, $hook, true ) ) {
+                $hooks[] = $call;
+            }
+        }
+
+        return $hooks;
+    }
+
     /**
      * Returns an array of methods to call in a `build` step.
      *
@@ -54,46 +95,43 @@ class Hook
      *  }
      *  ```
      *
-     * @param class-string<object>|object $class
+     * @param object $class
      *
-     * @return array<int, array{0: non-empty-string, 1: array<non-empty-string,mixed>}>
+     * @return array<string, HookClosure>
      */
-    final public static function resolve( string|object $class ) : array
+    final public static function resolve( object $class ) : array
     {
-        $className = \is_object( $class ) ? $class::class : \gettype( $class );
+        $className = $class::class;
 
         if ( isset( self::$cache[$className] ) ) {
             return self::$cache[$className];
         }
 
-        \assert(
-            \class_exists( $className ),
-            __METHOD__." expected an existing class; {$className} does not exist.",
-        );
+        /** @var array<string, HookClosure> $hooks */
+        $hooks = [];
 
-        $onBuildMethods = [];
-
-        foreach ( ( new ReflectionClass( $className ) )->getMethods() as $method ) {
+        foreach ( ( new ReflectionClass( $class ) )->getMethods() as $method ) {
+            // Get annotated methods
             $attribute = $method->getAttributes(
                 self::class,
                 ReflectionAttribute::IS_INSTANCEOF,
             )[0] ?? null;
 
-            $onBuild = $attribute?->newInstance();
-
-            if ( ! $onBuild instanceof self ) {
+            if ( ! $attribute ) {
                 continue;
             }
             $methodName = $method->getName();
-            $parameters = [];
+            $arguments  = [];
 
-            $name = $onBuild->name ?? $methodName;
+            /** @var self $hook */
+            $hook = $attribute->newInstance();
+            $name = $hook->name ?? $methodName;
 
             foreach ( $method->getParameters() as $parameter ) {
                 $argument = $parameter->getName();
 
                 try {
-                    $value = $onBuild->arguments[$argument] ?? $parameter->getDefaultValue();
+                    $value = $hook->arguments[$argument] ?? $parameter->getDefaultValue();
                 }
                 catch ( ReflectionException $exception ) {
                     throw new InvalidArgumentException(
@@ -102,13 +140,38 @@ class Hook
                     );
                 }
 
-                $parameters[$argument] = $value;
+                $arguments[$argument] = $value;
             }
 
-            $onBuildMethods[$name] = [$methodName, $parameters];
+            try {
+                $closure = $method->getClosure( $class );
+            }
+            catch ( ReflectionException $exception ) {
+                throw new LogicException(
+                    $exception->getMessage(),
+                    previous : $exception,
+                );
+            }
+
+            $hookClosure = new HookClosure(
+                $name,
+                $closure,
+                $arguments,
+                $hook::class,
+            );
+
+            $hooks[$hookClosure->id] = $hookClosure;
         }
 
-        return self::$cache[$className] = $onBuildMethods;
+        return self::$cache[$className] = $hooks;
+    }
+
+    /**
+     * @return HookClosure[][]
+     */
+    public static function peekCache() : array
+    {
+        return self::$cache;
     }
 
     /**

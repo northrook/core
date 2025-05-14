@@ -10,6 +10,8 @@ parameters:
 		treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		-
+			identifier: trait.unused
+		-
 			message: '#PHPDoc tag @phpstan-assert-if-true for.+iterable.#'
 			path: *.php
 		-
