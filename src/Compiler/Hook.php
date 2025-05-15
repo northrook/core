@@ -6,10 +6,8 @@ namespace Core\Compiler;
 
 use Attribute;
 use ReflectionAttribute, ReflectionClass;
-use ReflectionException, InvalidArgumentException;
+use LogicException, ReflectionException, InvalidArgumentException;
 use function Support\array_is_associative;
-use const Support\AUTO;
-use LogicException;
 
 #[Attribute( Attribute::TARGET_METHOD )]
 class Hook
@@ -23,12 +21,10 @@ class Hook
     /**
      * @param ?string                 $name
      * @param array<array-key, mixed> $arguments
-     * @param bool                    $bind
      */
     public function __construct(
-        public readonly ?string $name = AUTO,
+        public readonly ?string $name = null,
         array                   $arguments = [],
-        public readonly bool    $bind = false,
     ) {
         \assert(
             array_is_associative( $arguments ),
