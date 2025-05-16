@@ -49,7 +49,7 @@ function arr_has_keys(
  *
  * @param array<TKey, TValue> $array
  * @param ?callable           $callback
- * @param int-mask<0,2>       $mode      ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param int-mask<0,1,2>     $mode      ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  * @param bool                $recursive
  *
  * @return array<TKey, TValue>
@@ -82,7 +82,7 @@ function arr_filter(
  * @param array<array-key, mixed> $array
  * @param bool                    $preserveKeys
  * @param bool                    $filter
- * @param int<0,2>                $filterMode   ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param int-mask<0,1,2>         $filterMode   ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return array<array-key, mixed>
  */
