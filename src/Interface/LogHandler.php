@@ -42,7 +42,7 @@ trait LogHandler
      * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $level
      * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $threshold
      */
-    final protected function handleLog(
+    final protected function log(
         #[Language( 'Smarty' )]
         string|Stringable|Throwable $message,
         array                       $context = [],
