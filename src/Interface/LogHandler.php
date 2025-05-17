@@ -42,7 +42,7 @@ trait LogHandler
      * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $level
      * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $threshold
      */
-    final protected function log(
+    final protected function handleLog(
         #[Language( 'Smarty' )]
         string|Stringable|Throwable $message,
         array                       $context = [],
@@ -68,7 +68,6 @@ trait LogHandler
             return;
         }
 
-        dump( \get_defined_vars() );
         // Only throw for [error] and above
         if ( LOG_LEVEL[$level] < LOG_LEVEL[$threshold] ) {
             return;
