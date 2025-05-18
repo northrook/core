@@ -39,12 +39,14 @@ interface SettingsProviderInterface extends ProviderInterface
      * @param string                               $setting
      * @param null|array<array-key, scalar>|scalar $set
      *
+     * @return self
+     *
      * @throws LogicException if the parameter cannot be set
      */
     public function set(
         string $setting,
         mixed  $set,
-    ) : void;
+    ) : self;
 
     /**
      * Add one or more settings.
@@ -53,6 +55,8 @@ interface SettingsProviderInterface extends ProviderInterface
      *
      * @param string                               $setting
      * @param null|array<array-key, scalar>|scalar $add
+     *
+     * @return self
      *
      * @throws LogicException if the setting cannot be updated or added
      */
