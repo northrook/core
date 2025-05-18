@@ -10,6 +10,7 @@ use Throwable;
 use LogicException;
 use RuntimeException;
 use const Support\LOG_LEVEL;
+use Exception;
 
 /**
  * @phpstan-require-implements \Core\Interface\Loggable
@@ -54,7 +55,8 @@ trait LogHandler
             $level = LOG_LEVEL[$exception->getCode()] ?? match ( true ) {
                 $exception instanceof RuntimeException,
                 $exception instanceof LogicException => 'critical',
-                default                              => 'error',
+                $exception instanceof Exception      => 'error',
+                default                              => 'warning',
             };
             $context = ['exception' => $exception];
             $message = $exception->getMessage();

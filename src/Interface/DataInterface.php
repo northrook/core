@@ -8,7 +8,7 @@ namespace Core\Interface;
  * The class must follow these rules:
  * - All properties are `public`.
  * - {@see self::__construct} ingests typed arguments.
- * - No internal logic outside of handling ingested data.
+ * - No internal logic outside handling ingested data.
  *
  * The class may add `get` methods for conditional property retrieval.
  *
