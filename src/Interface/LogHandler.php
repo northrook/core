@@ -13,17 +13,14 @@ use const Support\LOG_LEVEL;
 use Exception;
 
 /**
+ * {@see self::log()} events and exceptions.
+ *
  * @phpstan-require-implements \Core\Interface\Loggable
  */
 trait LogHandler
 {
-    /**
-     * Use {@see self::log()}.
-     *
-     * @internal
-     * @var null|LoggerInterface
-     */
-    protected ?LoggerInterface $logger = null;
+    /** @var null|LoggerInterface */
+    protected readonly ?LoggerInterface $logger;
 
     /**
      * @param null|LoggerInterface $logger
