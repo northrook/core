@@ -36,7 +36,7 @@ class Hook
     final public static function trigger( object $class, string ...$hook ) : void
     {
         foreach ( Hook::get( $class, ...$hook ) as $closure ) {
-            $closure();
+            $closure->call( $class );
         }
     }
 
@@ -46,7 +46,7 @@ class Hook
             if ( $closure->fired ) {
                 continue;
             }
-            $closure();
+            $closure->call( $class );
         }
     }
 
