@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Core\Interface;
+namespace Core\Autowire;
+
+use Core\Interface\SettingsProviderInterface;
 
 trait SettingsAccessor
 {
@@ -17,9 +19,8 @@ trait SettingsAccessor
      *
      * @return void
      */
-    final public function setSettingsProvider(
-        SettingsProviderInterface $provider,
-    ) : void {
+    final public function setSettingsProvider( SettingsProviderInterface $provider ) : void
+    {
         $this->settings = $provider;
     }
 
