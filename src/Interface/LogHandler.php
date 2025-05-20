@@ -13,6 +13,7 @@ use LogicException;
 use RuntimeException;
 use const Support\LOG_LEVEL;
 use Exception;
+use BadMethodCallException;
 
 /**
  * {@see self::log()} events and exceptions.
@@ -49,6 +50,10 @@ trait LogHandler
         string                      $level = 'info',
         string                      $threshold = 'error',
     ) : void {
+        if ( ! isset( $this->logger ) ) {
+            throw new BadMethodCallException( 'Logger not set.' );
+        }
+
         // Auto-fill exceptions
         if ( $exception = ( $message instanceof Throwable ? $message : null ) ) {
             $level = LOG_LEVEL[$exception->getCode()] ?? match ( true ) {
