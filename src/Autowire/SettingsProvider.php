@@ -6,7 +6,7 @@ namespace Core\Autowire;
 
 use Core\Interface\SettingsProviderInterface;
 
-trait SettingsAccessor
+trait SettingsProvider
 {
     private readonly SettingsProviderInterface $settings;
 
