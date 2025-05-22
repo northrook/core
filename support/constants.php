@@ -36,7 +36,29 @@ namespace Support {
     const PLACEHOLDER_FLOAT  = 0;
 
     /**
-     * Log levels, following Monolog and [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
+     * Log level by name - [RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)
+     */
+    const
+        LOG_DEBUG     = 'debug',
+        LOG_INFO      = 'info',
+        LOG_NOTICE    = 'notice',
+        LOG_WARNING   = 'warning',
+        LOG_ERROR     = 'error',
+        LOG_CRITICAL  = 'critical',
+        LOG_ALERT     = 'alert',
+        LOG_EMERGENCY = 'emergency';
+
+    /**
+     * Log levels, following [Monolog](https://github.com/Seldaek/monolog/blob/main/src/Monolog/Level.php).
+     *
+     * 7 `100` `Debug` debug-level messages
+     * 6 `200` `Informational` informational messages
+     * 5 `250` `Notice` normal but significant condition
+     * 4 `300` `Warning` warning conditions
+     * 3 `400` `Error` error conditions
+     * 2 `500` `Critical` critical conditions
+     * 1 `550` `Alert` action must be taken immediately
+     * 0 `600` `Emergency` system is unusable
      */
     const LOG_LEVEL = [
         'debug'     => 100,

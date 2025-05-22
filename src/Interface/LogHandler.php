@@ -27,11 +27,18 @@ trait LogHandler
 
     /**
      * @param null|LoggerInterface $logger
+     * @param bool                 $assignNull
      *
      * @return void
      */
-    final public function setLogger( ?LoggerInterface $logger ) : void
-    {
+    final public function setLogger(
+        ?LoggerInterface $logger,
+        bool             $assignNull = false,
+    ) : void {
+        if ( $logger === null && $assignNull === false ) {
+            return;
+        }
+
         $this->logger = $logger;
     }
 
