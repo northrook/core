@@ -11,9 +11,9 @@ use Stringable;
 use Throwable;
 use LogicException;
 use RuntimeException;
-use const Support\LOG_LEVEL;
 use Exception;
 use BadMethodCallException;
+use const Support\LOG_LEVEL;
 
 /**
  * {@see self::log()} events and exceptions.

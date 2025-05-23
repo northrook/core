@@ -21,6 +21,24 @@ function array_is_associative( array $array ) : bool
 }
 
 /**
+ * Check if the `$value` is a multidimensional iterable.
+ *
+ * @param mixed $value
+ *
+ * @return bool
+ */
+function is_multidimensional( mixed $value ) : bool
+{
+    if ( ! \is_iterable( $value ) ) {
+        return false;
+    }
+
+    $array = \iterator_to_array( $value, false );
+
+    return (bool) \count( \array_filter( $array, '\is_iterable' ) );
+}
+
+/**
  * Ensures the provided array contains all keys.
  *
  * @param array<array-key, mixed> $array

@@ -576,7 +576,7 @@ function is_url( mixed $value, ?string $requiredProtocol = null ) : bool
      *
      * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
      */
-    if ( ! \preg_match( '#^([\w\-+]*?[:/]{2}).+\.[a-z0-9]{2,}#m', $string ) ) {
+    if ( ! \preg_match( '#^([\w\-+]*?://)(\S.+)\.[a-z0-9]{2,}#m', $string ) ) {
         return false;
     }
 
@@ -764,90 +764,6 @@ function key_rand( false|string $hash = 'xxh64', int $entropy = 7 ) : string
 // </editor-fold>
 
 // <editor-fold desc="Strings">
-
-function str_contains_only( string|Stringable|null $string, string $characters ) : bool
-{
-    $string = (string) $string;
-
-    if ( ! $characters ) {
-        $message = __FUNCTION__.' requires at least one character to look for.';
-        throw new InvalidArgumentException( $message );
-    }
-
-    return \strspn( $string, $characters ) === \strlen( $string );
-}
-
-/**
- * Determines if a given set of characters is fully included in a string.
- *
- * Checks whether all characters from the specified character set exist in the string,
- * starting at an optional offset and considering an optional length.
- *
- * @param null|string|Stringable $string     the string to search within
- * @param string                 $characters the set of characters to check for inclusion
- * @param int                    $offset     The position in the string to start the search. Defaults to 0.
- * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
- *
- * @return bool returns true if all characters from the set are found in the string, false otherwise
- */
-function str_includes(
-    null|string|Stringable $string,
-    string                 $characters,
-    int                    $offset = 0,
-    ?int                   $length = null,
-) : bool {
-    if ( ! $string = (string) $string ) {
-        return false;
-    }
-    return \strlen( $characters ) === \strspn( $characters, $string, $offset, $length );
-}
-
-/**
- * Determines if a given set of characters is fully included in a string.
- *
- * Checks whether all characters from the specified character set exist in the string,
- * starting at an optional offset and considering an optional length.
- *
- * @param null|string|Stringable $string     the string to search within
- * @param string                 $characters the set of characters to check for inclusion
- * @param int                    $offset     The position in the string to start the search. Defaults to 0.
- * @param ?int                   $length     The length of the substring to consider. If null, the entire string is used from the offset.
- *
- * @return bool returns true if all characters from the set are found in the string, false otherwise
- */
-function str_includes_any(
-    null|string|Stringable $string,
-    string                 $characters,
-    int                    $offset = 0,
-    ?int                   $length = null,
-) : bool {
-    if ( ! $string = (string) $string ) {
-        return false;
-    }
-    return \strpbrk( $string, $characters ) !== false;
-}
-
-/**
- * Checks if the given string excludes specific characters within an optional range.
- *
- * @param null|string|Stringable $string     the input string to evaluate
- * @param string                 $characters a list of characters to check for exclusion
- * @param int                    $offset     the starting position for the check (default is 0)
- * @param ?int                   $length     the length of the substring to check (default is null, meaning until the end of the string)
- *
- * @return bool returns true if the string excludes all specified characters, false otherwise
- */
-function str_excludes(
-    null|string|Stringable $string,
-    string                 $characters,
-    int                    $offset = 0,
-    ?int                   $length = null,
-) : bool {
-    if ( ! $string = (string) $string ) {
-        return true;
-    }
-    return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
-}
 
 /**
  * @param null|string|Stringable       $string

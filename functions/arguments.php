@@ -8,24 +8,6 @@ use Stringable;
 use UnitEnum;
 
 /**
- * Check if the `$value` is a multidimensional iterable.
- *
- * @param mixed $value
- *
- * @return bool
- */
-function is_multidimensional( mixed $value ) : bool
-{
-    if ( ! \is_iterable( $value ) ) {
-        return false;
-    }
-
-    $array = \iterator_to_array( $value, false );
-
-    return (bool) \count( \array_filter( $array, '\is_iterable' ) );
-}
-
-/**
  * This function tries very hard to return a string from any given `$value`.
  *
  * @param mixed $value

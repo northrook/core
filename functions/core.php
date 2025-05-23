@@ -57,7 +57,7 @@ function ob_get( callable $callback, mixed ...$args ) : string
     catch ( Throwable $exception ) {
         \ob_end_clean();
         throw new RuntimeException(
-            message  : 'An error occurred while capturinb the callback.',
+            message  : 'An error occurred while capturing the callback.',
             code     : 500,
             previous : $exception,
         );

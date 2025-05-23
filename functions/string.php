@@ -5,6 +5,7 @@ namespace Support;
 use Stringable;
 use InvalidArgumentException;
 use OverflowException;
+use LengthException;
 
 /**
  * Ensures the appropriate string encoding.
@@ -18,8 +19,10 @@ use OverflowException;
  *
  * @return string
  */
-function str_encode( null|string|Stringable $string, ?string $encoding = CHARSET ) : string
-{
+function str_encode(
+    null|string|Stringable $string,
+    ?string                $encoding = CHARSET,
+) : string {
     if ( ! $string = (string) $string ) {
         return EMPTY_STRING;
     }
@@ -31,6 +34,108 @@ function str_encode( null|string|Stringable $string, ?string $encoding = CHARSET
     $map      = [0x80, 0x10_FF_FF, 0, ~0];
 
     return \mb_encode_numericentity( $decoded, $map, $encoding );
+}
+
+/**
+ * Determine if a given `$string` contains only `$characters` in any number and order.
+ *
+ * @param null|string|Stringable $string     input string to check
+ * @param non-empty-string       $characters set of allowed characters
+ *
+ * @return bool true if the string contains only the specified characters, false otherwise
+ */
+function str_contains_only(
+    string|Stringable|null $string,
+    string                 $characters,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+    if ( ! $characters ) {
+        throw new LengthException( __FUNCTION__.' requires at least one character to look for.' );
+    }
+
+    return \strspn( $string, $characters ) === \strlen( $string );
+}
+
+/**
+ * Determine if a given `$string` contains all `$characters` in any number and order.
+ *
+ * - Starting at an optional offset and considering an optional length.
+ *
+ * @param null|string|Stringable $string     string to search within
+ * @param non-empty-string       $characters set of characters to check for inclusion
+ * @param int                    $offset     position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     length of the substring to consider. If null, the entire string is used from the offset.
+ *
+ * @return bool true if all characters from the set are found in the string, false otherwise
+ */
+function str_includes_all(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    if ( ! $characters ) {
+        throw new LengthException( __FUNCTION__.' requires at least one character to look for.' );
+    }
+
+    return \strlen( $characters ) === \strspn( $characters, $string, $offset, $length );
+}
+
+/**
+ * Determine if a given `$string` contains at least one of many `$characters` in any number and order.
+ *
+ *  - Starting at an optional offset and considering an optional length.
+ *
+ * @param null|string|Stringable $string     string to search within
+ * @param non-empty-string       $characters set of characters to check for inclusion
+ * @param int                    $offset     position in the string to start the search. Defaults to 0.
+ * @param ?int                   $length     length of the substring to consider. If null, the entire string is used from the offset.
+ *
+ * @return bool true if at least one character from the set is found in the string, false otherwise
+ */
+function str_includes_any(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    if ( ! $characters ) {
+        throw new LengthException( __FUNCTION__.' requires at least one character to look for.' );
+    }
+
+    return \strpbrk( $string, $characters ) !== false;
+}
+
+/**
+ * Checks if the given string excludes specific characters within an optional range.
+ *
+ * @param null|string|Stringable $string     the input string to evaluate
+ * @param string                 $characters a list of characters to check for exclusion
+ * @param int                    $offset     the starting position for the check (default is 0)
+ * @param ?int                   $length     the length of the substring to check (default is null, meaning until the end of the string)
+ *
+ * @return bool returns true if the string excludes all specified characters, false otherwise
+ */
+function str_excludes(
+    null|string|Stringable $string,
+    string                 $characters,
+    int                    $offset = 0,
+    ?int                   $length = null,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return true;
+    }
+    return \strlen( $string ) !== \strcspn( $string, $characters, $offset, $length );
 }
 
 /**
