@@ -36,7 +36,7 @@ class Hook
     final public static function trigger( object $class, string ...$hook ) : void
     {
         foreach ( Hook::get( $class, ...$hook ) as $closure ) {
-            $closure();
+            $closure( $class );
         }
     }
 
@@ -46,7 +46,7 @@ class Hook
             if ( $closure->fired ) {
                 continue;
             }
-            $closure();
+            $closure( $class );
         }
     }
 
@@ -117,6 +117,7 @@ class Hook
                 continue;
             }
             $methodName = $method->getName();
+            $action     = \strrchr( $methodName, '\\', true ) ?: $methodName;
             $arguments  = [];
 
             /** @var self $hook */
@@ -152,6 +153,7 @@ class Hook
             $hookClosure = new HookClosure(
                 $name,
                 $closure,
+                $action,
                 $arguments,
                 $hook::class,
             );

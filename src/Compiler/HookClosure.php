@@ -20,10 +20,12 @@ final class HookClosure
      * @param Closure                 $closure
      * @param array<array-key, mixed> $arguments
      * @param class-string<Hook>      $type
+     * @param string                  $action
      */
     public function __construct(
         public readonly string  $name,
         public readonly Closure $closure,
+        public readonly string  $action,
         public readonly array   $arguments,
         public readonly string  $type,
     ) {
@@ -39,11 +41,16 @@ final class HookClosure
         if ( ! $arguments ) {
             $arguments = $this->arguments;
         }
+
         return $this->handle( $this->closure->call( $newThis, ...$arguments ) );
     }
 
-    public function __invoke() : mixed
+    public function __invoke( ?object $scope = null ) : mixed
     {
+        if ( $scope ) {
+            return $this->handle( [$scope, $this->action]( ...$this->arguments ) );
+        }
+
         return $this->handle( ( $this->closure )( ...$this->arguments ) );
     }
 
