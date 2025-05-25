@@ -18,7 +18,7 @@ final class HookClosure
     /**
      * @param string                  $name
      * @param Closure                 $closure
-     * @param callable-string         $action
+     * @param non-empty-string        $action
      * @param array<array-key, mixed> $arguments
      * @param class-string<Hook>      $type
      */
