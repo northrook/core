@@ -18,9 +18,9 @@ final class HookClosure
     /**
      * @param string                  $name
      * @param Closure                 $closure
+     * @param callable-string         $action
      * @param array<array-key, mixed> $arguments
      * @param class-string<Hook>      $type
-     * @param string                  $action
      */
     public function __construct(
         public readonly string  $name,
@@ -48,7 +48,7 @@ final class HookClosure
     public function __invoke( ?object $scope = null ) : mixed
     {
         if ( $scope ) {
-            return $this->handle( [$scope, $this->action]( ...$this->arguments ) );
+            return $this->handle( $scope->{$this->action}( ...$this->arguments ) );
         }
 
         return $this->handle( ( $this->closure )( ...$this->arguments ) );
@@ -56,7 +56,6 @@ final class HookClosure
 
     private function handle( mixed $result ) : mixed
     {
-        // $this->fired[$this->id] = true;
         $this->fired = true;
         return $result;
     }
