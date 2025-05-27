@@ -26,34 +26,43 @@ function slug(
         return EMPTY_STRING;
     }
 
-    if ( \class_exists( ASCII::class ) ) {
-        /** @var ASCII::* $language */
-        $string = ASCII::to_ascii( $string, $language );
+    static $cache = [];
+
+    if ( \array_key_exists( $string, $cache ) ) {
+        return $cache[$string];
     }
 
-    $parse  = \strtolower( $string );
+    if ( \class_exists( ASCII::class ) ) {
+        /** @var ASCII::* $language */
+        $parse = ASCII::to_ascii( $string, $language );
+    }
+    else {
+        $parse = $string;
+    }
+
+    $parse  = \strtolower( $parse );
     $length = \strlen( $parse );
 
-    $string    = '';
+    $slug      = '';
     $separated = true;
 
     for ( $i = 0; $i < $length; $i++ ) {
         $c = $parse[$i];
         // If the $character is [a-z0-9], add
         if ( $c >= 'a' && $c <= 'z' || $c >= '0' && $c <= '9' ) {
-            $string .= $c;
+            $slug .= $c;
             $separated = false;
         }
         // Add separator as needed
         elseif ( ! $separated ) {
-            $string .= $separator;
+            $slug .= $separator;
             $separated = true;
         }
     }
 
-    $string = \rtrim( $string, $separator );
+    $slug = \rtrim( $slug, $separator );
 
-    return \is_callable( $filter ) ? (string) $filter( $string ) : $string;
+    return $cache[$string] = ( \is_callable( $filter ) ? (string) $filter( $slug ) : $slug );
 }
 
 /**
