@@ -11,7 +11,7 @@ use function Support\{as_string, regex_match_all};
 /**
  * Thrown when an expected {@see \Psr\Log\LoggerInterface} is unavailable.
  *
- * @used-by \Core\Interface\LogHandler
+ * @used-by \Core\Autowire\Logger
  */
 final class LogEventException extends RuntimeException
 {

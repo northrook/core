@@ -4,89 +4,16 @@ declare(strict_types=1);
 
 namespace Core\Interface;
 
-use Core\Exception\LogEventException;
-use JetBrains\PhpStorm\Language;
-use Psr\Log\LoggerInterface;
-use Stringable;
-use Throwable;
-use LogicException;
-use RuntimeException;
-use Exception;
-use BadMethodCallException;
-use const Support\LOG_LEVEL;
+use Core\Autowire\Logger;
+use JetBrains\PhpStorm\Deprecated;
 
 /**
  * {@see self::log()} events and exceptions.
  *
  * @used-by Loggable,LoggerAwareInterface
  */
+#[Deprecated( replacement : Logger::class )]
 trait LogHandler
 {
-    /** @var null|LoggerInterface */
-    protected readonly ?LoggerInterface $logger;
-
-    /**
-     * @param null|LoggerInterface $logger
-     * @param bool                 $assignNull
-     *
-     * @return void
-     */
-    final public function setLogger(
-        ?LoggerInterface $logger,
-        bool             $assignNull = false,
-    ) : void {
-        if ( $logger === null && $assignNull === false ) {
-            return;
-        }
-
-        $this->logger = $logger;
-    }
-
-    /**
-     * Internal logging helper.
-     *
-     * @param string                                                                   $message
-     * @param array<string, mixed>                                                     $context
-     * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $level
-     * @param 'alert'|'critical'|'debug'|'emergency'|'error'|'info'|'notice'|'warning' $threshold
-     */
-    final protected function log(
-        #[Language( 'Smarty' )]
-        string|Stringable|Throwable $message,
-        array                       $context = [],
-        string                      $level = 'info',
-        string                      $threshold = 'error',
-    ) : void {
-        if ( ! isset( $this->logger ) ) {
-            throw new BadMethodCallException( 'Logger not set.' );
-        }
-
-        // Auto-fill exceptions
-        if ( $exception = ( $message instanceof Throwable ? $message : null ) ) {
-            $level = LOG_LEVEL[$exception->getCode()] ?? match ( true ) {
-                $exception instanceof RuntimeException,
-                $exception instanceof LogicException => 'critical',
-                $exception instanceof Exception      => 'error',
-                default                              => 'warning',
-            };
-            $context = ['exception' => $exception];
-            $message = $exception->getMessage();
-        }
-
-        \assert( \in_array( $level, LOG_LEVEL ) && \in_array( $threshold, LOG_LEVEL ) );
-
-        /** Log using the provided {@see LoggerInterface} if available */
-        if ( $this->logger ) {
-            $this->logger->{$level}( $message, $context );
-            return;
-        }
-
-        // Only throw for [error] and above
-        if ( LOG_LEVEL[$level] < LOG_LEVEL[$threshold] ) {
-            return;
-        }
-
-        /** Throw a {@see RuntimeException} as last resort */
-        throw new LogEventException( $message, $context, $exception );
-    }
+    use Logger;
 }
