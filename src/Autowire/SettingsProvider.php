@@ -4,39 +4,42 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
-use Core\Interface\SettingsProviderInterface;
+use Core\Interface\SettingsInterface;
 
 trait SettingsProvider
 {
-    private readonly SettingsProviderInterface $settings;
+    private readonly SettingsInterface $settings;
 
     /**
      * Autowired during the instantiation process of the containing class.
      *
      * @internal
      *
-     * @param SettingsProviderInterface $provider
+     * @param SettingsInterface $provider
      *
      * @return void
+     *
+     * @final
      */
-    final public function setSettingsProvider( SettingsProviderInterface $provider ) : void
+    final public function setSettingsProvider( SettingsInterface $provider ) : void
     {
         $this->settings = $provider;
     }
 
     /**
-     * @template Setting of null|array<array-key, scalar>|scalar
+     * @template T_setting of null|array<array-key, scalar>|scalar
      *
-     * @param string                                   $key
-     * @param null|array|bool|float|int|Setting|string $default
+     * @param string    $key
+     * @param T_setting $default
      *
-     * @return null|array|bool|float|int|string
-     * @phpstan-return Setting
+     * @return T_setting
+     *
+     * @final
      */
     final protected function getSetting(
         string                           $key,
         null|array|bool|float|int|string $default,
-    ) : null|array|bool|float|int|string {
+    ) : mixed {
         return $this->settings->get( $key, $default );
     }
 }
