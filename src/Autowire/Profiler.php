@@ -8,7 +8,7 @@ use Core\Interface\ProfilerInterface;
 
 trait Profiler
 {
-    private readonly ProfilerInterface $profiler;
+    protected readonly ProfilerInterface $profiler;
 
     /**
      * @param ProfilerInterface $profiler
