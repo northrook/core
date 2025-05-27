@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Core\Interface;
 
 use Core\Exception\LogEventException;
-use JetBrains\PhpStorm\{Language};
-use Psr\Log\{LoggerInterface};
+use JetBrains\PhpStorm\Language;
+use Psr\Log\LoggerInterface;
 use Stringable;
 use Throwable;
 use LogicException;
@@ -18,7 +18,7 @@ use const Support\LOG_LEVEL;
 /**
  * {@see self::log()} events and exceptions.
  *
- * @phpstan-require-implements \Core\Interface\Loggable
+ * @used-by Loggable,LoggerAwareInterface
  */
 trait LogHandler
 {
