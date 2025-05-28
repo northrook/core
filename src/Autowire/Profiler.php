@@ -28,8 +28,6 @@ trait Profiler
     }
 
     /**
-     * @internal
-     *
      * @param non-empty-string      $event
      * @param null|non-empty-string $category
      *
@@ -45,8 +43,6 @@ trait Profiler
     }
 
     /**
-     * @internal
-     *
      * @param non-empty-string      $event
      * @param null|non-empty-string $category
      *
@@ -62,8 +58,6 @@ trait Profiler
     }
 
     /**
-     * @internal
-     *
      * @param null|non-empty-string $event
      * @param null|non-empty-string $category
      *
