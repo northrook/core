@@ -14,16 +14,16 @@ use LogicException;
  * @param ?callable-string       $filter    {@see \strtolower} by default
  * @param string                 $language  [en]
  *
- * @return string
+ * @return null|non-empty-string
  */
 function slug(
     null|string|Stringable $string,
     string                 $separator = '-',
     ?string                $filter = 'strtolower',
     string                 $language = 'en',
-) : string {
+) : ?string {
     if ( ! $string = \trim( (string) $string ) ) {
-        return EMPTY_STRING;
+        return null;
     }
 
     static $cache = [];
@@ -62,7 +62,9 @@ function slug(
 
     $slug = \rtrim( $slug, $separator );
 
-    return $cache[$string] = ( \is_callable( $filter ) ? (string) $filter( $slug ) : $slug );
+    $slug = \is_callable( $filter ) ? (string) $filter( $slug ) : $slug;
+
+    return $cache[$string] = $slug ?: null;
 }
 
 /**
