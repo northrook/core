@@ -9,7 +9,7 @@ interface SettingsInterface extends ProviderInterface
     /**
      * Check if a given Setting is defined.
      *
-     * @param string $setting
+     * @param non-empty-string $setting
      *
      * @return bool
      */
@@ -20,23 +20,22 @@ interface SettingsInterface extends ProviderInterface
      *
      * If no setting is found, but a valid `set` key and `value` is provided, and given the current `user` has relevant permissions, the Setting will be set and saved.
      *
-     * @template Setting of null|array<array-key, scalar>|scalar
+     * @template T_Setting of null|array<array-key, scalar>|scalar
      *
-     * @param string  $setting
-     * @param Setting $default
+     * @param non-empty-string $setting
+     * @param T_Setting        $default
      *
-     * @return null|array|bool|float|int|string
-     * @phpstan-return Setting
+     * @return T_Setting
      */
     public function get(
-        string                           $setting,
-        null|array|bool|float|int|string $default,
-    ) : null|array|bool|float|int|string;
+        string $setting,
+        mixed  $default,
+    ) : mixed;
 
     /**
      * Set a `setting`, overriding existing values.
      *
-     * @param string                               $setting
+     * @param non-empty-string                     $setting
      * @param null|array<array-key, scalar>|scalar $set
      *
      * @return self
@@ -53,7 +52,7 @@ interface SettingsInterface extends ProviderInterface
      *
      * If the `key` matches a setting and the `user` has permissions, it will be updated.
      *
-     * @param string                               $setting
+     * @param non-empty-string                     $setting
      * @param null|array<array-key, scalar>|scalar $add
      *
      * @return self

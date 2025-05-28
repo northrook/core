@@ -1,8 +1,9 @@
 parameters:
 	level: 9
 	paths:
-		- functions
+		- index.php
 		- src
+		- functions
 		- support
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: false
@@ -10,7 +11,7 @@ parameters:
 		treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		-
-			identifier: trait.unused
+			identifier: function.alreadyNarrowedType
 		-
 			message: '#PHPDoc tag @phpstan-assert-if-true for.+iterable.#'
 			path: *.php

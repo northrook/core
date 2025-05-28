@@ -12,7 +12,6 @@ use Throwable;
 use LogicException;
 use RuntimeException;
 use Exception;
-use BadMethodCallException;
 use const Support\LOG_LEVEL;
 
 /**
@@ -60,10 +59,6 @@ trait Logger
         string                      $level = 'info',
         string                      $threshold = 'error',
     ) : void {
-        if ( ! isset( $this->logger ) ) {
-            throw new BadMethodCallException( 'Logger not set.' );
-        }
-
         // Auto-fill exceptions
         if ( $exception = ( $message instanceof Throwable ? $message : null ) ) {
             $level = LOG_LEVEL[$exception->getCode()] ?? match ( true ) {
@@ -79,7 +74,7 @@ trait Logger
         \assert( \in_array( $level, LOG_LEVEL ) && \in_array( $threshold, LOG_LEVEL ) );
 
         /** Log using the provided {@see LoggerInterface} if available */
-        if ( $this->logger ) {
+        if ( isset( $this->logger ) ) {
             $this->logger->{$level}( $message, $context );
             return;
         }

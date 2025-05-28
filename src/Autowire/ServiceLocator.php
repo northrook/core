@@ -31,26 +31,32 @@ trait ServiceLocator
     }
 
     /**
-     * @template Service of object
+     * @template T_ContainerService of object
      *
-     * @param class-string<Service> $id
-     * @param bool                  $nullable
+     * @param class-string<T_ContainerService> $id
+     * @param bool                             $nullable
      *
-     * @return ($nullable is true ? null|Service : Service)
+     * @return ($nullable is true ? null|T_ContainerService : T_ContainerService)
      *
      * @final
      */
-    final protected function getService( string $id, bool $nullable = false ) : ?object
-    {
+    final protected function getService(
+        string $id,
+        bool   $nullable = false,
+    ) : ?object {
         try {
             $service = match ( $id ) {
+                // @phpstan-ignore-next-line
                 '\\Symfony\\Component\\HttpFoundation\\Request' => $this->serviceLocator
                     ->get( '\\Symfony\\Component\\HttpFoundation\\RequestStack' )
                     ->getCurrentRequest(),
                 default => $this->serviceLocator->get( $id ),
             };
 
-            \assert( $service instanceof $id );
+            \assert(
+                $service instanceof $id,
+                "The located service must be instance of '{$id}.'",
+            );
         }
         catch ( Throwable $exception ) {
             if ( \property_exists( $this, 'logger' ) && $this->logger instanceof LoggerInterface ) {

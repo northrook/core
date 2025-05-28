@@ -35,7 +35,8 @@
   },
   "require-dev": {
     "northrook/dev": "dev-main",
-    "voku/portable-ascii": "*"
+    "voku/portable-ascii": "*",
+    "symfony/http-foundation": "^7.2"
   },
   "scripts": {
     "phpstan": "vendor/bin/phpstan analyse"

@@ -27,18 +27,18 @@ trait SettingsProvider
     }
 
     /**
-     * @template T_setting of null|array<array-key, scalar>|scalar
+     * @template T_Setting of null|array<array-key, scalar>|scalar
      *
-     * @param string    $key
-     * @param T_setting $default
+     * @param non-empty-string $key
+     * @param T_Setting        $default
      *
-     * @return T_setting
+     * @return T_Setting
      *
      * @final
      */
     final protected function getSetting(
-        string                           $key,
-        null|array|bool|float|int|string $default,
+        string $key,
+        mixed  $default,
     ) : mixed {
         return $this->settings->get( $key, $default );
     }
