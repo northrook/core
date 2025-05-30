@@ -15,6 +15,19 @@ use SplFileInfo;
  *
  * @return string
  */
+function path(
+    null|string|Stringable|array $path,
+    bool                         $throwOnFault = false,
+) : string {
+    return normalize_path( $path, true, $throwOnFault );
+}
+
+/**
+ * @param null|array<array-key,null|string|Stringable>|string|Stringable $path
+ * @param bool                                                           $throwOnFault
+ *
+ * @return string
+ */
 function get_path(
     null|string|Stringable|array $path,
     bool                         $throwOnFault = false,
@@ -205,4 +218,27 @@ function path_writable(
 
     return ! $exception;
 }
+
+/**
+ * @param null|string|Stringable $filename
+ * @param bool                   $traversal
+ * @param bool                   $throwOnFault
+ * @param bool                   $throw
+ *
+ * @return array{0: ?string, 1:string, 2: ?string}
+ */
+function path_info(
+    null|string|Stringable $filename,
+    bool                   $traversal = false,
+    bool                   $throwOnFault = false,
+) : array {
+    $info = \pathinfo( normalize_path( $filename, $traversal, $throwOnFault ) );
+
+    return [
+        $info['dirname'] ?? null,
+        $info['filename'],
+        $info['extension'] ?? null,
+    ];
+}
+
 // </editor-fold>

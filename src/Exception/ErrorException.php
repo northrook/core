@@ -52,4 +52,17 @@ final class ErrorException extends RuntimeException
             throw new self();
         }
     }
+
+    /**
+     * Returns an unthrown {@see ErrorException} if {@see error_get_last} is not `null`.
+     *
+     * @return ?ErrorException
+     */
+    public static function getLast() : ?ErrorException
+    {
+        if ( \error_get_last() !== null ) {
+            return new self();
+        }
+        return null;
+    }
 }
