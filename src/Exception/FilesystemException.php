@@ -11,10 +11,16 @@ class FilesystemException extends RuntimeException
 
     public readonly string $caller;
 
-    public function __construct( string $message = '', int $code = 0, ?Throwable $previous = null )
-    {
+    public function __construct(
+        string     $message,
+        ?Throwable $previous = null,
+    ) {
         $this->caller = $this->getThrowCall() ?? $this->getTraceAsString();
 
-        parent::__construct( $message, $code, $previous );
+        parent::__construct(
+            $message,
+            E_RECOVERABLE_ERROR,
+            $previous ?? ErrorException::getLast(),
+        );
     }
 }

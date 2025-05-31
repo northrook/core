@@ -19,6 +19,8 @@
       "functions/array.php",
       "functions/core.php",
       "functions/filesystem.php",
+      "functions/hash.php",
+      "functions/math.php",
       "functions/normalize.php",
       "functions/regex.php",
       "functions/string.php",
