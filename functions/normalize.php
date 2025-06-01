@@ -2,6 +2,7 @@
 
 namespace Support;
 
+use Core\Exception\ErrorException;
 use voku\helper\ASCII;
 use LengthException;
 use Stringable;
@@ -172,7 +173,8 @@ function normalize_path(
     if ( ! $path ) {
         return $throwOnFault
                 ? throw new InvalidArgumentException(
-                    'The provided path is empty: '.\var_export( $path, true ),
+                    message  : 'The provided path is empty: '.\var_export( $path, true ),
+                    previous : ErrorException::getLast(),
                 )
                 : EMPTY_STRING;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Exception;
 
-use RuntimeException, Throwable;
+use Throwable;
 
 use const PREG_INTERNAL_ERROR,
 PREG_BACKTRACK_LIMIT_ERROR,
@@ -36,7 +36,6 @@ final class RegexpException extends RuntimeException
 
         parent::__construct(
             $message,
-            E_ERROR,
             $previous,
         );
     }

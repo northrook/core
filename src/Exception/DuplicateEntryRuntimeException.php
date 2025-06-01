@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Exception;
 
-use LogicException, Throwable, Stringable;
+use Throwable, Stringable;
 
-class DuplicateEntryException extends LogicException
+class DuplicateEntryRuntimeException extends RuntimeException
 {
     public function __construct(
         ?string                  $message = null,
@@ -21,6 +23,9 @@ class DuplicateEntryException extends LogicException
             $message = "The value '{$value}' already exists.";
         }
 
-        parent::__construct( (string) $message, E_ERROR, $previous );
+        parent::__construct(
+            $message,
+            $previous,
+        );
     }
 }

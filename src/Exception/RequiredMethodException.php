@@ -32,6 +32,10 @@ final class RequiredMethodException extends LogicException
                 $message .= '.';
             }
         }
-        parent::__construct( $message, E_ERROR, $previous );
+        parent::__construct(
+            $message,
+            E_ERROR,
+            $previous ?? ErrorException::getLast(),
+        );
     }
 }

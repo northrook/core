@@ -190,6 +190,24 @@ function str_squish( string|Stringable|null $string, bool $whitespaceOnly = fals
             : \preg_replace( "#\s+#", WHITESPACE, \trim( (string) $string ) ) );
 }
 
+function str_bisect(
+    string &           $string,
+    string|false|int $needle,
+    bool             $includeNeedle = false,
+    bool             $nullable = false,
+) : ?string {
+    if ( $needle === false ) {
+        return $nullable ? null : '';
+    }
+
+    $needle = \is_int( $needle ) ? (int) $needle : ( \strpos( $string, $needle ) + \strlen( $needle ) );
+
+    $before = \mb_substr( $string, 0, $needle );
+    $string = \mb_substr( $string, $needle );
+
+    return $nullable ? ( $before ?: null ) : $before;
+}
+
 function str_before(
     null|string|Stringable $string,
     null|string|Stringable $needle,

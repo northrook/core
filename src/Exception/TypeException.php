@@ -34,7 +34,10 @@ final class TypeException extends InvalidArgumentException
             default   => $type,
         };
 
-        $message ??= "Expected '{$this->expected}', but got '{$this->type}'";
-        parent::__construct( $message, 0, $previous );
+        parent::__construct(
+            $message ?? "Expected '{$this->expected}', but got '{$this->type}'",
+            E_ERROR,
+            $previous ?? ErrorException::getLast(),
+        );
     }
 }

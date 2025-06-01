@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Support;
 
+use Core\Exception\{FileNotFoundException, FilesystemException};
 use InvalidArgumentException;
 use Stringable;
 use RuntimeException;
@@ -93,16 +94,14 @@ function file_purge( string $path ) : bool
 // <editor-fold desc="Path">
 
 /**
- * @param string                        $path
- * @param bool                          $throw
- * @param null|InvalidArgumentException $exception
+ * @param string $path
+ * @param bool   $throw
  *
  * @return bool
  */
 function path_valid(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
+    string $path,
+    bool   $throw = false,
 ) : bool {
     // Ensure we are not receiving any previously set exceptions
     $exception = null;
@@ -121,10 +120,14 @@ function path_valid(
 
     // Handle non-existent paths
     if ( ! $type ) {
-        $exception = new InvalidArgumentException( "The '{$path}' does not exist." );
+        $message = "The '{$path}' does not exist.";
+
         if ( $throw ) {
-            throw $exception;
+            throw new FileNotFoundException( $message );
         }
+
+        @\trigger_error( $message );
+
         return false;
     }
 
@@ -135,85 +138,82 @@ function path_valid(
     $error ??= ( ! $isReadable ) ? ' not unreadable.' : null;
     $error ??= ' encountered a filesystem error. The cause could not be determined.';
 
-    // Create an exception message
-    $exception = new InvalidArgumentException( "The path '{$path}' {$error}" );
+    $message = "The path '{$path}' {$error}";
 
     if ( $throw ) {
-        throw $exception;
+        throw new InvalidArgumentException( $message );
     }
+
+    @\trigger_error( $message );
 
     return false;
 }
 
 /**
- * @param string                        $path
- * @param bool                          $throw     [false]
- * @param null|InvalidArgumentException $exception
+ * @param string $path
+ * @param bool   $throw [false]
  *
  * @return bool
  */
 function path_readable(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
+    string $path,
+    bool   $throw = false,
 ) : bool {
     $exception = null;
 
     if ( ! \file_exists( $path ) ) {
-        $exception = new InvalidArgumentException(
-            'The file at "'.$path.'" does not exist.',
-            500,
-        );
+        $message = "The file at '{$path}' does not exist.";
+
         if ( $throw ) {
-            throw $exception;
+            throw new FileNotFoundException( $message );
         }
+
+        @\trigger_error( $message );
     }
 
     if ( ! \is_readable( $path ) ) {
-        $exception = new InvalidArgumentException(
-            \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-            500,
-        );
+        $message = \sprintf( 'The "%s" "%s" is not readable.', \is_dir( $path ) ? 'directory' : 'file', $path );
+
         if ( $throw ) {
-            throw $exception;
+            throw new FilesystemException( $message );
         }
+
+        @\trigger_error( $message );
     }
 
     return ! $exception;
 }
 
 /**
- * @param string                        $path
- * @param bool                          $throw     [false]
- * @param null|InvalidArgumentException $exception
+ * @param string $path
+ * @param bool   $throw [false]
  *
  * @return bool
  */
 function path_writable(
-    string                   $path,
-    bool                     $throw = false,
-    InvalidArgumentException & $exception = null,
+    string $path,
+    bool   $throw = false,
 ) : bool {
     $exception = null;
 
     if ( ! \file_exists( $path ) ) {
-        $exception = new InvalidArgumentException(
-            'The file at "'.$path.'" does not exist.',
-            500,
-        );
+        $message = "The at '{$path}' does not exist.";
+
         if ( $throw ) {
-            throw $exception;
+            throw new FileNotFoundException( $message );
         }
+
+        @\trigger_error( $message );
     }
 
     if ( ! \is_writable( $path ) ) {
-        $exception = new InvalidArgumentException(
-            \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path ),
-            500,
-        );
+        $message = \sprintf( 'The "%s" "%s" is not writable.', \is_dir( $path ) ? 'directory' : 'file', $path );
+
         if ( $throw ) {
-            throw $exception;
+            throw new FilesystemException( $message );
         }
+
+        @\trigger_error( $message );
     }
 
     return ! $exception;
@@ -223,7 +223,6 @@ function path_writable(
  * @param null|string|Stringable $filename
  * @param bool                   $traversal
  * @param bool                   $throwOnFault
- * @param bool                   $throw
  *
  * @return array{0: ?string, 1:string, 2: ?string}
  */

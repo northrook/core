@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Core\Exception;
 
-use RuntimeException;
 use Throwable;
 use function Support\{as_string, regex_match_all};
 
@@ -13,7 +12,7 @@ use function Support\{as_string, regex_match_all};
  *
  * @used-by \Core\Autowire\Logger
  */
-final class LogEventException extends RuntimeException
+final class LogEventRuntimeException extends RuntimeException
 {
     /**
      * @param string               $message

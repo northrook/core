@@ -695,85 +695,85 @@ function str_extract(
     return $before.$replace.$after;
 }
 
-/**
- * Split the provided `$string` in two, at the first or last `$substring`.
- *
- * - Always returns an array of `[string: before, null|string: after]`.
- * - The matched part of the `$substring` belongs to `after` by default.
- * - If no `$substring` is found, the `after` value will be `null`
- *
- *  ```
- * // default, match first
- *  str_bisect(
- *      string: 'this example [has] example [substring].',
- *      substring: '[',
- *  ) [
- *      'this example ',
- *      '[has] example [substring].',
- *  ]
- * // match last
- *  str_bisect(
- *      string: 'this example [has] example [substring].',
- *      substring: '[',
- *      first: false,
- *  ) [
- *      'this example [has] example ',
- *      '[substring].',
- *  ]
- * // string .= substring
- *  str_bisect(
- *      string: 'this example [has] example [substring].',
- *      substring: '[',
- *      includeSubstring: true,
- *  ) [
- *      'this example [',
- *      'has] example [substring].',
- *  ]
- * ```
- *
- * @param null|string|Stringable $string
- * @param null|string|Stringable $needle
- * @param bool                   $last
- * @param bool                   $needleLast
- *
- * @return array{string, string}
- */
-function str_bisect(
-    null|string|Stringable $string,
-    null|string|Stringable $needle,
-    bool                   $last = false,
-    bool                   $needleLast = false,
-) : array {
-    $string = (string) $string;
-    $needle = (string) $needle;
-
-    if ( ! $string || ! $needle ) {
-        return [$string, ''];
-    }
-
-    $offset = $last
-            ? \mb_strripos( $string, $needle )
-            : \mb_stripos( $string, $needle );
-
-    if ( $offset === false ) {
-        return [$string, ''];
-    }
-
-    if ( $last ) {
-        $offset = $needleLast ? $offset + \mb_strlen( $needle ) : $offset;
-    }
-    else {
-        $offset = $needleLast ? $offset : $offset + \mb_strlen( $needle );
-    }
-
-    $before = \mb_substr( $string, 0, $offset );
-    $after  = \mb_substr( $string, $offset );
-
-    return [
-        $before,
-        $after,
-    ];
-}
+// /**
+//  * Split the provided `$string` in two, at the first or last `$substring`.
+//  *
+//  * - Always returns an array of `[string: before, null|string: after]`.
+//  * - The matched part of the `$substring` belongs to `after` by default.
+//  * - If no `$substring` is found, the `after` value will be `null`
+//  *
+//  *  ```
+//  * // default, match first
+//  *  str_bisect(
+//  *      string: 'this example [has] example [substring].',
+//  *      substring: '[',
+//  *  ) [
+//  *      'this example ',
+//  *      '[has] example [substring].',
+//  *  ]
+//  * // match last
+//  *  str_bisect(
+//  *      string: 'this example [has] example [substring].',
+//  *      substring: '[',
+//  *      first: false,
+//  *  ) [
+//  *      'this example [has] example ',
+//  *      '[substring].',
+//  *  ]
+//  * // string .= substring
+//  *  str_bisect(
+//  *      string: 'this example [has] example [substring].',
+//  *      substring: '[',
+//  *      includeSubstring: true,
+//  *  ) [
+//  *      'this example [',
+//  *      'has] example [substring].',
+//  *  ]
+//  * ```
+//  *
+//  * @param null|string|Stringable $string
+//  * @param null|string|Stringable $needle
+//  * @param bool                   $last
+//  * @param bool                   $needleLast
+//  *
+//  * @return array{string, string}
+//  */
+// function str_bisect(
+//     null|string|Stringable $string,
+//     null|string|Stringable $needle,
+//     bool                   $last = false,
+//     bool                   $needleLast = false,
+// ) : array {
+//     $string = (string) $string;
+//     $needle = (string) $needle;
+//
+//     if ( ! $string || ! $needle ) {
+//         return [$string, ''];
+//     }
+//
+//     $offset = $last
+//             ? \mb_strripos( $string, $needle )
+//             : \mb_stripos( $string, $needle );
+//
+//     if ( $offset === false ) {
+//         return [$string, ''];
+//     }
+//
+//     if ( $last ) {
+//         $offset = $needleLast ? $offset + \mb_strlen( $needle ) : $offset;
+//     }
+//     else {
+//         $offset = $needleLast ? $offset : $offset + \mb_strlen( $needle );
+//     }
+//
+//     $before = \mb_substr( $string, 0, $offset );
+//     $after  = \mb_substr( $string, $offset );
+//
+//     return [
+//         $before,
+//         $after,
+//     ];
+// }
 
 function mb_str_starts_with(
     null|string|Stringable $haystack,

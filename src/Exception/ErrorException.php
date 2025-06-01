@@ -8,7 +8,7 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Treat PHP errors like a {@see RuntimeException}.
+ * Treat PHP errors like a native {@see RuntimeException}.
  */
 final class ErrorException extends RuntimeException
 {

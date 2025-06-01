@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
-use Core\Exception\LogEventException;
+use Core\Exception\LogEventRuntimeException;
 use JetBrains\PhpStorm\Language;
 use Psr\Log\LoggerInterface;
 use Stringable;
@@ -85,6 +85,6 @@ trait Logger
         }
 
         /** Throw a {@see RuntimeException} as last resort */
-        throw new LogEventException( $message, $context, $exception );
+        throw new LogEventRuntimeException( $message, $context, $exception );
     }
 }
