@@ -37,5 +37,12 @@ interface ProfilerInterface
         ?string $category = null,
     ) : void;
 
-    public function setCategory( ?string $category ) : self;
+    /**
+     * @param null|non-empty-string $category
+     *
+     * @return self
+     */
+    public function setCategory(
+        ?string $category,
+    ) : self;
 }
