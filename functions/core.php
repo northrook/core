@@ -153,3 +153,54 @@ function get_throw_call( int $limit = 3 ) : ?string
 
     return $file;
 }
+
+function cli_format(
+    string    $text,
+    string ...$style,
+) : string {
+    $styles = [
+        'black'   => '0;30',
+        'red'     => '0;31',
+        'green'   => '0;32',
+        'yellow'  => '0;33',
+        'blue'    => '0;34',
+        'magenta' => '0;35',
+        'cyan'    => '0;36',
+        'white'   => '0;37',
+
+        'bold'       => '1',
+        'underscore' => '4',
+        'blink'      => '5',
+        'reverse'    => '7',
+        'conceal'    => '8',
+    ];
+
+    $backgrounds = [
+        'bg_black'   => '40',
+        'bg_red'     => '41',
+        'bg_green'   => '42',
+        'bg_yellow'  => '43',
+        'bg_blue'    => '44',
+        'bg_magenta' => '45',
+        'bg_cyan'    => '46',
+        'bg_white'   => '47',
+    ];
+
+    $format = [];
+
+    foreach ( $style as $code ) {
+        $code = \trim( $code );
+        if ( isset( $styles[$code] ) ) {
+            $format[] = $styles[$code];
+        }
+        elseif ( isset( $backgrounds[$code] ) ) {
+            $format[] = $backgrounds[$code];
+        }
+    }
+
+    if ( ! $format ) {
+        return $text;
+    }
+
+    return "\033[".\implode( ';', $format )."m{$text}\033[0m";
+}
