@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Support;
 
 use Core\Exception\ErrorException;
@@ -269,7 +271,8 @@ function normalize_url(
     if ( ! $path ) {
         return EMPTY_STRING;
     }
-    $string = \is_array( $path ) ? \implode( '/', $path ) : $path;
+
+    $string = \is_array( $path ) ? \implode( '/', $path ) : (string) $path;
 
     // Normalize slashes
     $string = \str_replace( '\\', '/', $string );

@@ -7,8 +7,7 @@ namespace Support;
 use Core\Exception\MissingPropertyException;
 use JetBrains\PhpStorm\Deprecated;
 use Stringable;
-use InvalidArgumentException, BadMethodCallException, BadFunctionCallException;
-use Random\RandomException;
+use InvalidArgumentException, BadFunctionCallException;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionUnionType;
@@ -41,6 +40,7 @@ const FILTER_STRING_COMMENTS = [
  *
  * @return string
  */
+#[Deprecated( replacement : '\Support\get_project_directory()' )]
 function getProjectDirectory() : string
 {
     static $projectDirectory = null;
@@ -71,6 +71,7 @@ function getProjectDirectory() : string
  *
  * @return string
  */
+#[Deprecated( replacement : '\Support\get_system_cache_directory()' )]
 function getSystemCacheDirectory() : string
 {
     static $cacheDirectory = null;
@@ -455,245 +456,163 @@ function class_extends(
 
 // </editor-fold>
 
-// <editor-fold desc="Checks">
+// <editor-fold desc="Filters and Escapes">
 
 /**
- * False if the passed value is considered `null` and `empty` type values, retains `0` and `false`.
+ * @param null|string|Stringable $string
+ * @param bool                   $comments
+ * @param string                 $encoding
+ * @param int                    $flags
  *
- * @phpstan-assert-if-true scalar $value
- *
- * @param mixed $value
- *
- * @return bool
+ * @return string
  */
-function is_empty( mixed $value ) : bool
-{
-    // If it is a boolean, it cannot be empty
-    if ( \is_bool( $value ) ) {
-        return false;
+#[Deprecated( 'probing' )]
+function escape_html(
+    null|string|Stringable $string,
+    bool                   $comments = false,
+    string                 $encoding = 'UTF-8',
+    int                    $flags = ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return $string;
     }
 
-    if ( \is_numeric( $value ) ) {
-        return false;
+    $string = \htmlspecialchars( $string, $flags, $encoding );
+
+    if ( $comments ) {
+        $string = str_replace_each( FILTER_STRING_COMMENTS, $string );
     }
 
-    return empty( $value );
-}
-
-/**
- * Determine if a `$value` be cast as `(string)`.
- *
- * @phpstan-assert-if-true scalar|\Stringable|null $value
- *
- * @param mixed $value
- *
- * @return bool
- */
-function is_stringable( mixed $value ) : bool
-{
-    return \is_scalar( $value ) || $value instanceof Stringable || \is_null( $value );
+    return $string;
 }
 
 /**
- * Checks if a given value has a `path` structure.
+ * Filter a string assuming it a URL.
  *
- * ⚠️ Does **NOT** validate the `path` in any capacity!
+ * - Preserves Unicode characters.
+ * - Removes tags by default.
  *
- * @param mixed  $value
- * @param string $contains [..] optional `str_contains` check
- * @param string $illegal
+ * @param null|string|Stringable $string       $string
+ * @param bool                   $preserveTags [false]
  *
- * @return bool
+ * @return string
  */
-function is_path( mixed $value, string $contains = '..', string $illegal = '{}' ) : bool
-{
-    // Bail early on non-stringable values
-    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
-        return false;
+#[Deprecated( 'probing' )]
+function escape_url(
+    null|string|Stringable $string,
+    bool                   $preserveTags = false,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return $string;
     }
 
-    // Stringify
-    $string = \trim( (string) $value );
+    $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
 
-    // Must be at least two characters long to be a path string
-    if ( ! $string || \strlen( $string ) < 2 ) {
-        return false;
+    if ( $preserveTags ) {
+        $safeCharacters .= '{}|^`"><@';
     }
 
-    if ( str_excludes( $string, '{}' ) ) {
-        return false;
-    }
+    $filtered = (string) ( \preg_replace(
+        pattern     : "/[^{$safeCharacters}]/u",
+        replacement : EMPTY_STRING,
+        subject     : $string,
+    ) ?? EMPTY_STRING );
 
-    // One or more slashes indicate this could be a path string
-    if ( \str_contains( $string, '/' ) || \str_contains( $string, '\\' ) ) {
-        return true;
-    }
-
-    // Any periods that aren't in the first 3 characters indicate this could be a `path/file.ext`
-    if ( \strrpos( $string, '.' ) > 2 ) {
-        return true;
-    }
-
-    // Indicates this could be a `.hidden` path
-    if ( $string[0] === '.' && \ctype_alpha( $string[1] ) ) {
-        return true;
-    }
-
-    return \str_contains( $string, $contains );
+    // Escape special characters including tags
+    return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
 }
 
-/**
- * Checks if a given value has a `URL` structure.
- *
- * ⚠️ Does **NOT** validate the URL in any capacity!
- *
- * @param mixed   $value
- * @param ?string $requiredProtocol
- *
- * @return bool
- */
-function is_url( mixed $value, ?string $requiredProtocol = null ) : bool
+// /**
+//  * @param null|string|Stringable $string       $string
+//  * @param bool                   $preserveTags
+//  *
+//  * @return string
+//  * @deprecated `\Support\Escape::url( .., .., )`
+//  *
+//  * Filter a string assuming it a URL.
+//  *
+//  * - Preserves Unicode characters.
+//  * - Removes tags by default.
+//  */
+// function filterUrl( null|string|Stringable $string, bool $preserveTags = false ) : string
+// {
+//     throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
+// Can not be null or an empty string
+// if ( ! $string = (string) $string ) {
+//     return EMPTY_STRING;
+// }
+// trigger_deprecation( 'Northrook\\Functions', 'dev', __METHOD__ );
+// static $cache = [];
+//
+// return $cache[\json_encode( [$string, $preserveTags], 832 )] ??= (
+//     static function() use ( $string, $preserveTags ) : string {
+//         $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
+//
+//         if ( $preserveTags ) {
+//             $safeCharacters .= '{}|^`"><@';
+//         }
+//
+//         return \preg_replace(
+//             pattern     : "/[^{$safeCharacters}]/u",
+//             replacement : EMPTY_STRING,
+//             subject     : $string,
+//         ) ?? EMPTY_STRING;
+//     }
+// )();
+// }
+
+// function stripTags(
+//     null|string|Stringable $string,
+//     string                 $replacement = ' ',
+//     ?string             ...$allowed_tags,
+// ) : string {
+//     throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
+//     // return \str_replace(
+//     //     '  ',
+//     //     ' ',
+//     //     \strip_tags(
+//     //         \str_replace( '<', "{$replacement}<", (string) $string ),
+//     //     ),
+//     // );
+// }
+
+// </editor-fold>
+
+// <editor-fold desc="Case Converters">
+
+function snakeToCamelCase( string $input ) : string
 {
-    // Bail early on non-stringable values
-    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
-        return false;
-    }
-
-    // Cannot be null or an empty string
-    if ( ! $string = (string) $value ) {
-        return false;
-    }
-
-    // Must not start with a number
-    if ( \is_numeric( $string[0] ) ) {
-        return false;
-    }
-
-    /**
-     * Does the string resemble a URL-like structure?
-     *
-     * Ensures the string starts with a schema-like substring and has a real-ish domain extension.
-     *
-     * - Will gladly accept bogus strings like `not-a-schema://d0m@!n.tld/`
-     */
-    if ( ! \preg_match( '#^([\w\-+]*?://)(\S.+)\.[a-z0-9]{2,}#m', $string ) ) {
-        return false;
-    }
-
-    // Check for the required protocol if requested
-    return ! ( $requiredProtocol && ! \str_starts_with( $string, \rtrim( $requiredProtocol, ':/' ).'://' ) );
+    return \lcfirst( \str_replace( '_', '', \ucwords( $input, '_' ) ) );
 }
 
-/**
- * Check if the provided `$path` starts with a `/`.
- *
- * @param string|Stringable $path
- *
- * @return bool
- */
-function is_relative_path( string|Stringable $path ) : bool
+function kebabToCamelCase( string $input ) : string
 {
-    return \str_starts_with( \strtr( (string) $path, '\\', '/' ), '/' );
-}
-
-function is_delimiter( string $string ) : bool
-{
-    return (bool) \preg_match( '#^[,;]+$#', $string );
-}
-
-function is_punctuation( string $string, bool $endingOnly = false ) : bool
-{
-    return (bool) ( $endingOnly
-            ? \preg_match( '#^[.!]+$#', $string )
-            : \preg_match( '#^[[:punct:]]+$#', $string ) );
-}
-
-/**
- * @param mixed  $value
- * @param string ...$enforceDomain
- *
- * @return bool
- */
-function is_email( mixed $value, string ...$enforceDomain ) : bool
-{
-    // Bail early on non-stringable values
-    if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
-        return false;
-    }
-
-    // Cannot be null or an empty string
-    if ( ! $string = (string) $value ) {
-        return false;
-    }
-
-    // Emails are case-insensitive, lowercase the $value for processing
-    $string = \strtolower( $string );
-
-    // Must contain an [at] and at least one period
-    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
-        return false;
-    }
-
-    // Must end with a letter
-    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
-        return false;
-    }
-
-    // Must only contain valid characters
-    if ( \preg_match( '/[^'.URL_SAFE_CHARACTERS_UNICODE.']/u', $string ) ) {
-        return false;
-    }
-
-    // Validate domains, if specified
-    foreach ( $enforceDomain as $domain ) {
-        if ( \str_ends_with( $string, \strtolower( $domain ) ) ) {
-            return true;
-        }
-    }
-
-    return true;
+    return \lcfirst( \str_replace( '-', '', \ucwords( $input, '-' ) ) );
 }
 
 // </editor-fold>
 
-// <editor-fold desc="Strings">
-
-/**
- * @param null|string|Stringable       $string
- * @param int                          $start
- * @param int                          $end
- * @param null|false|string|Stringable $replace
- * @param string                       $encoding
- *
- * @return string
- */
-function str_extract(
-    null|string|Stringable       $string,
-    int                          $start,
-    int                          $end,
-    false|null|string|Stringable $replace = false,
-    string                       $encoding = 'UTF-8',
-) : string {
-    if ( ! $string = (string) $string ) {
-        return EMPTY_STRING;
-    }
-
-    $end -= $start;
-
-    if ( $replace === false ) {
-        return \mb_substr( $string, $start, $end );
-    }
-
-    $replace = (string) $replace;
-
-    $before = \mb_substr( $string, 0, $start, $encoding );
-
-    $length = \mb_strlen( $before, $encoding ) + $end;
-
-    $after = \mb_substr( $string, $length, AUTO, $encoding );
-
-    return $before.$replace.$after;
-}
+// /**
+//  * Escapes string for use inside iCal template.
+//  *
+//  * @param null|string|Stringable $value
+//  *
+//  * @return string
+//  */
+// function escapeICal( null|string|Stringable $value ) : string
+// {
+//     // Cannot be null or an empty string
+//     if ( ! ( $string = (string) $value ) ) {
+//         return EMPTY_STRING;
+//     }
+//
+//     trigger_deprecation( 'Northrook\\Functions', 'probing', __METHOD__ );
+//     // https://www.ietf.org/rfc/rfc5545.txt
+//     $string = \str_replace( "\r", '', $string );
+//     $string = \preg_replace( '#[\x00-\x08\x0B-\x1F]#', "\u{FFFD}", (string) $string );
+//
+//     return \addcslashes( (string) $string, "\";\\,:\n" );
+// }
 
 // /**
 //  * Split the provided `$string` in two, at the first or last `$substring`.
@@ -774,211 +693,3 @@ function str_extract(
 //         $after,
 //     ];
 // }
-
-function mb_str_starts_with(
-    null|string|Stringable $haystack,
-    null|string|Stringable $needle,
-) : bool {
-    return \mb_stripos( (string) $haystack, (string) $needle, 0, 'UTF-8' ) === 0;
-}
-
-function mb_str_ends_with(
-    null|string|Stringable $haystack,
-    null|string|Stringable $needle,
-) : bool {
-    $haystack = (string) $haystack;
-    $needle   = (string) $needle;
-    return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
-}
-
-function str_starts_with_any(
-    null|string|Stringable    $string,
-    null|string|Stringable ...$needle,
-) : bool {
-    if ( ! $string = (string) $string ) {
-        return false;
-    }
-
-    foreach ( $needle as $substring ) {
-        if ( \str_starts_with( $string, (string) $substring ) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function str_ends_with_any(
-    null|string|Stringable    $string,
-    null|string|Stringable ...$needle,
-) : bool {
-    if ( ! $string = (string) $string ) {
-        return false;
-    }
-
-    foreach ( $needle as $substring ) {
-        if ( \str_ends_with( $string, (string) $substring ) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// </editor-fold>
-
-// <editor-fold desc="Filters and Escapes">
-
-/**
- * @param null|string|Stringable $string
- * @param bool                   $comments
- * @param string                 $encoding
- * @param int                    $flags
- *
- * @return string
- */
-function escape_html(
-    null|string|Stringable $string,
-    bool                   $comments = false,
-    string                 $encoding = 'UTF-8',
-    int                    $flags = ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
-) : string {
-    if ( ! $string = (string) $string ) {
-        return $string;
-    }
-
-    $string = \htmlspecialchars( $string, $flags, $encoding );
-
-    if ( $comments ) {
-        $string = str_replace_each( FILTER_STRING_COMMENTS, $string );
-    }
-
-    return $string;
-}
-
-/**
- * Filter a string assuming it a URL.
- *
- * - Preserves Unicode characters.
- * - Removes tags by default.
- *
- * @param null|string|Stringable $string       $string
- * @param bool                   $preserveTags [false]
- *
- * @return string
- */
-function escape_url(
-    null|string|Stringable $string,
-    bool                   $preserveTags = false,
-) : string {
-    if ( ! $string = (string) $string ) {
-        return $string;
-    }
-
-    $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
-
-    if ( $preserveTags ) {
-        $safeCharacters .= '{}|^`"><@';
-    }
-
-    $filtered = (string) ( \preg_replace(
-        pattern     : "/[^{$safeCharacters}]/u",
-        replacement : EMPTY_STRING,
-        subject     : $string,
-    ) ?? EMPTY_STRING );
-
-    // Escape special characters including tags
-    return \htmlspecialchars( $filtered, ENT_QUOTES, 'UTF-8' );
-}
-
-/**
- * @param null|string|Stringable $string       $string
- * @param bool                   $preserveTags
- *
- * @return string
- * @deprecated `\Support\Escape::url( .., .., )`
- *
- * Filter a string assuming it a URL.
- *
- * - Preserves Unicode characters.
- * - Removes tags by default.
- */
-function filterUrl( null|string|Stringable $string, bool $preserveTags = false ) : string
-{
-    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
-    // Can not be null or an empty string
-    // if ( ! $string = (string) $string ) {
-    //     return EMPTY_STRING;
-    // }
-    // trigger_deprecation( 'Northrook\\Functions', 'dev', __METHOD__ );
-    // static $cache = [];
-    //
-    // return $cache[\json_encode( [$string, $preserveTags], 832 )] ??= (
-    //     static function() use ( $string, $preserveTags ) : string {
-    //         $safeCharacters = URL_SAFE_CHARACTERS_UNICODE;
-    //
-    //         if ( $preserveTags ) {
-    //             $safeCharacters .= '{}|^`"><@';
-    //         }
-    //
-    //         return \preg_replace(
-    //             pattern     : "/[^{$safeCharacters}]/u",
-    //             replacement : EMPTY_STRING,
-    //             subject     : $string,
-    //         ) ?? EMPTY_STRING;
-    //     }
-    // )();
-}
-
-function stripTags(
-    null|string|Stringable $string,
-    string                 $replacement = ' ',
-    ?string             ...$allowed_tags,
-) : string {
-    throw new BadMethodCallException( __FUNCTION__.' no longer supported.' );
-    // return \str_replace(
-    //     '  ',
-    //     ' ',
-    //     \strip_tags(
-    //         \str_replace( '<', "{$replacement}<", (string) $string ),
-    //     ),
-    // );
-}
-
-/**
- * Escapes string for use inside iCal template.
- *
- * @param null|string|Stringable $value
- *
- * @return string
- */
-function escapeICal( null|string|Stringable $value ) : string
-{
-    // Cannot be null or an empty string
-    if ( ! ( $string = (string) $value ) ) {
-        return EMPTY_STRING;
-    }
-
-    trigger_deprecation( 'Northrook\\Functions', 'probing', __METHOD__ );
-    // https://www.ietf.org/rfc/rfc5545.txt
-    $string = \str_replace( "\r", '', $string );
-    $string = \preg_replace( '#[\x00-\x08\x0B-\x1F]#', "\u{FFFD}", (string) $string );
-
-    return \addcslashes( (string) $string, "\";\\,:\n" );
-}
-
-// </editor-fold>
-
-// <editor-fold desc="Case Converters">
-
-function snakeToCamelCase( string $input ) : string
-{
-    return \lcfirst( \str_replace( '_', '', \ucwords( $input, '_' ) ) );
-}
-
-function kebabToCamelCase( string $input ) : string
-{
-    return \lcfirst( \str_replace( '-', '', \ucwords( $input, '-' ) ) );
-}
-
-// </editor-fold>

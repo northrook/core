@@ -25,7 +25,7 @@ interface Printable extends Stringable
      * ⚠️ Assumes the {@see __toString()} handles all parsing, optimization, escaping, and encoding.
      *
      *  ```
-     * // escape strings, optimize, etc
+     * // escape strings, optimize, etc.
      * public function __toString() : string {
      *    return trim( $this->build() )
      * }

@@ -24,7 +24,7 @@
       "functions/normalize.php",
       "functions/regex.php",
       "functions/string.php",
-      "support/constants.php",
+      "src/constants.php",
       "support/functions.php"
     ]
   },
@@ -38,7 +38,6 @@
   "require-dev": {
     "northrook/dev": "dev-main",
     "voku/portable-ascii": "*",
-    "symfony/dependency-injection": "@stable",
     "symfony/http-foundation": "@stable"
   },
   "scripts": {

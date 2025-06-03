@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Support;
 
 use Stringable;
@@ -190,22 +192,81 @@ function str_squish( string|Stringable|null $string, bool $whitespaceOnly = fals
             : \preg_replace( "#\s+#", WHITESPACE, \trim( (string) $string ) ) );
 }
 
+/**
+ * Bisect a string into two parts at a specified position or around a given substring.
+ *
+ * - Modifies the `$string` to contain the remainder after bisection
+ * - `false` needles cause an early empty return
+ * - `$includeNeedle' includes the `$needle` string in the return
+ * - `$nullable` casts empty returns to `null`
+ *
+ * @param string           &$string
+ * @param false|int|string $needle
+ * @param bool             $includeNeedle
+ * @param bool             $nullable
+ *
+ * @return null|string string before the `$needle`
+ */
 function str_bisect(
     string &           $string,
     string|false|int $needle,
     bool             $includeNeedle = false,
     bool             $nullable = false,
 ) : ?string {
-    if ( $needle === false ) {
+    if ( \is_string( $needle ) ) {
+        $needlePosition = \mb_strpos( $string, $needle );
+        if ( $needlePosition === false ) {
+            return $nullable ? null : '';
+        }
+        $needle = $includeNeedle
+                ? $needlePosition + \mb_strlen( $needle )
+                : $needlePosition;
+    }
+    if ( ! \is_int( $needle ) ) {
         return $nullable ? null : '';
     }
-
-    $needle = \is_int( $needle ) ? (int) $needle : ( \strpos( $string, $needle ) + \strlen( $needle ) );
 
     $before = \mb_substr( $string, 0, $needle );
     $string = \mb_substr( $string, $needle );
 
-    return $nullable ? ( $before ?: null ) : $before;
+    return $nullable ? ( $before === '' ? null : $before ) : $before;
+}
+
+/**
+ * @param null|string|Stringable       $string
+ * @param int                          $start
+ * @param int                          $end
+ * @param null|false|string|Stringable $replace
+ * @param string                       $encoding
+ *
+ * @return string
+ */
+function str_extract(
+    null|string|Stringable       $string,
+    int                          $start,
+    int                          $end,
+    false|null|string|Stringable $replace = false,
+    string                       $encoding = 'UTF-8',
+) : string {
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $end -= $start;
+
+    if ( $replace === false ) {
+        return \mb_substr( $string, $start, $end );
+    }
+
+    $replace = (string) $replace;
+
+    $before = \mb_substr( $string, 0, $start, $encoding );
+
+    $length = \mb_strlen( $before, $encoding ) + $end;
+
+    $after = \mb_substr( $string, $length, AUTO, $encoding );
+
+    return $before.$replace.$after;
 }
 
 function str_before(
@@ -256,6 +317,14 @@ function str_after(
             : \substr( $string, $pos + \strlen( $needle ) );
 }
 
+/**
+ * Ensures that a string starts with a specified substring.
+ *
+ * @param null|string|Stringable $string
+ * @param null|string|Stringable $with
+ *
+ * @return string prepended with `$with` if not already present
+ */
 function str_start(
     null|string|Stringable $string,
     null|string|Stringable $with,
@@ -270,6 +339,14 @@ function str_start(
     return $with.$string;
 }
 
+/**
+ * Ensures that a string ends with a specified substring.
+ *
+ * @param null|string|Stringable $string
+ * @param null|string|Stringable $with
+ *
+ * @return string appended with `$with` if not already present
+ */
 function str_end(
     null|string|Stringable $string,
     null|string|Stringable $with,
@@ -285,7 +362,89 @@ function str_end(
 }
 
 /**
- * A {@see \strrchr()} implementation with full-needle support
+ * Checks if a multibyte string starts with a given substring.
+ *
+ * @param null|string|Stringable $haystack
+ * @param null|string|Stringable $needle
+ *
+ * @return bool
+ */
+function mb_str_starts_with(
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
+    return \mb_stripos( (string) $haystack, (string) $needle, 0, 'UTF-8' ) === 0;
+}
+
+/**
+ * Checks if a multibyte string ends with a given substring.
+ *
+ * @param null|string|Stringable $haystack
+ * @param null|string|Stringable $needle
+ *
+ * @return bool
+ */
+function mb_str_ends_with(
+    null|string|Stringable $haystack,
+    null|string|Stringable $needle,
+) : bool {
+    $haystack = (string) $haystack;
+    $needle   = (string) $needle;
+    return \mb_strripos( $haystack, $needle, 0, 'UTF-8' ) === \mb_strlen( $haystack ) - \mb_strlen( $needle );
+}
+
+/**
+ * Checks if a `$string` starts with any of the provided `$needle` substrings.
+ *
+ * @param null|string|Stringable $string
+ * @param null|string|Stringable ...$needle
+ *
+ * @return bool
+ */
+function str_starts_with_any(
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    foreach ( $needle as $substring ) {
+        if ( \str_starts_with( $string, (string) $substring ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Checks if a `$string` ends with any of the provided `$needle` substrings.
+ *
+ * @param null|string|Stringable $string
+ * @param null|string|Stringable ...$needle
+ *
+ * @return bool
+ */
+function str_ends_with_any(
+    null|string|Stringable    $string,
+    null|string|Stringable ...$needle,
+) : bool {
+    if ( ! $string = (string) $string ) {
+        return false;
+    }
+
+    foreach ( $needle as $substring ) {
+        if ( \str_ends_with( $string, (string) $substring ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * A {@see \strrchr()} implementation with full needle support
  *
  * @param string $haystack
  * @param string $needle

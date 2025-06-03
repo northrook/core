@@ -37,6 +37,67 @@ function get_path(
 }
 
 /**
+ * Retrieves the project root directory.
+ *
+ * - This function assumes the Composer `vendor` directory is present in the project root.
+ *
+ * @param bool   $throwOnInvalidRoot [false]
+ * @param string $composerDirectory  [vendor]
+ *
+ * @return string
+ */
+function get_project_directory(
+    bool   $throwOnInvalidRoot = false,
+    string $composerDirectory = 'vendor',
+) : string {
+    static $projectDirectory = null;
+
+    return $projectDirectory ??= (
+        static function() use ( $throwOnInvalidRoot, $composerDirectory ) : string {
+            // Split the current directory into an array of directory segments
+            $segments = \explode( DIRECTORY_SEPARATOR, __DIR__ );
+
+            // Ensure the directory array has at least 5 segments and a valid vendor value
+            if ( ( \count( $segments ) >= 5 && $segments[\count( $segments ) - 4] === $composerDirectory ) ) {
+                // Remove the last 4 segments (vendor, package name, and Composer structure)
+                $segments = \array_slice( $segments, 0, -4 );
+            }
+            elseif ( $throwOnInvalidRoot ) {
+                throw new FilesystemException(
+                    '\Support\get_project_directory() was unable to determine a valid root. Current path: '.__DIR__,
+                );
+            }
+
+            $path = normalize_path( $segments );
+
+            // return the project path
+            return \realpath( $path ) ?: $path;
+        }
+    )();
+}
+
+/**
+ * Retrieves the system temp directory for this project.
+ *
+ * - The `$subdirectory` is named using a hash based on the get_project_directory.
+ *
+ * @param ?string $subdirectory
+ *
+ * @return string
+ */
+function get_system_cache_directory( ?string $subdirectory = null ) : string
+{
+    static $cacheDirectory = null;
+    return $cacheDirectory ??= (
+        static function() use ( $subdirectory ) : string {
+            $subdirectory ??= \hash( 'xxh32', get_project_directory() );
+            $cacheDirectory = normalize_path( [\sys_get_temp_dir(), $subdirectory] );
+            return \realpath( $cacheDirectory ) ?: $cacheDirectory;
+        }
+    )();
+}
+
+/**
  * @param string $filename
  * @param mixed  $data
  * @param bool   $overwrite
@@ -103,9 +164,6 @@ function path_valid(
     string $path,
     bool   $throw = false,
 ) : bool {
-    // Ensure we are not receiving any previously set exceptions
-    $exception = null;
-
     // Check if $path exists and is readable
     $isReadable = \is_readable( $path );
     $exists     = \file_exists( $path ) && $isReadable;
@@ -159,8 +217,6 @@ function path_readable(
     string $path,
     bool   $throw = false,
 ) : bool {
-    $exception = null;
-
     if ( ! \file_exists( $path ) ) {
         $message = "The file at '{$path}' does not exist.";
 
@@ -179,9 +235,10 @@ function path_readable(
         }
 
         @\trigger_error( $message );
+        return false;
     }
 
-    return ! $exception;
+    return true;
 }
 
 /**
@@ -194,8 +251,6 @@ function path_writable(
     string $path,
     bool   $throw = false,
 ) : bool {
-    $exception = null;
-
     if ( ! \file_exists( $path ) ) {
         $message = "The at '{$path}' does not exist.";
 
@@ -214,9 +269,10 @@ function path_writable(
         }
 
         @\trigger_error( $message );
+        return false;
     }
 
-    return ! $exception;
+    return true;
 }
 
 /**

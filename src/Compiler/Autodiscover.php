@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace Core\Compiler;
 
 use Attribute;
-use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator;
-use function Support\normalize_path;
-use InvalidArgumentException;
-use Throwable;
-use ValueError;
 use ReflectionClass;
+use Throwable, ValueError, InvalidArgumentException;
+use function Support\normalize_path;
 use const Support\{AUTO, INFER};
 
 /**
@@ -47,7 +43,7 @@ class Autodiscover
      * ```
      *
      * ## `$calls`
-     *
+     * Array of `[method, arguments[], returnsClone]`.
      *
      * ## `$bind`
      * ## `$lazy`
@@ -59,18 +55,18 @@ class Autodiscover
      * ## `$configurator`
      * ## `$constructor`
      *
-     * @param null|string                                                             $serviceId
-     * @param null|array<array-key, array<string, string>|string>|string              $tag
-     * @param null|array<string, ReferenceConfigurator|string|TaggedIteratorArgument> $calls
-     * @param null|array<string, string>                                              $bind
-     * @param null|bool                                                               $lazy
-     * @param null|bool                                                               $public
-     * @param null|bool                                                               $shared
-     * @param null|bool                                                               $autowire
-     * @param null|false|string|string[]                                              $alias
-     * @param null|array<string, mixed>                                               $properties
-     * @param null|array<class-string, string>|string                                 $configurator
-     * @param null|string                                                             $constructor
+     * @param null|string                                                $serviceId
+     * @param null|array<array-key, array<string, string>|string>|string $tag
+     * @param null|array{string,array<array-key,mixed>,bool}             $calls
+     * @param null|array<string, string>                                 $bind
+     * @param null|bool                                                  $lazy
+     * @param null|bool                                                  $public
+     * @param null|bool                                                  $shared
+     * @param null|bool                                                  $autowire
+     * @param null|false|string|string[]                                 $alias
+     * @param null|array<string, mixed>                                  $properties
+     * @param null|array<class-string, string>|string                    $configurator
+     * @param null|string                                                $constructor
      */
     public function __construct(
         ?string                           $serviceId = INFER,
