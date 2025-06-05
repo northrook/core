@@ -4,22 +4,34 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
+use Core\Compiler\Autowire;
 use Core\Interface\ProfilerInterface;
 use LogicException;
 
+/**
+ * @used-by Profilable
+ */
 trait Profiler
 {
     private ?ProfilerInterface $profiler = null;
 
     /**
-     * @param ProfilerInterface $profiler
+     * Autowired during the instantiation process of the containing class.
+     *
+     * @internal
+     *
+     * @param ProfilerInterface     $profiler
+     * @param null|non-empty-string $category
      *
      * @return void
      *
      * @final
      */
-    final public function setProfiler( ProfilerInterface $profiler ) : void
-    {
+    #[Autowire]
+    final public function setProfiler(
+        ProfilerInterface $profiler,
+        ?string           $category = null,
+    ) : void {
         if ( $this->profiler ) {
             throw new LogicException( 'Profiler is already set' );
         }

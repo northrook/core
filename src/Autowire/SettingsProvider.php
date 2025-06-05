@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
+use Core\Compiler\Autowire;
 use Core\Interface\SettingsInterface;
 
 trait SettingsProvider
@@ -21,6 +22,7 @@ trait SettingsProvider
      *
      * @final
      */
+    #[Autowire]
     final public function setSettingsProvider( SettingsInterface $provider ) : void
     {
         $this->settings = $provider;

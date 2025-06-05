@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
+use Core\Compiler\Autowire;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Throwable, LogicException, InvalidArgumentException;
@@ -25,6 +26,7 @@ trait ServiceLocator
      *
      * @final
      */
+    #[Autowire]
     final public function setServiceLocator( ContainerInterface $serviceLocator ) : void
     {
         $this->serviceLocator = $serviceLocator;

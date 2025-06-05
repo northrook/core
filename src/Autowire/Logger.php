@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Autowire;
 
+use Core\Compiler\Autowire;
 use Core\Exception\LogEventRuntimeException;
 use JetBrains\PhpStorm\Language;
 use Psr\Log\LoggerInterface;
@@ -25,12 +26,17 @@ trait Logger
     protected readonly ?LoggerInterface $logger;
 
     /**
+     * Autowired during the instantiation process of the containing class.
+     *
+     * @internal
+     *
      * @param null|LoggerInterface $logger
      * @param bool                 $assignNull
      *
      * @return void
      * @final
      */
+    #[Autowire]
     final public function setLogger(
         ?LoggerInterface $logger,
         bool             $assignNull = false,
