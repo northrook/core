@@ -36,7 +36,7 @@ trait Profiler
             throw new LogicException( 'Profiler is already set' );
         }
 
-        $this->profiler = $profiler->setCategory( $this::class );
+        $this->profiler = $profiler->setCategory( $category ?? $this::class );
     }
 
     /**
