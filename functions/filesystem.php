@@ -103,14 +103,14 @@ function get_system_cache_directory( ?string $subdirectory = null ) : string
  * @param bool   $overwrite
  * @param bool   $append
  *
- * @return void
+ * @return false|int
  */
 function file_save(
     null|string|Stringable $filename,
     mixed                  $data,
     bool                   $overwrite = true,
     bool                   $append = false,
-) : void {
+) : false|int {
     if ( ! $filename ) {
         throw new RuntimeException( 'No filename specified.' );
     }
@@ -118,7 +118,7 @@ function file_save(
     $path = new SplFileInfo( (string) $filename );
 
     if ( ! $overwrite && $path->isReadable() ) {
-        return;
+        return false;
     }
 
     if ( ! \file_exists( $path->getPath() ) ) {
@@ -136,6 +136,8 @@ function file_save(
     if ( $status === false ) {
         throw new RuntimeException( message : 'Unable to write to file '.$path->getPathname() );
     }
+
+    return $status;
 }
 
 /**

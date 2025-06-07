@@ -4,7 +4,7 @@ namespace Core\Interface;
 
 use LogicException;
 
-interface SettingsInterface extends ProviderInterface
+interface SettingsInterface
 {
     /**
      * Check if a given Setting is defined.
