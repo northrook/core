@@ -169,6 +169,7 @@ function cli_format(
         'white'   => '0;37',
 
         'bold'       => '1',
+        'dim'        => '2',
         'underscore' => '4',
         'blink'      => '5',
         'reverse'    => '7',
