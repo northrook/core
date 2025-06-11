@@ -5,6 +5,31 @@ declare(strict_types=1);
 namespace Support;
 
 /**
+ * @param float|int        $hrtime
+ * @param int              $decimals
+ * @param non-empty-string $decimal
+ * @param string           $thousands
+ * @param string           $append
+ * @param string           $pad
+ *
+ * @return string
+ */
+function hrtime_format(
+    float  $hrtime,
+    int    $decimals = 4,
+    string $decimal = '.',
+    string $thousands = ',',
+    string $append = 'ms',
+    string $pad = '0',
+) : string {
+    return \str_pad(
+        string     : \number_format( $hrtime / 1_000_000, $decimals, $decimal, $thousands ),
+        length     : $decimals,
+        pad_string : $pad,
+    ).$append;
+}
+
+/**
  * @param array<array-key, scalar> $data
  * @param int                      $seed
  *

@@ -25,16 +25,18 @@ final class CompilerException extends LogicException
         string $label = 'Error',
         bool   $continue = false,
     ) : void {
-        if ( $continue === false || ! is_cli() ) {
-            throw new CompilerException( $message, $label );
+        if ( is_cli() ) {
+            echo cli_format(
+                ' '.\trim( $label ).'   ',
+                'black',
+                'bg_red',
+                'bold',
+            )." {$message}\n";
         }
 
-        echo cli_format(
-            ' '.\trim( $label ).'   ',
-            'black',
-            'bg_red',
-            'bold',
-        )." {$message}\n";
+        if ( $continue === false ) {
+            throw new CompilerException( $message, $label );
+        }
     }
 
     public static function warning(
@@ -42,15 +44,17 @@ final class CompilerException extends LogicException
         string $label = 'Warning',
         bool   $continue = false,
     ) : void {
-        if ( $continue === false || ! is_cli() ) {
-            throw new CompilerException( $message, $label );
+        if ( is_cli() ) {
+            echo cli_format(
+                ' '.\trim( $label ).' ',
+                'yellow',
+                'bg_black',
+                'bold',
+            )." {$message}\n";
         }
 
-        echo cli_format(
-            ' '.\trim( $label ).' ',
-            'yellow',
-            'bg_black',
-            'bold',
-        )." {$message}\n";
+        if ( $continue === false ) {
+            throw new CompilerException( $message, $label );
+        }
     }
 }
