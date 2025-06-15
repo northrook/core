@@ -2,8 +2,10 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
 use Stringable;
 
+#[Deprecated( 'Considered for removal' )]
 interface Printable extends Stringable
 {
     /**

@@ -6,7 +6,9 @@ namespace Core\Autowire;
 
 use Core\Compiler\Autowire;
 use Core\Interface\SettingsInterface;
+use JetBrains\PhpStorm\Deprecated;
 
+#[Deprecated( 'Moved to Contracts as Settings' )]
 trait SettingsProvider
 {
     private readonly SettingsInterface $settings;

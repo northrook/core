@@ -2,6 +2,9 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
+
+#[Deprecated( 'Removed' )]
 interface Profilable
 {
     /**

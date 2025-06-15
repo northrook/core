@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Core\Autowire;
 
 use Core\Compiler\Autowire;
-use Core\Interface\{PathfinderInterface};
+use Core\Interface\PathfinderInterface;
+use JetBrains\PhpStorm\Deprecated;
 
+#[Deprecated( 'Moved to Contracts' )]
 trait Pathfinder
 {
     protected readonly PathfinderInterface $pathfinder;

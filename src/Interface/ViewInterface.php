@@ -2,8 +2,10 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
 use Stringable;
 
+#[Deprecated( 'Moved to Contracts' )]
 interface ViewInterface extends Stringable
 {
     /**

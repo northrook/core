@@ -6,11 +6,13 @@ namespace Core\Autowire;
 
 use Core\Compiler\Autowire;
 use Core\Interface\ProfilerInterface;
+use JetBrains\PhpStorm\Deprecated;
 use LogicException;
 
 /**
  * @used-by Profilable
  */
+#[Deprecated( 'Moved to Contracts' )]
 trait Profiler
 {
     private ?ProfilerInterface $profiler = null;

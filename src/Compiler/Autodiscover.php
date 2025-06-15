@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Compiler;
 
 use Attribute;
+use JetBrains\PhpStorm\Deprecated;
 use ReflectionClass;
 use Throwable, ValueError, InvalidArgumentException;
 use function Support\normalize_path;
@@ -13,6 +14,7 @@ use const Support\{AUTO, INFER};
 /**
  * @template T of object
  */
+#[Deprecated( 'Moved to Contracts' )]
 #[Attribute( Attribute::TARGET_CLASS )]
 class Autodiscover
 {
@@ -108,6 +110,7 @@ class Autodiscover
             \class_exists( $className ),
             $this::class." expected a valid \$className; {$className} does not exist.",
         );
+
         $this->className ??= $className;
         $this->serviceId ??= $this->serviceId();
 

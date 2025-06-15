@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Core\Autowire;
 
 use Core\Compiler\Autowire;
+use JetBrains\PhpStorm\Deprecated;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Throwable, LogicException, InvalidArgumentException;
 
+#[Deprecated( 'Removed' )]
 trait ServiceLocator
 {
     private readonly ContainerInterface $serviceLocator;

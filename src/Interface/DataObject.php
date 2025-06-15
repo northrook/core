@@ -2,6 +2,8 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
+
 /**
  * Indicates that this class is a `DataTransferObject`.
  *
@@ -15,4 +17,5 @@ namespace Core\Interface;
  *
  * @author Martin Nielsen <mn@northrook.com>
  */
+#[Deprecated( 'Considered for removal' )]
 abstract readonly class DataObject implements DataInterface {}

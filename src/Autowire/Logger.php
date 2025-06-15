@@ -6,7 +6,7 @@ namespace Core\Autowire;
 
 use Core\Compiler\Autowire;
 use Core\Exception\LogEventRuntimeException;
-use JetBrains\PhpStorm\Language;
+use JetBrains\PhpStorm\{Deprecated, Language};
 use Psr\Log\LoggerInterface;
 use Stringable;
 use Throwable;
@@ -20,6 +20,7 @@ use const Support\LOG_LEVEL;
  *
  * @used-by Loggable,LoggerAwareInterface
  */
+#[Deprecated( 'Moved to Contracts' )]
 trait Logger
 {
     /** @var null|LoggerInterface */

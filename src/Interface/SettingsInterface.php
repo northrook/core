@@ -2,8 +2,10 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
 use LogicException;
 
+#[Deprecated( 'Moved to Contracts' )]
 interface SettingsInterface
 {
     /**

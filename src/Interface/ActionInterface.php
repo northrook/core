@@ -2,6 +2,8 @@
 
 namespace Core\Interface;
 
+use JetBrains\PhpStorm\Deprecated;
+
 /**
  * The primary `action` must be through the `__invoke` method.
  *
@@ -17,4 +19,5 @@ namespace Core\Interface;
  *
  * @author          Martin Nielsen <mn@northrook.com>
  */
+#[Deprecated( 'Moved to Contracts' )]
 interface ActionInterface {}
