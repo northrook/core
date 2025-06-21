@@ -39,6 +39,62 @@ function str_encode(
 }
 
 /**
+ * Converts a given `$string` to an `ASCII-safe` string by transliterating
+ * Unicode characters to their closest ASCII equivalent.
+ *
+ * If transliteration fails, an `E_USER_WARNING` is raised,
+ * and the original `$string` returned.
+ *
+ * @param null|string|Stringable $string
+ *
+ * @return string
+ */
+function str_ascii(
+    null|string|Stringable $string,
+) : string {
+    if ( ! $string = (string) $string ) {
+        return EMPTY_STRING;
+    }
+
+    $ascii = false;
+
+    if ( \function_exists( 'transliterator_transliterate' ) ) {
+        $ascii = \transliterator_transliterate(
+            'Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove',
+            $string,
+        );
+    }
+
+    if ( $ascii === false && \function_exists( 'iconv' ) ) {
+        $ascii = \iconv( 'UTF-8', 'ASCII//TRANSLIT//IGNORE', $string );
+    }
+
+    if ( $ascii !== false ) {
+        return $ascii;
+    }
+
+    $error = \error_get_last();
+
+    if ( $error !== null ) {
+        $error['ext-intl']  = \function_exists( 'transliterator_transliterate' ) ? 'Installed' : 'Not Installed';
+        $error['ext-iconv'] = \function_exists( 'iconv' ) ? 'Installed' : 'Not Installed';
+
+        foreach ( $error as $key => $value ) {
+            $error[$key] = "{$key}: {$value}";
+        }
+
+        $error = "\n".\implode( ",\n", $error );
+    }
+
+    \trigger_error(
+        "Error parsing string `{$string}` to ASCII-safe string.".$error,
+        E_USER_WARNING,
+    );
+
+    return $string;
+}
+
+/**
  * Determine if a given `$string` contains only `$characters` in any number and order.
  *
  * @param null|string|Stringable $string     input string to check

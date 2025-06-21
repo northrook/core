@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Support;
 
 use Core\Exception\ErrorException;
-use voku\helper\ASCII;
 use LengthException;
 use Stringable;
 use InvalidArgumentException;
@@ -35,15 +34,7 @@ function slug(
         return $cache[$string];
     }
 
-    if ( \class_exists( ASCII::class ) ) {
-        /** @var ASCII::* $language */
-        $parse = ASCII::to_ascii( $string, $language );
-    }
-    else {
-        $parse = $string;
-    }
-
-    $parse  = \strtolower( $parse );
+    $parse  = \strtolower( str_ascii( $string ) );
     $length = \strlen( $parse );
 
     $slug      = '';
