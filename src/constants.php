@@ -156,6 +156,21 @@ namespace Support {
         'col', 'area', 'base', 'source', 'embed', 'track',
     ];
     // @formatter:on
+
+    /**
+     * Use with `strtr` to efficiently remove all whitespace from a string.
+     * ```
+     * return \strtr( $string, \Support\REMOVE_WHITESPACE );
+     * ```
+     */
+    const REMOVE_WHITESPACE = [
+        ' '    => '',
+        "\t"   => '',
+        "\n"   => '',
+        "\r"   => '',
+        "\0"   => '',
+        "\x0B" => '',
+    ];
 }
 
 namespace Time {

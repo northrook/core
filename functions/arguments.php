@@ -279,28 +279,51 @@ function is_punctuation( string $string, bool $endingOnly = false ) : bool
  *
  * @return bool
  */
-function is_email( mixed $value, string ...$enforceDomain ) : bool
-{
+function is_email(
+    mixed     $value,
+    string ...$enforceDomain,
+) : bool {
     // Bail early on non-stringable values
     if ( ! ( \is_string( $value ) || $value instanceof Stringable ) ) {
         return false;
     }
 
-    // Cannot be null or an empty string
-    if ( ! $string = (string) $value ) {
+    $string = (string) $value;
+
+    // Cannot be an empty string
+    if ( $string === '' ) {
         return false;
     }
 
-    // Emails are case-insensitive, lowercase the $value for processing
+    // Must contain an [at] and at least one non-repeating period
+    if ( \substr_count( $string, '@' )    !== 1
+         || \str_contains( $string, '.' ) !== true
+         || \str_contains( $string, '..' )
+    ) {
+        return false;
+    }
+
+    // Emails are case-insensitive, lowercase the $value for easier processing
     $string = \strtolower( $string );
 
-    // Must contain an [at] and at least one period
-    if ( ! \str_contains( $string, '@' ) || ! \str_contains( $string, '.' ) ) {
+    // Must not start with a period
+    if ( $string[0] === '.' ) {
         return false;
     }
 
     // Must end with a letter
-    if ( ! \preg_match( '/[a-z]/', $string[-1] ) ) {
+    if ( ! \ctype_alpha( $string[-1] ) ) {
+        return false;
+    }
+
+    [$user, $server] = \explode( '@', $string );
+
+    if ( $user === '' || ! \str_contains( $server, '.' ) ) {
+        return false;
+    }
+
+    // Fail on IP addresses
+    if ( \ctype_digit( \strtr( $server, ['.' => ''] ) ) ) {
         return false;
     }
 
