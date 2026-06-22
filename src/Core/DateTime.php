@@ -48,7 +48,7 @@ final class DateTime implements Stringable
         null|string|DateFormat $format = null,
         bool|string $segment = false,
     ): string {
-        return Format::date(
+        return date_format(
             $this->immutable,
             $format ?? Core::get()->dateFormat->value,
             $segment,

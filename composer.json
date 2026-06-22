@@ -12,6 +12,14 @@
   "autoload": {
     "psr-4": {
       "Northrook\\": "src"
+    },
+    "files": [
+      "src/functions.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Northrook\\Tests\\": "tests"
     }
   },
   "minimum-stability": "dev",
@@ -19,15 +27,16 @@
   "require": {
     "php": ">=8.4",
     "ext-ctype": "*",
-    "ext-curl": "*",
+    "ext-mbstring": "*",
+    "ext-hash": "*",
+    "ext-intl": "*",
     "northrook/core-contracts": "dev-main"
   },
   "require-dev": {
     "northrook/php-cs": "dev-main",
-    "symfony/http-foundation": "^8.1",
     "phpstan/phpstan": "^2.2",
     "phpstan/extension-installer": "^1.4",
-    "tracy/tracy": "^2.12"
+    "phpunit/phpunit": "^11.0"
   },
   "config": {
     "allow-plugins": {
@@ -35,6 +44,7 @@
     }
   },
   "scripts": {
-    "phpstan": "vendor/bin/phpstan analyse"
+    "phpstan": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/phpunit"
   }
 }

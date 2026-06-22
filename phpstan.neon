@@ -2,11 +2,19 @@ parameters:
 	level: 9
 	paths:
 		- src
+		- bin
 		- tests
 	excludePaths:
 		- tests/Cases/**
 		- var/*
 	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		-
+			message: '#Dead catch#'
+			path: */Core/DateTime/TimeZone.php
+		-
+			message: '#Attribute class JetBrains\\PhpStorm\\Language does not exist#'
+			path: *.php
 rules:
 	- Northrook\Dev\PHPStan\ClassRequiresMemberRule
 	- Northrook\Dev\PHPStan\InterfaceRequiresMemberRule

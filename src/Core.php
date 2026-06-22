@@ -10,9 +10,13 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Stringable;
 
+use function Northrook\Core\{get_hash, normalize_path};
+
 final class Core extends ContractSingleton
 {
-    public readonly string $projectRoot;
+    public readonly string $rootDirectory;
+
+    public readonly string $cacheDirectory;
 
     public readonly LoggerInterface $logger;
 
@@ -21,13 +25,16 @@ final class Core extends ContractSingleton
     public readonly TimeZone $timezone;
 
     /**
-     * @param string|Stringable     $projectRoot
-     * @param DateFormat            $dateFormat
-     * @param null|TimeZone         $timezone
-     * @param null|LoggerInterface  $logger
+     * @param string|Stringable        $rootDirectory
+     * @param null|string|\Stringable  $cacheDirectory
+     * @param DateFormat               $dateFormat
+     * @param null|TimeZone            $timezone
+     * @param null|LoggerInterface     $logger
      */
     protected function __construct(
-        string|Stringable $projectRoot,
+        string|Stringable $rootDirectory,
+        null|string|Stringable $cacheDirectory = null,
+
         DateFormat $dateFormat = DateFormat::SORTABLE,
         null|TimeZone $timezone = TimeZone::AUTO,
         null|LoggerInterface $logger = null,
@@ -37,9 +44,10 @@ final class Core extends ContractSingleton
         // TODO: Replace with EphemeralLogger
         $this->logger = $logger ?? new NullLogger();
 
-        $this->projectRoot = $this->resolveProjectRoot($projectRoot);
-        $this->dateFormat  = $this->resolveDateFormat($dateFormat);
-        $this->timezone    = $this->resolveTimeZone($timezone);
+        $this->rootDirectory  = $this->resolveRootDirectory($rootDirectory);
+        $this->cacheDirectory = $this->resolveCacheDirectory($cacheDirectory);
+        $this->dateFormat     = $this->resolveDateFormat($dateFormat);
+        $this->timezone       = $this->resolveTimeZone($timezone);
     }
 
     // Requires Core::register() to be called first
@@ -48,16 +56,39 @@ final class Core extends ContractSingleton
         return self::getInstance();
     }
 
-    private function resolveProjectRoot(
-        string|Stringable $projectRoot,
+    private function resolveRootDirectory(
+        string|Stringable $rootDirectory,
     ): string {
-        $directoryPath = (string) $projectRoot;
+        $directory = normalize_path($rootDirectory, throwOnFault: true);
 
-        if (! \is_dir($directoryPath)) {
-            throw new \InvalidArgumentException("Project root directory does not exist: {$directoryPath}");
+        return \is_dir($directory)
+            ? $directory
+            : throw new \InvalidArgumentException(
+                "The resolved root directory does not exist: {$directory}",
+            );
+    }
+
+    private function resolveCacheDirectory(
+        null|string|Stringable $cacheDirectory = null,
+    ): string {
+        $useSystemCache = $cacheDirectory === null;
+
+        $cacheDirectory = (string) ( $cacheDirectory ?? \sys_get_temp_dir() );
+
+        if (! \is_dir($cacheDirectory)) {
+            throw new \InvalidArgumentException(
+                "The resolved cache directory does not exist: {$cacheDirectory}",
+            );
         }
 
-        return $directoryPath;
+        if ($useSystemCache) {
+            $cacheDirectory .= \DIR_SEP . get_hash($this->rootDirectory);
+        }
+
+        return normalize_path(
+            $cacheDirectory,
+            throwOnFault: true,
+        );
     }
 
     /**
@@ -86,21 +117,22 @@ final class Core extends ContractSingleton
     }
 
     /**
-     * @param string|Stringable    $projectRoot
-     * @param DateFormat           $dateFormat
-     * @param TimeZone|null        $timezone
-     * @param LoggerInterface|null $logger
-     *
-     * @return \Northrook\Core
+     * @param string|Stringable        $rootDirectory
+     * @param null|string|\Stringable  $cacheDirectory
+     * @param DateFormat               $dateFormat
+     * @param TimeZone|null            $timezone
+     * @param LoggerInterface|null     $logger
      */
     public static function register(
-        string|Stringable $projectRoot,
+        string|Stringable $rootDirectory,
+        null|string|Stringable $cacheDirectory = null,
         DateFormat $dateFormat = DateFormat::SORTABLE,
         null|TimeZone $timezone = TimeZone::AUTO,
         null|LoggerInterface $logger = null,
-    ): Core {
+    ): self {
         return new Core(
-            $projectRoot,
+            $rootDirectory,
+            $cacheDirectory,
             $dateFormat,
             $timezone,
             $logger,
@@ -110,28 +142,6 @@ final class Core extends ContractSingleton
     public static function log(): LoggerInterface
     {
         return self::get()->logger;
-    }
-
-    /**
-     * @template T
-     * @param callable(): T $resolver
-     * @return T
-     */
-    public static function assertive(
-        callable $resolver,
-    ): mixed {
-        try {
-            return $resolver();
-        } catch (\Throwable $exception) {
-            Core::log()->error(
-                $exception->getMessage(),
-                ['exception' => $exception],
-            );
-        }
-
-        throw new \RuntimeException(
-            'Unable to resolve the value.',
-        );
     }
 
     /**

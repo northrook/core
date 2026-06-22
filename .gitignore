@@ -10,4 +10,5 @@
 /*.cache
 /index.php
 /.env
+/.src
 package-lock.json
