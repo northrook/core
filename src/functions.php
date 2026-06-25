@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Northrook\Core;
 
 use JetBrains\PhpStorm\Language;
+use Northrook\Contracts\Exceptions\RegexpException;
 use Northrook\Core;
-use Northrook\Exceptions\RegexpException;
 use Stringable;
 use Throwable;
 
@@ -17,12 +17,15 @@ require_once __DIR__ . '/Functions/array.php';
 require_once __DIR__ . '/Functions/filesystem.php';
 require_once __DIR__ . '/Functions/format.php';
 require_once __DIR__ . '/Functions/hashes.php';
+require_once __DIR__ . '/Functions/http.php';
 require_once __DIR__ . '/Functions/normalize.php';
 require_once __DIR__ . '/Functions/number.php';
 require_once __DIR__ . '/Functions/string.php';
 require_once __DIR__ . '/Functions/value.php';
 
 /**
+ * Run `$callback` and return its value, logging and returning `$fallback` on any throwable.
+ *
  * @template Value
  *
  * @param callable(): Value     $callback
@@ -46,6 +49,10 @@ function get(
 }
 
 /**
+ * Generate a URL-safe slug from `$string`.
+ *
+ * Transliterates to ASCII, keeps alphanumerics, and collapses separators.
+ *
  * @param null|string|Stringable $string
  * @param string                 $separator
  * @param ?callable-string       $filter    {@see \strtolower} by default
@@ -102,6 +109,8 @@ function slug(
 }
 
 /**
+ * Run {@see \preg_match_all()} with `PREG_SET_ORDER` and throw {@see RegexpException} on failure.
+ *
  * @param string $pattern
  * @param string $subject
  * @param int    $offset

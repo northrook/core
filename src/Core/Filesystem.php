@@ -8,14 +8,13 @@ use FilesystemIterator;
 use Northrook\Contracts\Exceptions\FileNotFoundException;
 use Northrook\Contracts\Exceptions\FilesystemException;
 use Northrook\Contracts\Interfaces\FilesystemInterface;
+use Northrook\ErrorHandler;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Traversable;
 
 final class Filesystem implements FilesystemInterface
 {
-    private static null|string $lastError = null;
-
     public function copyFile(
         string $source,
         string $target,
@@ -45,7 +44,7 @@ final class Filesystem implements FilesystemInterface
                         $source,
                         $target,
                     )
-                        . self::$lastError,
+                        . ErrorHandler::get()->getLastError(),
                     path: $source,
                 );
             }
@@ -60,7 +59,7 @@ final class Filesystem implements FilesystemInterface
                         $source,
                         $target,
                     )
-                        . self::$lastError,
+                        . ErrorHandler::get()->getLastError(),
                     path: $source,
                 );
             }
@@ -117,7 +116,7 @@ final class Filesystem implements FilesystemInterface
 
             if (! self::box('mkdir', $path, $mode, true) && ! \is_dir($path)) {
                 throw new FilesystemException(
-                    \sprintf('Failed to create "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to create "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -145,7 +144,7 @@ final class Filesystem implements FilesystemInterface
 
             if (! $touched) {
                 throw new FilesystemException(
-                    \sprintf('Failed to touch "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to touch "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -175,7 +174,7 @@ final class Filesystem implements FilesystemInterface
         foreach ($this->toIterable($paths) as $path) {
             if (! self::box('chmod', $path, $mode & ~$umask)) {
                 throw new FilesystemException(
-                    \sprintf('Failed to chmod file "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to chmod file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -197,13 +196,13 @@ final class Filesystem implements FilesystemInterface
             if (\is_link($path) && \function_exists('lchown')) {
                 if (! self::box('lchown', $path, $owner)) {
                     throw new FilesystemException(
-                        \sprintf('Failed to chown file "%s": ', $path) . self::$lastError,
+                        \sprintf('Failed to chown file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                         path: $path,
                     );
                 }
             } elseif (! self::box('chown', $path, $owner)) {
                 throw new FilesystemException(
-                    \sprintf('Failed to chown file "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to chown file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -222,13 +221,13 @@ final class Filesystem implements FilesystemInterface
             if (\is_link($path) && \function_exists('lchgrp')) {
                 if (! self::box('lchgrp', $path, $group)) {
                     throw new FilesystemException(
-                        \sprintf('Failed to chgrp file "%s": ', $path) . self::$lastError,
+                        \sprintf('Failed to chgrp file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                         path: $path,
                     );
                 }
             } elseif (! self::box('chgrp', $path, $group)) {
                 throw new FilesystemException(
-                    \sprintf('Failed to chgrp file "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to chgrp file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -255,7 +254,7 @@ final class Filesystem implements FilesystemInterface
                 return;
             }
             throw new FilesystemException(
-                \sprintf('Cannot rename "%s" to "%s": ', $source, $target) . self::$lastError,
+                \sprintf('Cannot rename "%s" to "%s": ', $source, $target) . ErrorHandler::get()->getLastError(),
                 path: $target,
             );
         }
@@ -608,7 +607,7 @@ final class Filesystem implements FilesystemInterface
                 return $tmpFile;
             }
 
-            throw new FilesystemException('A temporary file could not be created: ' . self::$lastError);
+            throw new FilesystemException('A temporary file could not be created: ' . ErrorHandler::get()->getLastError());
         }
 
         $basename = $prefix . get_fast_hash(4) . $suffix;
@@ -629,7 +628,7 @@ final class Filesystem implements FilesystemInterface
             return $tmpFile;
         }
 
-        throw new FilesystemException('A temporary file could not be created: ' . self::$lastError);
+        throw new FilesystemException('A temporary file could not be created: ' . ErrorHandler::get()->getLastError());
     }
 
     public function writeFileAtomically(
@@ -660,7 +659,7 @@ final class Filesystem implements FilesystemInterface
         try {
             if (false === self::box('file_put_contents', $tmpFile, $content)) {
                 throw new FilesystemException(
-                    \sprintf('Failed to write file "%s": ', $path) . self::$lastError,
+                    \sprintf('Failed to write file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                     path: $path,
                 );
             }
@@ -703,7 +702,7 @@ final class Filesystem implements FilesystemInterface
 
         if (false === self::box('file_put_contents', $path, $content, \FILE_APPEND | ( $lock ? \LOCK_EX : 0 ))) {
             throw new FilesystemException(
-                \sprintf('Failed to write file "%s": ', $path) . self::$lastError,
+                \sprintf('Failed to write file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                 path: $path,
             );
         }
@@ -722,7 +721,7 @@ final class Filesystem implements FilesystemInterface
         $content = self::box('file_get_contents', $path);
         if (! \is_string($content)) {
             throw new FilesystemException(
-                \sprintf('Failed to read file "%s": ', $path) . self::$lastError,
+                \sprintf('Failed to read file "%s": ', $path) . ErrorHandler::get()->getLastError(),
                 path: $path,
             );
         }
@@ -736,7 +735,7 @@ final class Filesystem implements FilesystemInterface
         $size = self::box('filesize', $path);
         if (! \is_int($size)) {
             throw new FilesystemException(
-                \sprintf('Failed to read file size of "%s": ', $path) . self::$lastError,
+                \sprintf('Failed to read file size of "%s": ', $path) . ErrorHandler::get()->getLastError(),
                 path: $path,
             );
         }
@@ -750,7 +749,7 @@ final class Filesystem implements FilesystemInterface
         $time = self::box('filemtime', $path);
         if (! \is_int($time)) {
             throw new FilesystemException(
-                \sprintf('Failed to read modification time of "%s": ', $path) . self::$lastError,
+                \sprintf('Failed to read modification time of "%s": ', $path) . ErrorHandler::get()->getLastError(),
                 path: $path,
             );
         }
@@ -764,7 +763,7 @@ final class Filesystem implements FilesystemInterface
         $time = self::box('filectime', $path);
         if (! \is_int($time)) {
             throw new FilesystemException(
-                \sprintf('Failed to read creation time of "%s": ', $path) . self::$lastError,
+                \sprintf('Failed to read creation time of "%s": ', $path) . ErrorHandler::get()->getLastError(),
                 path: $path,
             );
         }
@@ -785,7 +784,7 @@ final class Filesystem implements FilesystemInterface
                     && \file_exists($file)
                 ) {
                     throw new FilesystemException(
-                        \sprintf('Failed to remove symlink "%s": ', $file) . self::$lastError,
+                        \sprintf('Failed to remove symlink "%s": ', $file) . ErrorHandler::get()->getLastError(),
                     );
                 }
             } elseif (\is_dir($file)) {
@@ -817,7 +816,7 @@ final class Filesystem implements FilesystemInterface
                 self::doRemove($childPaths, true);
 
                 if (! self::box('rmdir', $file) && \file_exists($file) && ! $isRecursive) {
-                    $lastError = self::$lastError;
+                    $lastError = ErrorHandler::get()->getLastError();
 
                     if (null !== $origFile && self::box('rename', $file, $origFile)) {
                         $file = $origFile;
@@ -827,17 +826,17 @@ final class Filesystem implements FilesystemInterface
                 }
             } elseif (
                 ! self::box('unlink', $file)
-                && ( self::$lastError && \str_contains(self::$lastError, 'Permission denied') || \file_exists($file) )
+                && ( ErrorHandler::get()->getLastError() && \str_contains(ErrorHandler::get()->getLastError(), 'Permission denied') || \file_exists($file) )
             ) {
-                throw new FilesystemException(\sprintf('Failed to remove file "%s": ', $file) . self::$lastError);
+                throw new FilesystemException(\sprintf('Failed to remove file "%s": ', $file) . ErrorHandler::get()->getLastError());
             }
         }
     }
 
     private function linkException(string $origin, string $target, string $linkType): never
     {
-        if (self::$lastError) {
-            if ('\\' === \DIRECTORY_SEPARATOR && \str_contains(self::$lastError, 'error code(1314)')) {
+        if (ErrorHandler::get()->getLastError()) {
+            if ('\\' === \DIRECTORY_SEPARATOR && \str_contains(ErrorHandler::get()->getLastError(), 'error code(1314)')) {
                 throw new FilesystemException(
                     \sprintf(
                         'Unable to create "%s" link due to error code 1314: \'A required privilege is not held by the client\'. Do you have the required Administrator-rights?',
@@ -848,7 +847,7 @@ final class Filesystem implements FilesystemInterface
             }
         }
         throw new FilesystemException(
-            \sprintf('Failed to create "%s" link from "%s" to "%s": ', $linkType, $origin, $target) . self::$lastError,
+            \sprintf('Failed to create "%s" link from "%s" to "%s": ', $linkType, $origin, $target) . ErrorHandler::get()->getLastError(),
             path: $target,
         );
     }
@@ -893,7 +892,7 @@ final class Filesystem implements FilesystemInterface
     }
 
     /**
-     * @param string|iterable<string> $paths
+     * @param string|iterable  $paths
      *
      * @return iterable<string>
      */
@@ -950,20 +949,9 @@ final class Filesystem implements FilesystemInterface
     {
         self::assertFunctionExists($func);
 
-        self::$lastError = null;
-        \set_error_handler(self::handleError(...));
-        try {
-            return \call_user_func_array($func, $args);
-        } finally {
-            \restore_error_handler();
-        }
-    }
-
-    private static function handleError(int $type, string $msg): bool
-    {
-        self::$lastError = $msg;
-
-        return true;
+        return ErrorHandler::get()->box(
+            static fn (): mixed => \call_user_func_array($func, $args),
+        );
     }
 
     /**

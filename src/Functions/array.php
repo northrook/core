@@ -21,7 +21,10 @@ function array_is_associative(
         return false;
     }
 
-    return ! \array_is_list($array);
+    return array_all(
+        \array_keys($array),
+        static fn(string|int $key): bool => \is_string($key),
+    );
 }
 
 /**
@@ -62,10 +65,12 @@ function array_has_keys(
 }
 
 /**
+ * Recursively filter an array, applying the callback at every depth.
+ *
+ * Default callback removes `null` and empty-type values; retains `0` and `false`.
+ *
  * @template TKey of array-key
  * @template TValue of mixed
- * Default:
- * - Removes `null` and `empty` type values, retains `0` and `false`.
  *
  * @param array<TKey, TValue> $array
  * @param ?callable           $callback
@@ -80,19 +85,17 @@ function array_filter_recursive(
 ): array {
     $callback ??= static fn($v) => ! is_empty($v);
 
-        foreach ($array as $key => $value) {
-            if (\is_array($value) && ! empty($value)) {
-                $array[$key] = array_filter_recursive(
-                    $value,
-                    $callback,
-                    $mode,
-                    true,
-                );
-            } else {
-                $array[$key] = $value;
-            }
+    foreach ($array as $key => $value) {
+        if (\is_array($value) && ! empty($value)) {
+            $array[$key] = array_filter_recursive(
+                $value,
+                $callback,
+                $mode,
+            );
+        } else {
+            $array[$key] = $value;
         }
-
+    }
 
     /** @var array<TKey, TValue> $array */
 
@@ -104,9 +107,11 @@ function array_filter_recursive(
 }
 
 /**
+ * Flatten a nested array to a single level using {@see \array_walk_recursive()}.
+ *
  * @param array<array-key, mixed> $array
- * @param bool                    $preserveKeys
- * @param bool                    $filter
+ * @param bool                    $preserveKeys when true, leaf keys overwrite earlier values on collision
+ * @param bool|callable           $filter       when true, drops empty-type values after flattening
  * @param int-mask<0,1,2>         $filterMode   ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return array<array-key, mixed>
@@ -147,6 +152,8 @@ function arr_flatten(
 }
 
 /**
+ * Rename a single key while preserving value order.
+ *
  * @param array<array-key, mixed> $array
  * @param array-key               $key
  * @param array-key               $replacement
@@ -170,9 +177,13 @@ function arr_replace_key(
 }
 
 /**
+ * Find the first matching key in a nested array.
+ *
+ * When a nested match is found, returns the key at the current depth, not the nested key.
+ *
  * @param array<array-key, mixed> $array
- * @param mixed                   $match
- * @param int<0,2>                $mode  ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
+ * @param mixed                   $match   value for strict equality, or a callback when callable
+ * @param int<0,2>                $mode    ARRAY_FILTER_USE_VALUE|ARRAY_FILTER_USE_KEY|ARRAY_FILTER_USE_BOTH
  *
  * @return null|int|string
  */

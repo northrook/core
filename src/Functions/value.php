@@ -7,7 +7,9 @@ namespace Northrook\Core;
 use Stringable;
 
 /**
- * False if the passed value is considered `null` and `empty` type values, retains `0` and `false`.
+ * Returns true when `$value` is considered empty.
+ *
+ * Treats `null`, empty strings, and empty arrays as empty. Numeric values and `false` are never empty.
  *
  * @param mixed                                                               $value
  *
@@ -122,8 +124,12 @@ function is_url(
 }
 
 /**
+ * Checks if a value resembles an email address.
+ *
+ * ⚠️ Does **NOT** perform full RFC validation!
+ *
  * @param mixed  $value
- * @param string ...$enforceDomain
+ * @param string ...$enforceDomain when provided, the email must end with one of these domains
  *
  * @return bool
  */

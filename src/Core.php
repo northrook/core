@@ -25,14 +25,14 @@ final class Core extends ContractSingleton
     public readonly TimeZone $timezone;
 
     /**
-     * @param string|Stringable        $rootDirectory
-     * @param null|string|\Stringable  $cacheDirectory
+     * @param null|string|Stringable        $rootDirectory
+     * @param null|string|Stringable  $cacheDirectory
      * @param DateFormat               $dateFormat
      * @param null|TimeZone            $timezone
      * @param null|LoggerInterface     $logger
      */
     protected function __construct(
-        string|Stringable $rootDirectory,
+        null|string|Stringable $rootDirectory,
         null|string|Stringable $cacheDirectory = null,
 
         DateFormat $dateFormat = DateFormat::SORTABLE,
@@ -50,6 +50,18 @@ final class Core extends ContractSingleton
         $this->timezone       = $this->resolveTimeZone($timezone);
     }
 
+    public static function getCacheDirectory(
+        null|string $subDirectory = null,
+    ): string {
+        $cacheDirectory = self::get()->cacheDirectory;
+
+        if ($subDirectory) {
+            $cacheDirectory .= \DIR_SEP . $subDirectory;
+        }
+
+        return normalize_path($cacheDirectory);
+    }
+
     // Requires Core::register() to be called first
     public static function get(): self
     {
@@ -57,9 +69,33 @@ final class Core extends ContractSingleton
     }
 
     private function resolveRootDirectory(
-        string|Stringable $rootDirectory,
+        null|string|Stringable $rootDirectory,
     ): string {
-        $directory = normalize_path($rootDirectory, throwOnFault: true);
+        if ($rootDirectory === null) {
+            // Split the current directory into an array of directory segments
+            $segments = \explode(DIRECTORY_SEPARATOR, __DIR__);
+
+            // Ensure the directory array has at least 5 segments and a valid vendor value
+            if (\count($segments) >= 5 && $segments[\count($segments) - 4] === 'vendor') {
+                // Remove the last 4 segments (vendor, package name, and Composer structure)
+                $segments = \array_slice($segments, 0, -4);
+            } else {
+                $caller = __METHOD__;
+                $dir    = __DIR__;
+                throw new \RuntimeException(
+                    "{$caller} was unable to determine a valid root directory relative to {$dir}",
+                );
+            }
+
+            $resolveDirectory = $segments;
+        } else {
+            $resolveDirectory = $rootDirectory;
+        }
+
+        $directory = normalize_path(
+            $resolveDirectory,
+            throwOnFault: true,
+        );
 
         return \is_dir($directory)
             ? $directory
@@ -117,14 +153,16 @@ final class Core extends ContractSingleton
     }
 
     /**
-     * @param string|Stringable        $rootDirectory
+     * @param null|string|\Stringable  $rootDirectory
      * @param null|string|\Stringable  $cacheDirectory
      * @param DateFormat               $dateFormat
      * @param TimeZone|null            $timezone
      * @param LoggerInterface|null     $logger
+     *
+     * @return \Northrook\Core
      */
     public static function register(
-        string|Stringable $rootDirectory,
+        null|string|Stringable $rootDirectory,
         null|string|Stringable $cacheDirectory = null,
         DateFormat $dateFormat = DateFormat::SORTABLE,
         null|TimeZone $timezone = TimeZone::AUTO,

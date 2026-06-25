@@ -20,6 +20,11 @@ function num_percent(float $from, float $to): float
     return (float) \number_format(( ( $from - $to ) / $from ) * 100, 2);
 }
 
+/**
+ * Format a byte count as a binary unit string (B, KiB, MiB, …).
+ *
+ * Strings are measured by byte length; numeric values are treated as byte counts.
+ */
 function num_byte_size(string|int|float $bytes): string
 {
     $bytes = (float) ( \is_string($bytes) ? \mb_strlen($bytes, '8bit') : $bytes );
@@ -44,6 +49,8 @@ function num_byte_size(string|int|float $bytes): string
 }
 
 /**
+ * XOR each scalar value in `$data` into `$seed`.
+ *
  * @param array<array-key, scalar> $data
  * @param int                      $seed
  *
@@ -79,6 +86,8 @@ function num_gcd(
 }
 
 /**
+ * Check whether `$num` falls within the inclusive range `$min`..`$max`.
+ *
  * @param float|int $num
  * @param float|int $min
  * @param float|int $max
@@ -94,6 +103,8 @@ function num_within(
 }
 
 /**
+ * Clamp `$num` to the inclusive range between `$min` and `$max`.
+ *
  * @param float|int $num
  * @param float|int $min
  * @param float|int $max

@@ -8,6 +8,8 @@ use Northrook\Core;
 use Northrook\Core\DateTime\DateFormat;
 
 /**
+ * Format a high-resolution timestamp as a human-readable millisecond string.
+ *
  * @param float             $hrtime
  * @param int               $decimals
  * @param non-empty-string  $decimal
@@ -38,6 +40,11 @@ function hrtime_format(
     return $formatted . $append;
 }
 
+/**
+ * Format a date using a Core default, raw format string, or {@see DateFormat} enum.
+ *
+ * When `$segment` is enabled, date parts are wrapped in HTML spans via {@see date_format_highlight()}.
+ */
 function date_format(
     \DateTimeInterface $date,
     null|string|DateFormat $format = null,
@@ -59,6 +66,12 @@ function date_format(
     );
 }
 
+/**
+ * Wrap day, month, year, weekday, and time segments of a date format string in HTML spans.
+ *
+ * @param string      $string      PHP date format string
+ * @param null|string $classPrefix optional prefix for generated CSS classes
+ */
 function date_format_highlight(
     string $string,
     null|string $classPrefix,

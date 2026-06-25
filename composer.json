@@ -30,7 +30,11 @@
     "ext-mbstring": "*",
     "ext-hash": "*",
     "ext-intl": "*",
-    "northrook/core-contracts": "dev-main"
+    "northrook/core-contracts": "dev-main",
+    "symfony/http-client": "^8.1"
+  },
+  "suggest": {
+    "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
   },
   "require-dev": {
     "northrook/php-cs": "dev-main",

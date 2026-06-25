@@ -207,7 +207,7 @@ function str_excludes(
  * Replace each key from `$map` with its value when found in `$content`.
  *
  * @param array<string,null|string|Stringable> $map
- * @param string[]                             $content
+ * @param string|array<string>                 $content
  * @param bool                                 $caseSensitive
  *
  * @return ($content is string ? string : string[])
@@ -243,7 +243,7 @@ function str_replace_each(
  *
  * - Modifies the `$string` to contain the remainder after bisection
  * - `false` needles cause an early empty return
- * - `$includeNeedle' includes the `$needle` string in the return
+ * - `$includeNeedle` includes the `$needle` string in the return
  * - `$nullable` casts empty returns to `null`
  *
  * @param string           &$string
@@ -285,6 +285,8 @@ function str_bisect(
 }
 
 /**
+ * Replace the substring between `$start` and `$end`, or extract it when `$replace` is false.
+ *
  * @param null|string|Stringable       $string
  * @param int                          $start
  * @param int                          $end
@@ -321,6 +323,11 @@ function str_extract(
     return $before . $replace . $after;
 }
 
+/**
+ * Return the substring before the first or last occurrence of `$needle` (multibyte).
+ *
+ * When `$needle` is not found, returns the original string unchanged.
+ */
 function str_before(
     null|string|Stringable $string,
     null|string|Stringable $needle,
@@ -352,6 +359,11 @@ function str_before(
     return \mb_substr($string, 0, $end, $encoding);
 }
 
+/**
+ * Return the substring after the first or last occurrence of `$needle` (multibyte).
+ *
+ * When `$needle` is not found, returns the original string unchanged.
+ */
 function str_after(
     null|string|Stringable $string,
     null|string|Stringable $needle,

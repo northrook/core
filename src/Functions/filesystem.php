@@ -11,10 +11,14 @@ use RuntimeException;
 use Stringable;
 
 /**
+ * Write or append data to a file via the Core filesystem service.
+ *
+ * Returns bytes written, or `false` when the file exists and `$overwrite` is false.
+ *
  * @param null|string|Stringable $filename
- * @param mixed  $data
- * @param bool   $overwrite
- * @param bool   $append
+ * @param resource|string        $data
+ * @param bool                   $overwrite
+ * @param bool                   $append
  *
  * @return false|int
  */
@@ -24,6 +28,25 @@ function file_save(
     bool $overwrite = true,
     bool $append = false,
 ): false|int {
+    if (\is_array($data)) {
+        throw new \TypeError(
+            \sprintf(
+                'Argument 2 passed to "%s()" must be string or resource, array given.',
+                __FUNCTION__,
+            ),
+        );
+    }
+
+    if (! \is_string($data) && ! \is_resource($data)) {
+        throw new \TypeError(
+            \sprintf(
+                'Argument 2 passed to "%s()" must be string or resource, %s given.',
+                __FUNCTION__,
+                \get_debug_type($data),
+            ),
+        );
+    }
+
     if (! $filename) {
         throw new RuntimeException('No filename specified.');
     }
@@ -53,6 +76,9 @@ function file_save(
         : filesystem()->fileSize($path);
 }
 
+/**
+ * Shared {@see Filesystem} instance for Core file helpers.
+ */
 function filesystem(): Filesystem
 {
     static $instance = null;
@@ -61,6 +87,9 @@ function filesystem(): Filesystem
     return $instance;
 }
 
+/**
+ * Copy `$source` to `$target`, returning false on failure instead of throwing.
+ */
 function file_copy(
     string $source,
     string $target,
@@ -73,6 +102,9 @@ function file_copy(
     }, false);
 }
 
+/**
+ * Remove a file or directory, returning false on failure instead of throwing.
+ */
 function file_remove(string $path): bool
 {
     return (bool) get(static function () use ($path): true {
@@ -85,6 +117,10 @@ function file_remove(string $path): bool
 // <editor-fold desc="Path">
 
 /**
+ * Check whether `$path` exists and is readable.
+ *
+ * Triggers `E_USER_WARNING` or throws when validation fails.
+ *
  * @param string $path
  * @param bool   $throw
  *
@@ -138,6 +174,8 @@ function path_valid(
 }
 
 /**
+ * Check whether `$path` exists and is readable.
+ *
  * @param string $path
  * @param bool   $throw [false]
  *
@@ -174,6 +212,8 @@ function path_readable(
 }
 
 /**
+ * Check whether `$path` exists and is writable.
+ *
  * @param string $path
  * @param bool   $throw [false]
  *
@@ -210,6 +250,8 @@ function path_writable(
 }
 
 /**
+ * Split a path into `[dirname, filename, extension]` after {@see normalize_path()}.
+ *
  * @param null|string|Stringable $filename
  * @param bool                   $traversal
  * @param bool                   $throwOnFault

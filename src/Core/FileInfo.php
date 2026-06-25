@@ -41,37 +41,6 @@ class FileInfo extends SplFileInfo
         return \strrchr(parent::getFilename(), '.', true) ?: parent::getFilename();
     }
 
-    final public function isUrl(
-        null|string $protocol = null,
-    ): bool {
-        return is_url(
-            $this->getPathname(),
-            $protocol,
-        );
-    }
-
-    final public function isPath(): bool
-    {
-        return is_path(
-            $this->getPathname(),
-        );
-    }
-
-    #[Override]
-    final public function isReadable(): bool
-    {
-        // TODO : Deferred
-        // if ($this->isUrl()) {
-        // $isReadable = CURL::exists($this->getPathname(), $error);
-        // if ($error) {
-        //     throw new InvalidArgumentException($error);
-        // }
-        // return $isReadable;
-        // }
-
-        return parent::isReadable();
-    }
-
     final public function isDotFile(): bool
     {
         return (
@@ -94,16 +63,6 @@ class FileInfo extends SplFileInfo
     final public function getContents(
         bool $throwOnError = false,
     ): null|string {
-        // TODO : Deferred
-        // if ($this->isUrl()) {
-        //     if ($throwOnError) {
-        //         $message = $this::class . '::getContents() only supports local files.';
-        //         $instead = 'Use ' . CURL::class . '::fetch() instead.';
-        //         throw new InvalidArgumentException("{$message} {$instead}");
-        //     }
-        //     return null;
-        // }
-
         $contents = \file_get_contents($this->getPathname());
 
         if (false === $contents && $throwOnError) {
@@ -122,7 +81,7 @@ class FileInfo extends SplFileInfo
 
         if (false === $exists && $throwOnError) {
             throw new RuntimeException(
-                'Unable to read file: ' . $this->getPathname(),
+                'The file does not exist: ' . $this->getPathname(),
             );
         }
 
@@ -190,13 +149,13 @@ class FileInfo extends SplFileInfo
 
         if ($asFileInfo) {
             return \array_map(
-                static fn (string $filename): FileInfo => FileInfo::from($filename),
+                static fn(string $filename): FileInfo => FileInfo::from($filename),
                 $matches,
             );
         }
 
         return \array_map(
-            static fn (string $path): string => normalize_path($path),
+            static fn(string $path): string => normalize_path($path),
             $matches,
         );
     }
@@ -232,8 +191,10 @@ class FileInfo extends SplFileInfo
      *
      * @return bool True if the file was written to, false if it already existed or an error occurred
      */
-    final public function copy(string $targetFile, bool $overwriteNewerFiles = false): bool
-    {
+    final public function copy(
+        string $targetFile,
+        bool $overwriteNewerFiles = false,
+    ): bool {
         return file_copy($this->getPathname(), $targetFile, $overwriteNewerFiles);
     }
 
@@ -247,8 +208,9 @@ class FileInfo extends SplFileInfo
         return file_remove($this->getPathname());
     }
 
-    final public static function from(string|SplFileInfo|Stringable $filename): self
-    {
+    final public static function from(
+        string|SplFileInfo|Stringable $filename,
+    ): self {
         return new self($filename);
     }
 }

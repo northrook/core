@@ -7,7 +7,7 @@ namespace Northrook\Core;
 use InvalidArgumentException;
 use LengthException;
 use LogicException;
-use Northrook\Exceptions\ErrorException;
+use Northrook\Contracts\Exceptions\ErrorException;
 use Stringable;
 
 /**
@@ -65,6 +65,8 @@ function normalize_whitespace(
 
 /**
  * Normalize all newlines in a string to `NEWLINE`.
+ *
+ * @param null|string|Stringable $string
  */
 function normalize_newline(
     null|string|Stringable $string,
@@ -85,7 +87,7 @@ function normalize_slashes(
  * # Normalize a `string` or `string[]`, assuming it is a `path`.
  *
  * - If an array of strings is passed, they will be joined using the directory separator.
- * - Normalises slashes to `/`.
+ * - Normalises slashes to `DIR_SEP`.
  * - Removes repeated separators.
  * - Will throw a {@see \ValueError} if the resulting string exceeds {@see \PHP_MAXPATHLEN}.
  *
@@ -189,6 +191,8 @@ function normalize_path(
 }
 
 /**
+ * Normalize a URL path segment: slashes, whitespace, protocol casing, and duplicate separators.
+ *
  * @param array<int, ?string>|string $path                 the string to normalize
  * @param false|string               $substituteWhitespace [-]
  * @param bool                       $trailingSlash
