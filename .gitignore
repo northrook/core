@@ -5,6 +5,7 @@
 *.code-workspace
 
 ### Dev
+/.*
 /vendor
 /var
 /*.cache
