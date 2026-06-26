@@ -15,7 +15,7 @@ use Northrook\Core\DateTime\DateFormat;
 use Northrook\Core\DateTime\TimeZone;
 use Stringable;
 
-final class DateTime implements Stringable
+final class Time implements Stringable
 {
     public readonly \DateTimeImmutable $immutable;
 

@@ -777,8 +777,10 @@ final class Filesystem implements FilesystemInterface
     /**
      * @param list<string> $files
      */
-    private static function doRemove(array $files, bool $isRecursive): void
-    {
+    private static function doRemove(
+        array $files,
+        bool $isRecursive,
+    ): void {
         $files = \array_reverse($files);
         foreach ($files as $file) {
             if (\is_link($file)) {
@@ -842,8 +844,11 @@ final class Filesystem implements FilesystemInterface
         }
     }
 
-    private function linkException(string $origin, string $target, string $linkType): never
-    {
+    private function linkException(
+        string $origin,
+        string $target,
+        string $linkType,
+    ): never {
         if (ErrorHandler::get()->getLastError()) {
             if (
                 '\\' === \DIRECTORY_SEPARATOR
@@ -865,17 +870,23 @@ final class Filesystem implements FilesystemInterface
         );
     }
 
-    private function makeAbsolute(string $path, string $basePath): string
-    {
+    private function makeAbsolute(
+        string $path,
+        string $basePath,
+    ): string {
         if ($this->isAbsolutePath($path)) {
             return normalize_path($path, traversal: true);
         }
 
-        return normalize_path([\rtrim($basePath, '/\\'), $path], traversal: true);
+        return normalize_path(
+            path: [\rtrim($basePath, '/\\'), $path],
+            traversal: true,
+        );
     }
 
-    private function assertPathExists(string $path): bool
-    {
+    private function assertPathExists(
+        string $path,
+    ): bool {
         $maxPathLength = \PHP_MAXPATHLEN - 2;
 
         if (\strlen($path) > $maxPathLength) {
@@ -891,8 +902,9 @@ final class Filesystem implements FilesystemInterface
     /**
      * @return list<string>
      */
-    private function directoryPaths(string $directory): array
-    {
+    private function directoryPaths(
+        string $directory,
+    ): array {
         $paths = [];
         foreach (new FilesystemIterator(
             $directory,
@@ -909,8 +921,9 @@ final class Filesystem implements FilesystemInterface
      *
      * @return iterable<string>
      */
-    private function toIterable(string|iterable $paths): iterable
-    {
+    private function toIterable(
+        string|iterable $paths,
+    ): iterable {
         return \is_string($paths) ? [$paths] : $paths;
     }
 
@@ -931,15 +944,17 @@ final class Filesystem implements FilesystemInterface
     /**
      * @return array{0: null|string, 1: string}
      */
-    private function getSchemeAndHierarchy(string $filename): array
-    {
+    private function getSchemeAndHierarchy(
+        string $filename,
+    ): array {
         $components = \explode('://', $filename, 2);
 
         return 2 === \count($components) ? [$components[0], $components[1]] : [null, $components[0]];
     }
 
-    private static function assertFunctionExists(string $func): void
-    {
+    private static function assertFunctionExists(
+        string $func,
+    ): void {
         if (! \function_exists($func)) {
             throw new FilesystemException(
                 \sprintf(
@@ -950,16 +965,19 @@ final class Filesystem implements FilesystemInterface
         }
     }
 
-    private static function joinLocalPath(string ...$segments): string
-    {
+    private static function joinLocalPath(
+        string ...$segments,
+    ): string {
         return normalize_path($segments);
     }
 
     /**
      * @param callable-string $func
      */
-    private static function box(string $func, mixed ...$args): mixed
-    {
+    private static function box(
+        string $func,
+        mixed ...$args,
+    ): mixed {
         self::assertFunctionExists($func);
 
         return ErrorHandler::get()->box(
