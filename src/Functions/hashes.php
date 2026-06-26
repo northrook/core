@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpConditionAlreadyCheckedInspection */
+<?php
 
 declare(strict_types=1);
 
@@ -29,7 +29,9 @@ function get_time_hash(
     int $length = 10,
 ): string {
     if ($length < 1 || $length > 16) {
-        throw new InvalidArgumentException('length must be between 1 and 16');
+        throw new InvalidArgumentException(
+            'length must be between 1 and 16',
+        );
     }
 
     $shift  = (int) \floor(\microtime(true) * 1000);
@@ -55,7 +57,9 @@ function get_hash(
     int $length = 8,
 ): string {
     if ($length < 4 || $length > 8) {
-        throw new InvalidArgumentException('length must be between 4 and 8');
+        throw new InvalidArgumentException(
+            'length must be between 4 and 8',
+        );
     }
 
     $value  = \hexdec(\hash('xxh32', $input));
@@ -82,7 +86,9 @@ function get_fast_hash(
     int $length = 8,
 ): string {
     if ($length < 1 || $length > 32) {
-        throw new InvalidArgumentException('length must be between 1 and 32');
+        throw new InvalidArgumentException(
+            'length must be between 1 and 32',
+        );
     }
 
     $output = \array_fill(0, $length, '');
@@ -113,7 +119,9 @@ function get_crypto_hash(
     int $length = 16,
 ): string {
     if ($length < 8 || $length > 32) {
-        throw new InvalidArgumentException('length must be between 8 and 32');
+        throw new InvalidArgumentException(
+            'length must be between 8 and 32',
+        );
     }
 
     $buffer = new Randomizer()->getBytes(
