@@ -7,8 +7,6 @@ namespace Northrook\Core;
 use InvalidArgumentException;
 use Random\Randomizer;
 
-const CROCKFORD_BASE32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-
 /**
  * xxHash32 non-cryptographic checksum of an input value.
  */

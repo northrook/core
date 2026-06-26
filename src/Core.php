@@ -62,12 +62,6 @@ final class Core extends ContractSingleton
         return normalize_path($cacheDirectory);
     }
 
-    // Requires Core::register() to be called first
-    public static function get(): self
-    {
-        return self::getInstance();
-    }
-
     private function resolveRootDirectory(
         null|string|Stringable $rootDirectory,
     ): string {
@@ -167,7 +161,7 @@ final class Core extends ContractSingleton
         DateFormat $dateFormat = DateFormat::SORTABLE,
         null|TimeZone $timezone = TimeZone::AUTO,
         null|LoggerInterface $logger = null,
-    ): self {
+    ): Core {
         return new Core(
             $rootDirectory,
             $cacheDirectory,

@@ -539,8 +539,9 @@ final class Filesystem implements FilesystemInterface
         if (\is_string($destinationRealPath)) {
             self::normalizeSlashes($destinationRealPath, trailing: true);
         }
-        $destinationInsideSource = $destinationDirectory === $sourceDirectory
-        || $this->isDescendantOf($destinationDirectory, $sourceDirectory);
+        $destinationInsideSource =
+            $destinationDirectory === $sourceDirectory
+            || $this->isDescendantOf($destinationDirectory, $sourceDirectory);
 
         foreach ($entries as $file) {
             $pathname = $file instanceof \SplFileInfo ? $file->getPathname() : (string) $file;
@@ -607,7 +608,9 @@ final class Filesystem implements FilesystemInterface
                 return $tmpFile;
             }
 
-            throw new FilesystemException('A temporary file could not be created: ' . ErrorHandler::get()->getLastError());
+            throw new FilesystemException(
+                'A temporary file could not be created: ' . ErrorHandler::get()->getLastError(),
+            );
         }
 
         $basename = $prefix . get_fast_hash(4) . $suffix;
@@ -826,9 +829,15 @@ final class Filesystem implements FilesystemInterface
                 }
             } elseif (
                 ! self::box('unlink', $file)
-                && ( ErrorHandler::get()->getLastError() && \str_contains(ErrorHandler::get()->getLastError(), 'Permission denied') || \file_exists($file) )
+                && (
+                    ErrorHandler::get()->getLastError()
+                    && \str_contains(ErrorHandler::get()->getLastError(), 'Permission denied')
+                    || \file_exists($file)
+                )
             ) {
-                throw new FilesystemException(\sprintf('Failed to remove file "%s": ', $file) . ErrorHandler::get()->getLastError());
+                throw new FilesystemException(
+                    \sprintf('Failed to remove file "%s": ', $file) . ErrorHandler::get()->getLastError(),
+                );
             }
         }
     }
@@ -836,7 +845,10 @@ final class Filesystem implements FilesystemInterface
     private function linkException(string $origin, string $target, string $linkType): never
     {
         if (ErrorHandler::get()->getLastError()) {
-            if ('\\' === \DIRECTORY_SEPARATOR && \str_contains(ErrorHandler::get()->getLastError(), 'error code(1314)')) {
+            if (
+                '\\' === \DIRECTORY_SEPARATOR
+                && \str_contains(ErrorHandler::get()->getLastError(), 'error code(1314)')
+            ) {
                 throw new FilesystemException(
                     \sprintf(
                         'Unable to create "%s" link due to error code 1314: \'A required privilege is not held by the client\'. Do you have the required Administrator-rights?',
@@ -847,7 +859,8 @@ final class Filesystem implements FilesystemInterface
             }
         }
         throw new FilesystemException(
-            \sprintf('Failed to create "%s" link from "%s" to "%s": ', $linkType, $origin, $target) . ErrorHandler::get()->getLastError(),
+            \sprintf('Failed to create "%s" link from "%s" to "%s": ', $linkType, $origin, $target)
+                . ErrorHandler::get()->getLastError(),
             path: $target,
         );
     }
@@ -867,7 +880,7 @@ final class Filesystem implements FilesystemInterface
 
         if (\strlen($path) > $maxPathLength) {
             throw new FilesystemException(
-                \sprintf('Could not check if file exists because path length exceeds %d characters.', $maxPathLength),
+                message: "Could not check if file exists because path length exceeds {$maxPathLength} characters.",
                 path: $path,
             );
         }
@@ -950,7 +963,7 @@ final class Filesystem implements FilesystemInterface
         self::assertFunctionExists($func);
 
         return ErrorHandler::get()->box(
-            static fn (): mixed => \call_user_func_array($func, $args),
+            static fn(): mixed => \call_user_func_array($func, $args),
         );
     }
 
