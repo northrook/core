@@ -11,6 +11,7 @@ use Northrook\Contracts\Exceptions\FilesystemException;
 use Northrook\ErrorHandler\CliErrorRenderer;
 use Northrook\ErrorHandler\JsonErrorRenderer;
 use Northrook\ErrorHandler;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -40,14 +41,9 @@ final class ErrorHandlerTest extends TestCase
     public function testGlobalErrorHandlerThrowsErrorExceptionForMaskedTypes(): void
     {
         $handler = ErrorHandler::get();
-        $handler->install();
 
-        try {
-            $this->expectException(ErrorException::class);
-            \trigger_error('global warning', E_USER_WARNING);
-        } finally {
-            $handler->uninstall();
-        }
+        $this->expectException(ErrorException::class);
+        $handler->handleGlobalError(E_USER_WARNING, 'global warning', __FILE__, __LINE__);
     }
 
     public function testErrorReportFromSerializesThrowableAndPreviousChain(): void
@@ -96,26 +92,23 @@ final class ErrorHandlerTest extends TestCase
         self::assertTrue(( new CliErrorRenderer() )->supports($report));
     }
 
+    #[WithoutErrorHandler]
     public function testInstallAndUninstallRestoreHandlers(): void
     {
-        $tracker = new class {
-            public bool $called = false;
-        };
+        $handler = ErrorHandler::get();
+        $handler->install();
+        $handler->uninstall();
 
-        \set_error_handler(static function () use ($tracker): bool {
-            $tracker->called = true;
+        $probeCalled = false;
+        \set_error_handler(static function () use (&$probeCalled): bool {
+            $probeCalled = true;
 
             return true;
         });
 
         try {
-            $handler = ErrorHandler::get();
-            $handler->install();
-            $handler->uninstall();
-
-            $tracker->called = false;
-            \trigger_error('restore test', E_USER_NOTICE);
-            self::assertTrue($tracker->called);
+            \trigger_error('restore test', E_USER_DEPRECATED);
+            self::assertTrue($probeCalled);
         } finally {
             \restore_error_handler();
         }

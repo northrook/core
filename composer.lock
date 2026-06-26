@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dcf55010911e58e5b519532f8daba10f",
+    "content-hash": "96752d1b4f109002c82b28af13df8145",
     "packages": [
         {
             "name": "northrook/core-contracts",
@@ -942,6 +942,40 @@
                 "source": "https://github.com/northrook/php-cs/tree/main"
             },
             "time": "2026-06-26T04:22:25+00:00"
+        },
+        {
+            "name": "northrook/var-dump",
+            "version": "0.0.1",
+            "dist": {
+                "type": "path",
+                "url": "../var-dump",
+                "reference": "55729d632c12f1fe503138ef45c873c0dab4e9ee"
+            },
+            "require": {
+                "php": ">=8.4",
+                "psr/log": "@stable"
+            },
+            "require-dev": {
+                "tracy/tracy": "@stable"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Framework\\Dev\\": "src"
+                }
+            },
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Martin Nielsen",
+                    "email": "mn@northrook.com"
+                }
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "phar-io/manifest",
@@ -2723,13 +2757,13 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "northrook/core-contracts": 20,
-        "northrook/php-cs": 20
+        "northrook/php-cs": 20,
+        "northrook/var-dump": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.4",
-        "ext-ctype": "*",
         "ext-mbstring": "*",
         "ext-hash": "*",
         "ext-intl": "*"

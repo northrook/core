@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Northrook\Core;
 
 use Northrook\Contracts\Exceptions\CurlException;
-use Northrook\Contracts\Interfaces\CurlInterface;
+use Northrook\Contracts\Http\CurlInterface;
 use Northrook\Contracts\Interfaces\FilesystemInterface;
 use Northrook\Core;
 use Psr\Log\LoggerInterface;

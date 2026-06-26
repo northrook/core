@@ -313,7 +313,7 @@ final class Filesystem implements FilesystemInterface
             return true;
         }
 
-        if (\strlen($path) > 1 && \ctype_alpha($path[0]) && ':' === $path[1]) {
+        if (\strlen($path) > 1 && \str_contains(\CHARSET_ALPHA, $path[0]) && ':' === $path[1]) {
             if (2 === \strlen($path)) {
                 return true;
             }
@@ -435,7 +435,7 @@ final class Filesystem implements FilesystemInterface
         }
 
         $splitDriveLetter = static fn(string $segment) => (
-            \strlen($segment) > 2 && ':' === $segment[1] && '/' === $segment[2] && \ctype_alpha($segment[0])
+            \strlen($segment) > 2 && ':' === $segment[1] && '/' === $segment[2] && \str_contains(\CHARSET_ALPHA, $segment[0])
                 ? [\substr($segment, 2), \strtoupper($segment[0])]
                 : [$segment, null]
         );
@@ -917,7 +917,7 @@ final class Filesystem implements FilesystemInterface
     }
 
     /**
-     * @param string|iterable  $paths
+     * @param string|iterable<string> $paths
      *
      * @return iterable<string>
      */

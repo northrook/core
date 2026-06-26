@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Northrook;
 
+use Framework\Dev\VarDump;
+use Framework\Dev\VarDumper;
 use Northrook\Contracts\ErrorHandler\ErrorReport;
 use Northrook\Contracts\Exceptions\ErrorException;
 use Northrook\Contracts\Interfaces\ErrorHandlerInterface;
@@ -232,23 +234,28 @@ final class ErrorHandler implements ErrorHandlerInterface
     }
 
     /**
+     * Collects deferred var-dump output from {@see northrook/var-dump} when installed.
+     *
      * @return array<string, mixed>
+     *
+     * @throws \JsonException
      */
-    private function collectDumps(Throwable $throwable): array
-    {
-        if (! \class_exists(\Framework\Dev\VarDump::class)) {
+    private function collectDumps(
+        Throwable $throwable,
+    ): array {
+        if (! \class_exists(VarDump::class)) {
             return [];
         }
 
-        \Framework\Dev\VarDump::this($throwable);
+        VarDump::this($throwable);
 
-        if (! \class_exists(\Framework\Dev\VarDumper::class)) {
+        if (! \class_exists(VarDumper::class)) {
             return [];
         }
 
         $dumps = [];
 
-        foreach (\Framework\Dev\VarDumper::renderDeferred() as $reference => $json) {
+        foreach (VarDumper::renderDeferred() as $reference => $json) {
             $dumps[$reference] = \json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         }
 

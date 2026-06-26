@@ -6,6 +6,8 @@ namespace Northrook\Core;
 
 use Stringable;
 
+use function Northrook\Contracts\str_is_digit;
+
 /**
  * Returns true when `$value` is considered empty.
  *
@@ -72,7 +74,7 @@ function is_path(mixed $value, string $contains = '..', string $illegal = '{}'):
     }
 
     // Indicates this could be a `.hidden` path
-    if ($string[0] === '.' && \ctype_alpha($string[1])) {
+    if ($string[0] === '.' && \str_contains(\CHARSET_ALPHA, $string[1])) {
         return true;
     }
 
@@ -163,7 +165,7 @@ function is_email(
     }
 
     // Must end with a letter
-    if (! \ctype_alpha($string[-1])) {
+    if (! \str_contains(\CHARSET_ALPHA, $string[-1])) {
         return false;
     }
 
@@ -174,7 +176,7 @@ function is_email(
     }
 
     // Fail on IP addresses
-    if (\ctype_digit(\strtr($server, ['.' => '']))) {
+    if (str_is_digit(\strtr($server, ['.' => '']))) {
         return false;
     }
 

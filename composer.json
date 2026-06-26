@@ -26,7 +26,6 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.4",
-    "ext-ctype": "*",
     "ext-mbstring": "*",
     "ext-hash": "*",
     "ext-intl": "*",
@@ -36,8 +35,15 @@
   "suggest": {
     "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
   },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../var-dump"
+    }
+  ],
   "require-dev": {
     "northrook/php-cs": "dev-main",
+    "northrook/var-dump": "@dev",
     "phpstan/phpstan": "^2.2",
     "phpstan/extension-installer": "^1.4",
     "phpunit/phpunit": "^11.0"

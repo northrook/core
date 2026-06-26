@@ -8,33 +8,43 @@ use Northrook\Contracts\ErrorHandler\ErrorReport;
 use Northrook\Contracts\ErrorHandler\StackFrame;
 use Northrook\Contracts\Interfaces\ErrorRendererInterface;
 use Northrook\Core;
+use Northrook\Core\AnsiFormatter;
 
 final class CliErrorRenderer implements ErrorRendererInterface
 {
-    private const string RESET  = "\033[0m";
-    private const string RED    = "\033[31m";
-    private const string YELLOW = "\033[33m";
-    private const string CYAN   = "\033[36m";
-    private const string GRAY   = "\033[90m";
+    private readonly AnsiFormatter $formatter;
+
+    public function __construct(
+        null|AnsiFormatter $formatter = null,
+    ) {
+        $this->formatter = $formatter ?? new AnsiFormatter();
+    }
 
     public function render(
         ErrorReport $report,
     ): string {
+        $format = $this->formatter;
+
         $lines   = [];
-        $lines[] = self::RED . $report->class . self::RESET . ': ' . $report->message;
-        $lines[] = self::GRAY . '  at ' . $report->file . ':' . $report->line . self::RESET;
-        $lines[] = self::YELLOW . '  severity: ' . $report->severity . self::RESET;
+        $lines[] = $format->colorizeString('<red>' . $report->class . '</red>: ' . $report->message);
+        $lines[] = $format->colorizeString('<gray>  at ' . $report->file . ':' . $report->line . '</gray>');
+
+        $lines[] = $format->colorizeString('<yellow>  severity: ' . $report->severity . '</yellow>');
 
         if ($report->phpError !== null) {
-            $lines[] = self::GRAY . '  php error type: ' . $report->phpError['type'] . self::RESET;
+            $lines[] = $format->colorizeString(
+                '<gray>  php error type: ' . $report->phpError['type'] . '</gray>',
+            );
         }
 
         if ($report->meta !== []) {
-            $lines[] = self::GRAY . '  meta: ' . \json_encode($report->meta, JSON_UNESCAPED_UNICODE) . self::RESET;
+            $lines[] = $format->colorizeString(
+                '<gray>  meta: ' . \json_encode($report->meta, JSON_UNESCAPED_UNICODE) . '</gray>',
+            );
         }
 
         $lines[] = '';
-        $lines[] = self::CYAN . 'Stack trace:' . self::RESET;
+        $lines[] = $format->colorizeString('<cyan>Stack trace:</cyan>');
 
         foreach ($report->trace as $index => $frame) {
             $lines[] = $this->formatFrame($index, $frame);
@@ -42,7 +52,9 @@ final class CliErrorRenderer implements ErrorRendererInterface
 
         if ($report->dumps !== []) {
             $lines[] = '';
-            $lines[] = self::CYAN . 'Dumps: ' . \implode(', ', \array_keys($report->dumps)) . self::RESET;
+            $lines[] = $format->colorizeString(
+                '<cyan>Dumps: ' . \implode(', ', \array_keys($report->dumps)) . '</cyan>',
+            );
         }
 
         return \implode(PHP_EOL, $lines) . PHP_EOL;
@@ -66,6 +78,8 @@ final class CliErrorRenderer implements ErrorRendererInterface
             ? $frame->class . ( $frame->type ?? '' ) . ( $frame->function ?? '' )
             : $frame->function ?? 'unknown';
 
-        return self::GRAY . \sprintf('#%d %s %s()', $index, $location, $callable) . self::RESET;
+        return $this->formatter->colorizeString(
+            '<gray>' . \sprintf('#%d %s %s()', $index, $location, $callable) . '</gray>',
+        );
     }
 }
