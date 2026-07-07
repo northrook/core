@@ -153,7 +153,7 @@ final class Core extends ContractSingleton
      * @param TimeZone|null            $timezone
      * @param LoggerInterface|null     $logger
      *
-     * @return \Northrook\Core
+     * @return static(ContractSingleton)
      */
     public static function register(
         null|string|Stringable $rootDirectory,
@@ -161,7 +161,7 @@ final class Core extends ContractSingleton
         DateFormat $dateFormat = DateFormat::SORTABLE,
         null|TimeZone $timezone = TimeZone::AUTO,
         null|LoggerInterface $logger = null,
-    ): Core {
+    ): static {
         return new Core(
             $rootDirectory,
             $cacheDirectory,

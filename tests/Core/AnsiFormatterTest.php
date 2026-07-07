@@ -16,7 +16,7 @@ final class AnsiFormatterTest extends TestCase
 
         self::assertSame(
             'Hello World!',
-            $format->colorizeString('<blue b>Hello</blue> <b>World</b>!'),
+            $format->string( '<blue b>Hello</blue> <b>World</b>!'),
         );
     }
 
@@ -33,7 +33,7 @@ final class AnsiFormatterTest extends TestCase
         };
 
         $format = new AnsiFormatter(logger: $logger, assumeTty: true);
-        $format->colorizeString('<foo bar>text</foo>');
+        $format->string( '<foo bar>text</foo>');
 
         self::assertContains('Unsupported format tag: <foo>', $logger->messages);
         self::assertContains('Unsupported format attribute: bar on <foo>', $logger->messages);
@@ -42,7 +42,7 @@ final class AnsiFormatterTest extends TestCase
     public function testNestedTags(): void
     {
         $format = new AnsiFormatter(assumeTty: true);
-        $result = $format->colorizeString('<blue><b>hi</b> there</blue>');
+        $result = $format->string( '<blue><b>hi</b> there</blue>');
 
         self::assertSame(
             "\033[34m\033[0m\033[34;1mhi\033[0m\033[34m there\033[0m",
@@ -53,7 +53,7 @@ final class AnsiFormatterTest extends TestCase
     public function testFlatTags(): void
     {
         $format = new AnsiFormatter(assumeTty: true);
-        $result = $format->colorizeString('<blue b>Hello</blue> <b>World</b>!');
+        $result = $format->string( '<blue b>Hello</blue> <b>World</b>!');
 
         self::assertSame(
             "\033[34;1mHello\033[0m \033[1mWorld\033[0m!",
@@ -67,7 +67,7 @@ final class AnsiFormatterTest extends TestCase
 
         self::assertSame(
             "\033[34mtext\033[0m",
-            $format->colorizeString('<blue><foo>text</foo></blue>'),
+            $format->string( '<blue><foo>text</foo></blue>'),
         );
     }
 
@@ -77,7 +77,7 @@ final class AnsiFormatterTest extends TestCase
 
         self::assertSame(
             "\033[34mnested same\033[0m",
-            $format->colorizeString('<blue><blue>nested same</blue></blue>'),
+            $format->string( '<blue><blue>nested same</blue></blue>'),
         );
     }
 
@@ -87,7 +87,7 @@ final class AnsiFormatterTest extends TestCase
 
         self::assertSame(
             "\033[31;44mtest\033[0m",
-            $format->colorizeString('<red bg-blue>test</red>'),
+            $format->string( '<red bg-blue>test</red>'),
         );
     }
 
@@ -96,7 +96,7 @@ final class AnsiFormatterTest extends TestCase
         $script = <<<'PHP'
             require %s;
             $format = new Northrook\Core\AnsiFormatter(stderrOnUnsupported: true, assumeTty: true);
-            $format->colorizeString('<foo bar>text</foo>');
+            $format->string('<foo bar>text</foo>');
             PHP;
 
         $script = \sprintf($script, \var_export(__DIR__ . '/../../vendor/autoload.php', true));
@@ -127,25 +127,111 @@ final class AnsiFormatterTest extends TestCase
 
         self::assertSame(
             'array<int>',
-            $format->colorizeString('array<int>'),
+            $format->string( 'array<int>'),
         );
         self::assertSame(
             'Generic<Foo>',
-            $format->colorizeString('Generic<Foo>'),
+            $format->string( 'Generic<Foo>'),
         );
         self::assertSame(
             '2 < 3',
-            $format->colorizeString('2 < 3'),
+            $format->string( '2 < 3'),
         );
     }
 
-    public function testStripTagsOnlyRemovesSupportedMarkupWhenNotTty(): void
+    public function testStripTagsPreservesLiteralsWhenNotTty(): void
     {
         $format = new AnsiFormatter(assumeTty: false);
 
         self::assertSame(
             'array<int> hello',
-            $format->colorizeString('array<int> <blue>hello</blue>'),
+            $format->string( 'array<int> <blue>hello</blue>'),
+        );
+    }
+
+    public function testCaseInsensitiveTags(): void
+    {
+        $format = new AnsiFormatter(assumeTty: true);
+
+        self::assertSame(
+            "\033[34mhi\033[0m",
+            $format->string( '<BLUE>hi</BLUE>'),
+        );
+    }
+
+    public function testMismatchedCloseTagLogsWarning(): void
+    {
+        $logger = new class extends AbstractLogger {
+            /** @var list<string> */
+            public array $messages = [];
+
+            public function log($level, \Stringable|string $message, array $context = []): void
+            {
+                $this->messages[] = (string) $message;
+            }
+        };
+
+        $format = new AnsiFormatter(logger: $logger, assumeTty: true);
+        $format->string( '<blue>x</red>');
+
+        self::assertContains('Mismatched close tag: </red> does not match <blue>', $logger->messages);
+    }
+
+    public function testUnexpectedCloseTagLogsWarning(): void
+    {
+        $logger = new class extends AbstractLogger {
+            /** @var list<string> */
+            public array $messages = [];
+
+            public function log($level, \Stringable|string $message, array $context = []): void
+            {
+                $this->messages[] = (string) $message;
+            }
+        };
+
+        $format = new AnsiFormatter(logger: $logger, assumeTty: true);
+        $format->string( '<blue>x</foo>');
+
+        self::assertContains('Unexpected close tag: </foo> while open <blue>', $logger->messages);
+    }
+
+    public function testStripUnsupportedTagsWhenNotTty(): void
+    {
+        $format = new AnsiFormatter(assumeTty: false);
+
+        self::assertSame(
+            'bar',
+            $format->string( '<foo>bar</foo>'),
+        );
+    }
+
+    public function testVariadicInsertsRawContent(): void
+    {
+        $format = new AnsiFormatter(assumeTty: true);
+
+        self::assertSame(
+            "\033[31m<blue>x</blue>\033[0m",
+            $format->string( '<red>%s</red>', '<blue>x</blue>'),
+        );
+    }
+
+    public function testVariadicRawContentSurvivesNonTty(): void
+    {
+        $format = new AnsiFormatter(assumeTty: false);
+
+        self::assertSame(
+            '<blue>x</blue>',
+            $format->string( '<red>%s</red>', '<blue>x</blue>'),
+        );
+    }
+
+    public function testPlaceholderWithoutArgsStaysLiteral(): void
+    {
+        $format = new AnsiFormatter(assumeTty: true);
+
+        self::assertSame(
+            '%s',
+            $format->string( '%s'),
         );
     }
 }

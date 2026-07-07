@@ -6,7 +6,7 @@ namespace Northrook\Tests\Core;
 
 use Northrook\Contracts\Exceptions\CurlException;
 use Northrook\Core\Curl;
-use Northrook\Core\Filesystem;
+use Northrook\Filesystem;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;

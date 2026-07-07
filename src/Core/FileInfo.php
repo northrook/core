@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Northrook\Core;
 
+use Northrook\Contracts\Exceptions\FilesystemException;
 use Override;
 use RuntimeException;
 use SplFileInfo;
@@ -63,23 +64,28 @@ class FileInfo extends SplFileInfo
     final public function getContents(
         bool $throwOnError = false,
     ): null|string {
-        $contents = \file_get_contents($this->getPathname());
+        try {
+            $contents = filesystem()->readFile($this->getPathname());
+        } catch (FilesystemException $e) {
+            if ($throwOnError) {
+                throw new RuntimeException(
+                    'Unable to read file: ' . $this->getPathname(),
+                    previous: $e,
+                );
+            }
 
-        if (false === $contents && $throwOnError) {
-            throw new RuntimeException(
-                'Unable to read file: ' . $this->getPathname(),
-            );
+            return null;
         }
 
-        return $contents ?: null;
+        return $contents !== '' ? $contents : null;
     }
 
     final public function exists(
         bool $throwOnError = false,
     ): bool {
-        $exists = \file_exists($this->getPathname());
+        $exists = filesystem()->fileExists($this->getPathname());
 
-        if (false === $exists && $throwOnError) {
+        if (! $exists && $throwOnError) {
             throw new RuntimeException(
                 'The file does not exist: ' . $this->getPathname(),
             );
@@ -91,7 +97,7 @@ class FileInfo extends SplFileInfo
     /**
      * Atomically dumps content into a file.
      *
-     * - {@see IOException} will be caught and logged as an error, returning false
+     * {@see FilesystemException} is wrapped as {@see RuntimeException}; other failures return false.
      *
      * @param resource|string $content The data to write into the file
      *
@@ -113,11 +119,13 @@ class FileInfo extends SplFileInfo
     final public function mkdir(
         int $mode = 0777,
     ): bool {
-        return \mkdir(
-            directory: $this->getPathname(),
-            permissions: $mode,
-            recursive: true,
-        );
+        $path = $this->getPathname();
+
+        return (bool) get(static function () use ($path, $mode): true {
+            filesystem()->createDirectory($path, $mode);
+
+            return true;
+        }, false);
     }
 
     /**
@@ -172,11 +180,13 @@ class FileInfo extends SplFileInfo
         null|int $time = null,
         null|int $atime = null,
     ): bool {
-        return \touch(
-            $this->getPathname(),
-            $time,
-            $atime,
-        );
+        $path = $this->getPathname();
+
+        return (bool) get(static function () use ($path, $time, $atime): true {
+            filesystem()->touch($path, $time, $atime);
+
+            return true;
+        }, false);
     }
 
     /**
@@ -184,7 +194,7 @@ class FileInfo extends SplFileInfo
      *
      * - If the target file is automatically overwritten when this file is newer.
      * - If the target is newer, $overwriteNewerFiles decides whether to overwrite.
-     * - {@see IOException}s will be caught and logged as an error, returning false
+     * - {@see FilesystemException} failures return false via {@see file_copy()}.
      *
      * @param string $targetFile
      * @param bool   $overwriteNewerFiles

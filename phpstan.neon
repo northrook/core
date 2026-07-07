@@ -1,5 +1,6 @@
+includes:
+	- vendor/northrook/php-cs/extension.neon
 parameters:
-	level: 9
 	paths:
 		- src
 		- bin
@@ -7,7 +8,6 @@ parameters:
 	excludePaths:
 		- tests/Cases/**
 		- var/*
-	treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		-
 			message: '#Dead catch#'
@@ -15,7 +15,3 @@ parameters:
 		-
 			message: '#Attribute class JetBrains\\PhpStorm\\Language does not exist#'
 			path: *.php
-rules:
-	- Northrook\Dev\PHPStan\ClassRequiresMemberRule
-	- Northrook\Dev\PHPStan\InterfaceRequiresMemberRule
-	- Northrook\Dev\PHPStan\LooseAbstractMemberRule

@@ -26,25 +26,37 @@ final class CliErrorRenderer implements ErrorRendererInterface
         $format = $this->formatter;
 
         $lines   = [];
-        $lines[] = $format->colorizeString('<red>' . $report->class . '</red>: ' . $report->message);
-        $lines[] = $format->colorizeString('<gray>  at ' . $report->file . ':' . $report->line . '</gray>');
+        $lines[] = $format->string( '<red>' . $report->class . '</red>: ' . $report->message);
+        $lines[] = $format->string( '<gray>  at ' . $report->file . ':' . $report->line . '</gray>');
 
-        $lines[] = $format->colorizeString('<yellow>  severity: ' . $report->severity . '</yellow>');
+        $lines[] = $format->string( '<yellow>  severity: ' . $report->severity . '</yellow>');
 
         if ($report->phpError !== null) {
-            $lines[] = $format->colorizeString(
+            $lines[] = $format->string(
                 '<gray>  php error type: ' . $report->phpError['type'] . '</gray>',
             );
         }
 
+        if (\count($report->phpErrors) > 1) {
+            $lines[] = $format->string(
+                '<yellow>  php errors (' . \count($report->phpErrors) . '):</yellow>',
+            );
+
+            foreach ($report->phpErrors as $i => $error) {
+                $lines[] = $format->string(
+                    '<gray>    [' . $i . '] ' . $error['file'] . ':' . $error['line'] . ' ' . $error['message'] . '</gray>',
+                );
+            }
+        }
+
         if ($report->meta !== []) {
-            $lines[] = $format->colorizeString(
+            $lines[] = $format->string(
                 '<gray>  meta: ' . \json_encode($report->meta, JSON_UNESCAPED_UNICODE) . '</gray>',
             );
         }
 
         $lines[] = '';
-        $lines[] = $format->colorizeString('<cyan>Stack trace:</cyan>');
+        $lines[] = $format->string( '<cyan>Stack trace:</cyan>');
 
         foreach ($report->trace as $index => $frame) {
             $lines[] = $this->formatFrame($index, $frame);
@@ -52,7 +64,7 @@ final class CliErrorRenderer implements ErrorRendererInterface
 
         if ($report->dumps !== []) {
             $lines[] = '';
-            $lines[] = $format->colorizeString(
+            $lines[] = $format->string(
                 '<cyan>Dumps: ' . \implode(', ', \array_keys($report->dumps)) . '</cyan>',
             );
         }
@@ -78,7 +90,7 @@ final class CliErrorRenderer implements ErrorRendererInterface
             ? $frame->class . ( $frame->type ?? '' ) . ( $frame->function ?? '' )
             : $frame->function ?? 'unknown';
 
-        return $this->formatter->colorizeString(
+        return $this->formatter->string(
             '<gray>' . \sprintf('#%d %s %s()', $index, $location, $callable) . '</gray>',
         );
     }

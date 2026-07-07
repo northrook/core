@@ -6,20 +6,25 @@ namespace Northrook\Core;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Stringable;
 
 /**
  * Formats strings with ANSI SGR codes for terminal output from lightweight markup tags.
  *
- * Only recognised tag and attribute names are parsed; all other `<` sequences are left literal.
+ * Tag-shaped markup is consumed; non-tag `<` sequences (generics, comparisons) stay literal.
+ * Pass dynamic content via variadic `%s` placeholders to keep it raw and unparsed.
  *
  * ```
  * $format = new AnsiFormatter();
  * echo $format->colorizeString('<blue b>Hello</blue> <b>World</b>!');
+ * echo $format->colorizeString('<red>Error:</red> %s', $userMessage);
  * ```
  */
 final class AnsiFormatter
 {
     private const string RESET = "\033[0m";
+
+    private const string LITERAL_GUARD_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
     /** @var array<string, int> */
     private const array ANSI_CODES = [
@@ -73,21 +78,30 @@ final class AnsiFormatter
     /**
      * Formats a string with ANSI colour codes for terminal output based on embedded tags.
      *
-     * Unsupported tags and attributes are stripped. When output is not a TTY, supported tags are removed.
+     * Unsupported tags and attributes are stripped. When output is not a TTY, all tag-shaped
+     * markup is removed without emitting ANSI codes.
+     *
+     * When variadic arguments are passed, `%s` inserts each argument as raw literal text
+     * (never parsed or stripped) and `%%` emits a literal percent sign.
      */
-    public function colorizeString(
+    public function string(
         string $string,
+        Stringable|string|int|float ...$args,
     ): string {
-        if (! $this->isTty()) {
-            return $this->stripTags($string);
+        $emitAnsi = $this->isTty();
+
+        if ($emitAnsi) {
+            $this->unsupportedQueue = [];
         }
 
-        $this->unsupportedQueue = [];
+        $argIndex = 0;
+        /** @var list<Stringable|string|int|float> $argValues */
+        $argValues = \array_values($args);
 
         try {
-            return $this->parseSegment($string, 0, [])[0];
+            return $this->parseSegment($string, 0, [], null, $emitAnsi, $argValues, $argIndex)[0];
         } finally {
-            if ($this->stderrOnUnsupported) {
+            if ($emitAnsi && $this->stderrOnUnsupported) {
                 $this->writeUnsupportedToStderr();
             }
         }
@@ -102,20 +116,9 @@ final class AnsiFormatter
         return \defined('STDOUT') && \stream_isatty(STDOUT);
     }
 
-    private function stripTags(
-        string $string,
-    ): string {
-        $stripped = \preg_replace(
-            '#</?(?:' . $this->tagPattern . ')(?:\s[^>]*)?>#',
-            '',
-            $string,
-        );
-
-        return $stripped ?? $string;
-    }
-
     /**
-     * @param list<int> $stack
+     * @param list<int>                                    $stack
+     * @param list<Stringable|string|int|float>            $args
      *
      * @return array{0: string, 1: int}
      */
@@ -123,17 +126,21 @@ final class AnsiFormatter
         string $string,
         int $offset,
         array $stack,
-        null|string $untilCloseTag = null,
+        null|string $untilCloseTag,
+        bool $emitAnsi,
+        array $args,
+        int &$argIndex,
     ): array {
         $output = '';
         $length = \strlen($string);
+        $scanPlaceholders = $args !== [];
 
         while ($offset < $length) {
-            if ($untilCloseTag !== null && $this->tryConsumeSupportedClose($string, $offset, $untilCloseTag)) {
+            if ($untilCloseTag !== null && $this->tryConsumeSupportedClose($string, $offset, $untilCloseTag, $emitAnsi)) {
                 return [$output, $offset];
             }
 
-            $next = \strpos($string, '<', $offset);
+            $next = $this->findNextSpecial($string, $offset, $scanPlaceholders);
 
             if ($next === false) {
                 return [$output . \substr($string, $offset), $length];
@@ -142,39 +149,98 @@ final class AnsiFormatter
             $output .= \substr($string, $offset, $next - $offset);
             $offset = $next;
 
-            if ($untilCloseTag !== null && $this->tryConsumeSupportedClose($string, $offset, $untilCloseTag)) {
+            if ($scanPlaceholders && $this->tryConsumePlaceholder($string, $offset, $args, $argIndex, $output)) {
+                continue;
+            }
+
+            if ($untilCloseTag !== null && $this->tryConsumeSupportedClose($string, $offset, $untilCloseTag, $emitAnsi)) {
                 return [$output, $offset];
             }
 
             if ($this->isCloseTagAt($string, $offset)) {
-                if ($parsed = $this->tryParseSupportedElement($string, $offset, $stack)) {
-                    [$segment, $offset] = $parsed;
-                    $output            .= $segment;
-
-                    continue;
+                if ($untilCloseTag !== null) {
+                    $this->tryWarnUnexpectedClose($string, $offset, $untilCloseTag, $emitAnsi);
                 }
 
-                if ($this->tryConsumeUnsupportedTag($string, $offset)) {
+                if ($this->tryConsumeUnsupportedTag($string, $offset, $emitAnsi)) {
                     continue;
                 }
             } elseif ($this->isOpenTagAt($string, $offset)) {
-                if ($parsed = $this->tryParseSupportedElement($string, $offset, $stack)) {
+                if ($parsed = $this->tryParseSupportedElement($string, $offset, $stack, $emitAnsi, $args, $argIndex)) {
                     [$segment, $offset] = $parsed;
                     $output            .= $segment;
 
                     continue;
                 }
 
-                if ($this->tryConsumeUnsupportedTag($string, $offset)) {
+                if ($this->tryConsumeUnsupportedTag($string, $offset, $emitAnsi)) {
                     continue;
                 }
             }
 
-            $output .= '<';
+            $output .= $string[$offset];
             ++$offset;
         }
 
         return [$output, $offset];
+    }
+
+    private function findNextSpecial(
+        string $string,
+        int $offset,
+        bool $scanPlaceholders,
+    ): false|int {
+        $nextLt = \strpos($string, '<', $offset);
+
+        if (! $scanPlaceholders) {
+            return $nextLt;
+        }
+
+        $nextPct = \strpos($string, '%', $offset);
+
+        if ($nextLt === false) {
+            return $nextPct;
+        }
+
+        if ($nextPct === false) {
+            return $nextLt;
+        }
+
+        return \min($nextLt, $nextPct);
+    }
+
+    /**
+     * @param list<Stringable|string|int|float> $args
+     */
+    private function tryConsumePlaceholder(
+        string $string,
+        int &$offset,
+        array $args,
+        int &$argIndex,
+        string &$output,
+    ): bool {
+        if ($string[$offset] !== '%') {
+            return false;
+        }
+
+        $next = $string[$offset + 1] ?? '';
+
+        if ($next === '%') {
+            $output .= '%';
+            $offset += 2;
+
+            return true;
+        }
+
+        if ($next === 's' && $argIndex < \count($args)) {
+            $output .= (string) $args[$argIndex];
+            ++$argIndex;
+            $offset += 2;
+
+            return true;
+        }
+
+        return false;
     }
 
     private function isOpenTagAt(
@@ -185,7 +251,7 @@ final class AnsiFormatter
             return false;
         }
 
-        return $offset === 0 || ! \str_contains(\CHARSET_ALNUM, $string[$offset - 1]);
+        return $offset === 0 || ! \str_contains(self::LITERAL_GUARD_CHARSET, $string[$offset - 1]);
     }
 
     private function isCloseTagAt(
@@ -196,7 +262,8 @@ final class AnsiFormatter
     }
 
     /**
-     * @param list<int> $stack
+     * @param list<int>                         $stack
+     * @param list<Stringable|string|int|float> $args
      *
      * @return null|array{0: string, 1: int}
      */
@@ -204,11 +271,14 @@ final class AnsiFormatter
         string $string,
         int &$offset,
         array $stack,
+        bool $emitAnsi,
+        array $args,
+        int &$argIndex,
     ): null|array {
         $tail = \substr($string, $offset);
 
         if (! \preg_match(
-            '#^<(' . $this->tagPattern . ')(\s+[^>]*)?>#',
+            '#^<(' . $this->tagPattern . ')(\s+[^>]*)?>#i',
             $tail,
             $matches,
         )) {
@@ -216,14 +286,14 @@ final class AnsiFormatter
         }
 
         $tag          = \strtolower($matches[1]);
-        $elementCodes = $this->resolveCodes($tag, $matches[2] ?? '');
+        $elementCodes = $this->resolveCodes($tag, $matches[2] ?? '', $emitAnsi);
         $newStack     = $this->mergeStack($stack, $elementCodes);
         $offset      += \strlen($matches[0]);
 
-        [$content, $offset] = $this->parseSegment($string, $offset, $newStack, $tag);
+        [$content, $offset] = $this->parseSegment($string, $offset, $newStack, $tag, $emitAnsi, $args, $argIndex);
 
         return [
-            $this->transition($stack, $newStack) . $content . $this->transition($newStack, $stack),
+            $this->transition($stack, $newStack, $emitAnsi) . $content . $this->transition($newStack, $stack, $emitAnsi),
             $offset,
         ];
     }
@@ -232,18 +302,23 @@ final class AnsiFormatter
         string $string,
         int &$offset,
         string $tag,
+        bool $emitAnsi,
     ): bool {
         $tail = \substr($string, $offset);
 
         if (! \preg_match(
-            '#^</(' . $this->tagPattern . ')>#',
+            '#^</(' . $this->tagPattern . ')>#i',
             $tail,
             $matches,
         )) {
             return false;
         }
 
-        if (\strtolower($matches[1]) !== $tag) {
+        $found = \strtolower($matches[1]);
+
+        if ($found !== $tag) {
+            $this->recordUnsupported("Mismatched close tag: </{$found}> does not match <{$tag}>", $emitAnsi);
+
             return false;
         }
 
@@ -252,14 +327,40 @@ final class AnsiFormatter
         return true;
     }
 
+    private function tryWarnUnexpectedClose(
+        string $string,
+        int $offset,
+        string $expectedTag,
+        bool $emitAnsi,
+    ): void {
+        $tail = \substr($string, $offset);
+
+        if (! \preg_match(
+            '#^</([a-z][a-z0-9-]*)>#i',
+            $tail,
+            $matches,
+        )) {
+            return;
+        }
+
+        $found = \strtolower($matches[1]);
+
+        if (isset(self::ANSI_CODES[$found])) {
+            return;
+        }
+
+        $this->recordUnsupported("Unexpected close tag: </{$found}> while open <{$expectedTag}>", $emitAnsi);
+    }
+
     private function tryConsumeUnsupportedTag(
         string $string,
         int &$offset,
+        bool $emitAnsi,
     ): bool {
         $tail = \substr($string, $offset);
 
         if (! \preg_match(
-            '#^</?([a-z][a-z0-9-]*)(\s+[^>]*)?>#',
+            '#^</?([a-z][a-z0-9-]*)(\s+[^>]*)?>#i',
             $tail,
             $matches,
         )) {
@@ -277,7 +378,7 @@ final class AnsiFormatter
                     $name = \strtolower($attribute);
 
                     if (! isset(self::ANSI_CODES[$name])) {
-                        $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>");
+                        $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>", $emitAnsi);
                     }
                 }
             }
@@ -293,14 +394,14 @@ final class AnsiFormatter
             return true;
         }
 
-        $this->recordUnsupported("Unsupported format tag: <{$tag}>");
+        $this->recordUnsupported("Unsupported format tag: <{$tag}>", $emitAnsi);
 
         if ($attrString !== '') {
             foreach (\preg_split('/\s+/', $attrString, flags: PREG_SPLIT_NO_EMPTY) ?: [] as $attribute) {
                 $name = \strtolower($attribute);
 
                 if (! isset(self::ANSI_CODES[$name])) {
-                    $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>");
+                    $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>", $emitAnsi);
                 }
             }
         }
@@ -316,6 +417,7 @@ final class AnsiFormatter
     private function resolveCodes(
         string $tag,
         string $attributeString,
+        bool $emitAnsi,
     ): array {
         $codes = [self::ANSI_CODES[$tag]];
 
@@ -334,7 +436,7 @@ final class AnsiFormatter
                 continue;
             }
 
-            $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>");
+            $this->recordUnsupported("Unsupported format attribute: {$name} on <{$tag}>", $emitAnsi);
         }
 
         return $codes;
@@ -364,8 +466,9 @@ final class AnsiFormatter
     private function transition(
         array $from,
         array $to,
+        bool $emitAnsi,
     ): string {
-        if ($from === $to) {
+        if (! $emitAnsi || $from === $to) {
             return '';
         }
 
@@ -400,7 +503,12 @@ final class AnsiFormatter
      */
     private function recordUnsupported(
         string $message,
+        bool $emitAnsi,
     ): void {
+        if (! $emitAnsi) {
+            return;
+        }
+
         $this->logger->warning($message);
 
         if ($this->stderrOnUnsupported) {

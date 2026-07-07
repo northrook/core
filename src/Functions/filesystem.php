@@ -7,6 +7,8 @@ namespace Northrook\Core;
 use InvalidArgumentException;
 use Northrook\Contracts\Exceptions\FileNotFoundException;
 use Northrook\Contracts\Exceptions\FilesystemException;
+use Northrook\ErrorHandler;
+use Northrook\Filesystem;
 use RuntimeException;
 use Stringable;
 
@@ -57,7 +59,7 @@ function file_save(
         return false;
     }
 
-    $sizeBefore = $append && filesystem()->pathsExist($path)
+    $sizeBefore = $append && filesystem()->fileExists($path)
         ? filesystem()->fileSize($path)
         : 0;
 
@@ -82,7 +84,9 @@ function file_save(
 function filesystem(): Filesystem
 {
     static $instance = null;
-    $instance ??= new Filesystem();
+    $instance ??= new Filesystem(
+        ErrorHandler::isRegistered() ? ErrorHandler::get() : null,
+    );
 
     return $instance;
 }
@@ -131,8 +135,8 @@ function path_valid(
     bool $throw = false,
 ): bool {
     // Check if $path exists and is readable
-    $isReadable = \is_readable($path);
-    $exists     = \file_exists($path) && $isReadable;
+    $isReadable = filesystem()->isReadable($path);
+    $exists     = filesystem()->fileExists($path) && $isReadable;
 
     // Return early
     if ($exists) {
@@ -140,7 +144,7 @@ function path_valid(
     }
 
     // Determine $path type
-    $type = \is_dir($path) ? 'dir' : ( \is_file($path) ? 'file' : false );
+    $type = filesystem()->isDirectory($path) ? 'dir' : ( filesystem()->isFile($path) ? 'file' : false );
 
     // Handle non-existent paths
     if (! $type) {
@@ -155,7 +159,7 @@ function path_valid(
         return false;
     }
 
-    $isWritable = \is_writable($path);
+    $isWritable = filesystem()->isWritable($path);
 
     $error = ! $isWritable && ! $isReadable ? ' is not readable nor writable.' : null;
     $error ??= ! $isWritable ? ' is not writable.' : null;
@@ -185,7 +189,7 @@ function path_readable(
     string $path,
     bool $throw = false,
 ): bool {
-    if (! \file_exists($path)) {
+    if (! filesystem()->fileExists($path)) {
         $message = "The file at '{$path}' does not exist.";
 
         if ($throw) {
@@ -197,8 +201,8 @@ function path_readable(
         return false;
     }
 
-    if (! \is_readable($path)) {
-        $message = \sprintf('The "%s" "%s" is not readable.', \is_dir($path) ? 'directory' : 'file', $path);
+    if (! filesystem()->isReadable($path)) {
+        $message = \sprintf('The "%s" "%s" is not readable.', filesystem()->isDirectory($path) ? 'directory' : 'file', $path);
 
         if ($throw) {
             throw new FilesystemException($message);
@@ -223,7 +227,7 @@ function path_writable(
     string $path,
     bool $throw = false,
 ): bool {
-    if (! \file_exists($path)) {
+    if (! filesystem()->fileExists($path)) {
         $message = "The path at '{$path}' does not exist.";
 
         if ($throw) {
@@ -235,8 +239,8 @@ function path_writable(
         return false;
     }
 
-    if (! \is_writable($path)) {
-        $message = \sprintf('The "%s" "%s" is not writable.', \is_dir($path) ? 'directory' : 'file', $path);
+    if (! filesystem()->isWritable($path)) {
+        $message = \sprintf('The "%s" "%s" is not writable.', filesystem()->isDirectory($path) ? 'directory' : 'file', $path);
 
         if ($throw) {
             throw new FilesystemException($message);

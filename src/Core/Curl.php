@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Northrook\Core;
 
 use Northrook\Contracts\Exceptions\CurlException;
-use Northrook\Contracts\Http\CurlInterface;
+use Northrook\Contracts\Interfaces\CurlInterface;
 use Northrook\Contracts\Interfaces\FilesystemInterface;
 use Northrook\Core;
+use Northrook\Filesystem;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\CurlHttpClient;
@@ -376,14 +377,14 @@ final class Curl implements CurlInterface
         $tempFile    = $this->tempFilePath($destination);
 
         $options = [];
-        $mode    = 'wb';
+        $mode    = 'w+b';
 
         if ($this->filesystem->isReadable($tempFile)) {
             $filesize = $this->filesystem->fileSize($tempFile);
 
             if ($filesize > 0) {
                 $options['headers'] = ['Range' => 'bytes=' . $filesize . '-'];
-                $mode               = 'ab';
+                $mode               = 'a+b';
             }
         }
 

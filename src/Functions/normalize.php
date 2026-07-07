@@ -87,7 +87,7 @@ function normalize_slashes(
  * # Normalize a `string` or `string[]`, assuming it is a `path`.
  *
  * - If an array of strings is passed, they will be joined using the directory separator.
- * - Normalises slashes to `DIR_SEP`.
+ * - Normalizes slashes to `DIR_SEP`.
  * - Removes repeated separators.
  * - Will throw a {@see \ValueError} if the resulting string exceeds {@see \PHP_MAXPATHLEN}.
  *

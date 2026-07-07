@@ -30,7 +30,8 @@
     "ext-hash": "*",
     "ext-intl": "*",
     "northrook/core-contracts": "dev-main",
-    "symfony/http-client": "^8.1"
+    "symfony/http-client": "^8.1",
+    "northrook/php-filesystem": "^0.2.0"
   },
   "suggest": {
     "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
