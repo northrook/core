@@ -12,8 +12,10 @@ namespace Northrook\Core;
  *
  * @return float
  */
-function num_percent(float $from, float $to): float
-{
+function num_percent(
+    float $from,
+    float $to,
+): float {
     if (! $from || $from === $to) {
         return 0;
     }
@@ -25,8 +27,9 @@ function num_percent(float $from, float $to): float
  *
  * Strings are measured by byte length; numeric values are treated as byte counts.
  */
-function num_byte_size(string|int|float $bytes): string
-{
+function num_byte_size(
+    string|int|float $bytes,
+): string {
     $bytes = (float) ( \is_string($bytes) ? \mb_strlen($bytes, '8bit') : $bytes );
 
     $unitDecimalsByFactor = [
@@ -128,8 +131,11 @@ function num_clamp(
  *
  * @return null|int|string
  */
-function num_closest(int $num, array $in, bool $returnKey = false): string|int|null
-{
+function num_closest(
+    int $num,
+    array $in,
+    bool $returnKey = false,
+): string|int|null {
     if ($in === []) {
         return null;
     }

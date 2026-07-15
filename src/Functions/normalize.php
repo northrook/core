@@ -38,7 +38,9 @@ function normalize_string(
     if ($tabSize) {
         $string = (string) \preg_replace_callback(
             '#^ *#m',
-            static function($matches) use ($tabSize) {
+            static function(
+                $matches,
+            ) use ($tabSize) {
                 // Group each $tabSize
                 $tabs = \intdiv(\strlen($matches[0]), $tabSize);
 

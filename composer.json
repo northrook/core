@@ -31,12 +31,23 @@
     "ext-intl": "*",
     "northrook/core-contracts": "dev-main",
     "symfony/http-client": "^8.1",
-    "northrook/php-filesystem": "^0.2.0"
+    "northrook/php-filesystem": "^0.2.0",
+    "northrook/ansi-formatter": "dev-main",
+    "northrook/hasher": "dev-main",
+    "northrook/error-handler": "dev-main"
   },
   "suggest": {
     "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
   },
   "repositories": [
+    {
+      "type": "path",
+      "url": "../contracts"
+    },
+    {
+      "type": "path",
+      "url": "../../framework/error-handler"
+    },
     {
       "type": "path",
       "url": "../var-dump"

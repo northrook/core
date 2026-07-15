@@ -127,10 +127,15 @@ function arr_flatten(
     \array_walk_recursive(
         $array,
         match ($preserveKeys) {
-            true => function($v, $k) use (&$result): void {
+            true => function(
+                $v,
+                $k,
+            ) use (&$result): void {
                 $result[$k] = $v;
             },
-            false => function($v) use (&$result): void {
+            false => function(
+                $v,
+            ) use (&$result): void {
                 $result[] = $v;
             },
         },

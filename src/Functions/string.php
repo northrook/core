@@ -504,7 +504,7 @@ function mb_str_ends_with(
         return false;
     }
 
-    return $pos === \mb_strlen($haystack, $encoding) - \mb_strlen($needle, $encoding);
+    return $pos === ( \mb_strlen($haystack, $encoding) - \mb_strlen($needle, $encoding) );
 }
 
 /**

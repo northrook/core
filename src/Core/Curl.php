@@ -485,8 +485,9 @@ final class Curl implements CurlInterface
     }
 
     /** Path of the hashed temp file used while downloading to `$destination`. */
-    private function tempFilePath(string $destination): string
-    {
+    private function tempFilePath(
+        string $destination,
+    ): string {
         return normalize_path([
             $this->cacheDirectory,
             \hash('xxh32', $destination) . '.tmp',
@@ -498,15 +499,17 @@ final class Curl implements CurlInterface
         $this->filesystem->createDirectory($this->cacheDirectory);
     }
 
-    private function removeTempFile(string $path): void
-    {
+    private function removeTempFile(
+        string $path,
+    ): void {
         if ($this->filesystem->isReadable($path)) {
             $this->filesystem->remove($path);
         }
     }
 
-    private static function isSuccessStatus(int $status): bool
-    {
+    private static function isSuccessStatus(
+        int $status,
+    ): bool {
         return $status >= 200 && $status < 400;
     }
 }

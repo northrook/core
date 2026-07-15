@@ -121,7 +121,7 @@ class FileInfo extends SplFileInfo
     ): bool {
         $path = $this->getPathname();
 
-        return (bool) get(static function () use ($path, $mode): true {
+        return (bool) get(static function() use ($path, $mode): true {
             filesystem()->createDirectory($path, $mode);
 
             return true;
@@ -182,7 +182,7 @@ class FileInfo extends SplFileInfo
     ): bool {
         $path = $this->getPathname();
 
-        return (bool) get(static function () use ($path, $time, $atime): true {
+        return (bool) get(static function() use ($path, $time, $atime): true {
             filesystem()->touch($path, $time, $atime);
 
             return true;

@@ -5,7 +5,7 @@
 *.code-workspace
 
 ### Dev
-/.*
+/.*/
 /vendor
 /var
 /*.cache
@@ -13,3 +13,4 @@
 /.env
 /.src
 package-lock.json
+.lerd.yaml

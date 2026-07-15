@@ -44,8 +44,11 @@ function is_empty(
  *
  * @return bool
  */
-function is_path(mixed $value, string $contains = '..', string $illegal = '{}'): bool
-{
+function is_path(
+    mixed $value,
+    string $contains = '..',
+    string $illegal = '{}',
+): bool {
     // Bail early on non-stringable values
     if (! ( \is_string($value) || $value instanceof Stringable )) {
         return false;

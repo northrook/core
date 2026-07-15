@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Northrook;
 
-use Northrook\Contracts\ContractSingleton;
+use Northrook\Contracts\Singleton;
 use Northrook\Core\DateTime\{DateFormat, TimeZone};
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Stringable;
 
-use function Northrook\Core\{get_hash, normalize_path};
+use function Northrook\Core\{normalize_path};
 
-final class Core extends ContractSingleton
+final class Core extends Singleton
 {
     public readonly string $rootDirectory;
 
@@ -112,7 +112,7 @@ final class Core extends ContractSingleton
         }
 
         if ($useSystemCache) {
-            $cacheDirectory .= \DIR_SEP . get_hash($this->rootDirectory);
+            $cacheDirectory .= \DIR_SEP . Hash::value($this->rootDirectory);
         }
 
         return normalize_path(
@@ -128,8 +128,9 @@ final class Core extends ContractSingleton
      * @param \Northrook\Core\DateTime\DateFormat $dateFormat
      * @return \Northrook\Core\DateTime\DateFormat
      */
-    private function resolveDateFormat(DateFormat $dateFormat): DateFormat
-    {
+    private function resolveDateFormat(
+        DateFormat $dateFormat,
+    ): DateFormat {
         return $dateFormat;
     }
 
@@ -153,7 +154,7 @@ final class Core extends ContractSingleton
      * @param TimeZone|null            $timezone
      * @param LoggerInterface|null     $logger
      *
-     * @return static(ContractSingleton)
+     * @return static
      */
     public static function register(
         null|string|Stringable $rootDirectory,

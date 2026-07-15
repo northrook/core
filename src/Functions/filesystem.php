@@ -99,7 +99,7 @@ function file_copy(
     string $target,
     bool $alwaysOverwrite = false,
 ): bool {
-    return (bool) get(static function () use ($source, $target, $alwaysOverwrite): true {
+    return (bool) get(static function() use ($source, $target, $alwaysOverwrite): true {
         filesystem()->copyFile($source, $target, $alwaysOverwrite);
 
         return true;
@@ -109,9 +109,10 @@ function file_copy(
 /**
  * Remove a file or directory, returning false on failure instead of throwing.
  */
-function file_remove(string $path): bool
-{
-    return (bool) get(static function () use ($path): true {
+function file_remove(
+    string $path,
+): bool {
+    return (bool) get(static function() use ($path): true {
         filesystem()->remove($path);
 
         return true;
@@ -202,7 +203,11 @@ function path_readable(
     }
 
     if (! filesystem()->isReadable($path)) {
-        $message = \sprintf('The "%s" "%s" is not readable.', filesystem()->isDirectory($path) ? 'directory' : 'file', $path);
+        $message = \sprintf(
+            'The "%s" "%s" is not readable.',
+            filesystem()->isDirectory($path) ? 'directory' : 'file',
+            $path,
+        );
 
         if ($throw) {
             throw new FilesystemException($message);
@@ -240,7 +245,11 @@ function path_writable(
     }
 
     if (! filesystem()->isWritable($path)) {
-        $message = \sprintf('The "%s" "%s" is not writable.', filesystem()->isDirectory($path) ? 'directory' : 'file', $path);
+        $message = \sprintf(
+            'The "%s" "%s" is not writable.',
+            filesystem()->isDirectory($path) ? 'directory' : 'file',
+            $path,
+        );
 
         if ($throw) {
             throw new FilesystemException($message);

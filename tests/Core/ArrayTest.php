@@ -15,8 +15,10 @@ final class ArrayTest extends TestCase
      * @param array<array-key, mixed> $array
      */
     #[DataProvider('associativeProvider')]
-    public function testArrayIsAssociative(array $array, bool $expected): void
-    {
+    public function testArrayIsAssociative(
+        array $array,
+        bool $expected,
+    ): void {
         self::assertSame($expected, array_is_associative($array));
     }
 

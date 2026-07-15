@@ -30,7 +30,11 @@ final class CurlTest extends TestCase
     public function testGetForwardsMethodUrlAndQuery(): void
     {
         $requests = [];
-        $client   = new MockHttpClient(function (string $method, string $url, array $options) use (&$requests): MockResponse {
+        $client   = new MockHttpClient(function(
+            string $method,
+            string $url,
+            array $options,
+        ) use (&$requests): MockResponse {
             $requests[] = compact('method', 'url', 'options');
 
             return new MockResponse('ok');
@@ -47,13 +51,17 @@ final class CurlTest extends TestCase
     public function testPostForwardsBody(): void
     {
         $requests = [];
-        $client   = new MockHttpClient(function (string $method, string $url, array $options) use (&$requests): MockResponse {
+        $client   = new MockHttpClient(function(
+            string $method,
+            string $url,
+            array $options,
+        ) use (&$requests): MockResponse {
             $requests[] = compact('method', 'url', 'options');
 
             return new MockResponse('created', ['http_code' => 201]);
         });
 
-        $curl = new Curl(httpClient: $client);
+        $curl     = new Curl(httpClient: $client);
         $response = $curl->post('https://example.com/items', 'payload');
 
         self::assertSame(201, $response->getStatusCode());
@@ -63,7 +71,7 @@ final class CurlTest extends TestCase
 
     public function testJsonDecodesResponse(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('{"id":1}'));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('{"id":1}'));
         $curl   = new Curl(httpClient: $client);
 
         self::assertSame(['id' => 1], $curl->json('GET', 'https://example.com/item'));
@@ -71,7 +79,7 @@ final class CurlTest extends TestCase
 
     public function testProbeReturnsTrueForSuccessStatus(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['http_code' => 204]));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('', ['http_code' => 204]));
         $curl   = new Curl(httpClient: $client);
 
         self::assertTrue($curl->probeUrl('https://example.com/ok'));
@@ -79,7 +87,7 @@ final class CurlTest extends TestCase
 
     public function testProbeReturnsFalseForErrorStatus(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['http_code' => 404]));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('', ['http_code' => 404]));
         $curl   = new Curl(httpClient: $client);
 
         self::assertFalse($curl->probeUrl('https://example.com/missing'));
@@ -88,7 +96,7 @@ final class CurlTest extends TestCase
     public function testProbeCachesSuccessfulResults(): void
     {
         $count  = 0;
-        $client = new MockHttpClient(function () use (&$count): MockResponse {
+        $client = new MockHttpClient(function() use (&$count): MockResponse {
             ++$count;
 
             return new MockResponse('', ['http_code' => 200]);
@@ -102,7 +110,7 @@ final class CurlTest extends TestCase
 
     public function testProbeThrowOnError(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['http_code' => 500]));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('', ['http_code' => 500]));
         $curl   = new Curl(httpClient: $client);
 
         $this->expectException(CurlException::class);
@@ -111,7 +119,7 @@ final class CurlTest extends TestCase
 
     public function testDownloadWritesFile(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('file-bytes'));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('file-bytes'));
         $curl   = new Curl(
             filesystem: new Filesystem(),
             cacheDirectory: $this->workspace . \DIR_SEP . 'cache',
@@ -127,11 +135,13 @@ final class CurlTest extends TestCase
 
     public function testDownloadCallableReceivesHandle(): void
     {
-        $client = new MockHttpClient(static fn (): MockResponse => new MockResponse('streamed'));
+        $client = new MockHttpClient(static fn(): MockResponse => new MockResponse('streamed'));
         $curl   = new Curl(httpClient: $client);
 
         $received = null;
-        $result   = $curl->download('https://example.com/file', function ($handle) use (&$received): void {
+        $result   = $curl->download('https://example.com/file', function(
+            $handle,
+        ) use (&$received): void {
             $received = \stream_get_contents($handle);
         });
 
@@ -142,7 +152,11 @@ final class CurlTest extends TestCase
     public function testDownloadResumesWithRangeHeader(): void
     {
         $requests = [];
-        $client   = new MockHttpClient(function (string $method, string $url, array $options) use (&$requests): MockResponse {
+        $client   = new MockHttpClient(function(
+            string $method,
+            string $url,
+            array $options,
+        ) use (&$requests): MockResponse {
             $requests[] = $options;
 
             return new MockResponse('-rest');
@@ -175,10 +189,16 @@ final class CurlTest extends TestCase
      * @param array<int, mixed> $args
      */
     #[DataProvider('verbProvider')]
-    public function testVerbShortcuts(string $method, string $call, array $args): void
-    {
+    public function testVerbShortcuts(
+        string $method,
+        string $call,
+        array $args,
+    ): void {
         $requests = [];
-        $client   = new MockHttpClient(function (string $requestMethod, string $url) use (&$requests): MockResponse {
+        $client   = new MockHttpClient(function(
+            string $requestMethod,
+            string $url,
+        ) use (&$requests): MockResponse {
             $requests[] = $requestMethod;
 
             return new MockResponse('');
@@ -203,8 +223,9 @@ final class CurlTest extends TestCase
         ];
     }
 
-    private function removeDirectory(string $directory): void
-    {
+    private function removeDirectory(
+        string $directory,
+    ): void {
         if (! \is_dir($directory)) {
             return;
         }

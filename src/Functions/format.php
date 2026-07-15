@@ -33,8 +33,8 @@ function hrtime_format(
     // Pad the fractional portion to `$decimals` digits (validate: intended display width for sub-ms precision).
     if ($decimals > 0 && \str_contains($formatted, $decimal)) {
         [$whole, $fraction] = \explode($decimal, $formatted, 2);
-        $fraction           = \str_pad($fraction, $decimals, $pad, STR_PAD_RIGHT);
-        $formatted          = $whole . $decimal . $fraction;
+        $fraction  = \str_pad($fraction, $decimals, $pad, STR_PAD_RIGHT);
+        $formatted = $whole . $decimal . $fraction;
     }
 
     return $formatted . $append;
@@ -89,7 +89,9 @@ function date_format_highlight(
     $string = (string) \preg_replace_callback_array(
         [
             // Day
-            '#[dD]#' => static function($match) use (&$each) {
+            '#[dD]#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'day',
                     'flag' => $match[0],
@@ -97,7 +99,9 @@ function date_format_highlight(
                 return '[' . ( \count($each) - 1 ) . ']';
             },
             // Month
-            '#[mM]#' => static function($match) use (&$each) {
+            '#[mM]#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'month',
                     'flag' => $match[0],
@@ -105,7 +109,9 @@ function date_format_highlight(
                 return '[' . ( \count($each) - 1 ) . ']';
             },
             // Year
-            '#[yY]#' => static function($match) use (&$each) {
+            '#[yY]#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'year',
                     'flag' => $match[0],
@@ -113,7 +119,9 @@ function date_format_highlight(
                 return '[' . ( \count($each) - 1 ) . ']';
             },
             // Day
-            '#[jS]#' => static function($match) use (&$each) {
+            '#[jS]#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'day',
                     'flag' => $match[0],
@@ -121,7 +129,9 @@ function date_format_highlight(
                 return '[' . ( \count($each) - 1 ) . ']';
             },
             // Weekday
-            '#W#' => static function($match) use (&$each) {
+            '#W#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'weekday',
                     'flag' => $match[0],
@@ -129,7 +139,9 @@ function date_format_highlight(
                 return '[' . ( \count($each) - 1 ) . ']';
             },
             // Time
-            '#[aABgGhHisu].*#' => static function($match) use (&$each) {
+            '#[aABgGhHisu].*#' => static function(
+                $match,
+            ) use (&$each) {
                 $each[] = [
                     'type' => 'time',
                     'flag' => $match[0],
