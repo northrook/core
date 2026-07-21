@@ -7,6 +7,49 @@ namespace Northrook\Core;
 use InvalidArgumentException;
 
 /**
+ * Recursively merge one or more arrays.
+ *
+ * Nested arrays are merged by key; later scalars and objects override.
+ *
+ * @param array<array-key, mixed> ...$arrays
+ *
+ * @return array<array-key, mixed>
+ */
+function arr_merge(
+    array ...$arrays,
+): array {
+    if ($arrays === []) {
+        return [];
+    }
+
+    $merge = static function(
+        mixed $base,
+        mixed $overlay,
+    ) use (&$merge): mixed {
+        if (\is_array($base) && \is_array($overlay)) {
+            foreach ($overlay as $key => $value) {
+                $base[$key] = \array_key_exists($key, $base)
+                    ? $merge($base[$key], $value)
+                    : $value;
+            }
+
+            return $base;
+        }
+
+        return $overlay;
+    };
+
+    $merged = \array_shift($arrays);
+
+    foreach ($arrays as $array) {
+        $merged = $merge($merged, $array);
+    }
+
+    /** @var array<array-key, mixed> $merged */
+    return $merged;
+}
+
+/**
  * Checks if the provided `$array` only contains string keys.
  *
  * @param array<array-key,mixed> $array

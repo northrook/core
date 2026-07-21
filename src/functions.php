@@ -14,9 +14,7 @@ const URL_SAFE_CHARACTERS_UNICODE = "\w.,_~:;@!$&*?#=%()+\-\[\]\'\/";
 const URL_SAFE_CHARACTERS         = "A-Za-z0-9.,_~:;@!$&*?#=%()+\-\[\]\'\/";
 
 require_once __DIR__ . '/Functions/array.php';
-require_once __DIR__ . '/Functions/filesystem.php';
 require_once __DIR__ . '/Functions/format.php';
-require_once __DIR__ . '/Functions/hashes.php';
 require_once __DIR__ . '/Functions/http.php';
 require_once __DIR__ . '/Functions/normalize.php';
 require_once __DIR__ . '/Functions/number.php';

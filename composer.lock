@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de6d585b67441dbe75123c218d5e68d9",
+    "content-hash": "9c703cd4b943062333b187637581b970",
     "packages": [
         {
             "name": "northrook/ansi-formatter",
@@ -59,9 +59,11 @@
             "dist": {
                 "type": "path",
                 "url": "../contracts",
-                "reference": "2e3cfceb15e3ff445371c99195560a26d6575fe7"
+                "reference": "3b903b7053c526a2dd9dc2e842159254db8dbebc"
             },
             "require": {
+                "composer-runtime-api": "^2.2",
+                "ext-hash": "*",
                 "php": ">=8.4",
                 "psr/cache": "@stable",
                 "psr/container": "@stable",
@@ -71,6 +73,7 @@
             },
             "require-dev": {
                 "northrook/php-cs": "dev-main",
+                "northrook/php-debug": "dev-main",
                 "phpstan/phpstan": "^2.2",
                 "phpunit/phpunit": "^11.5"
             },
@@ -127,7 +130,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../framework/error-handler",
-                "reference": "c28d1f6f533596438550e40a5ef84cc605a21b3f3e8795cc564c554403d6f5d2"
+                "reference": "f5840d8c88d8796e06d0f478009a161f7a9bec84850adb68dd9919999edaa58c"
             },
             "require": {
                 "northrook/ansi-formatter": "dev-main",
@@ -278,12 +281,12 @@
             "source": {
                 "type": "git",
                 "url": "https://codeberg.org/northrook/php-debug.git",
-                "reference": "c155ee56bd08841249dd2b000775dedf795ad6275b718b1b764b0d16f4fbf31e"
+                "reference": "15f3f6232da6f29785567ce7e22fcbdc2b36a4a449487e09bac52a508bc29abd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://codeberg.org/api/v1/repos/northrook/php-debug/archive/c155ee56bd08841249dd2b000775dedf795ad6275b718b1b764b0d16f4fbf31e.zip",
-                "reference": "c155ee56bd08841249dd2b000775dedf795ad6275b718b1b764b0d16f4fbf31e",
+                "url": "https://codeberg.org/api/v1/repos/northrook/php-debug/archive/15f3f6232da6f29785567ce7e22fcbdc2b36a4a449487e09bac52a508bc29abd.zip",
+                "reference": "15f3f6232da6f29785567ce7e22fcbdc2b36a4a449487e09bac52a508bc29abd",
                 "shasum": ""
             },
             "require": {
@@ -321,29 +324,29 @@
                 "issues": "https://codeberg.org/northrook/php-debug/issues",
                 "source": "https://codeberg.org/northrook/php-debug/branch/main"
             },
-            "time": "2026-07-14T23:06:45+00:00"
+            "time": "2026-07-16T13:10:04+00:00"
         },
         {
             "name": "northrook/php-filesystem",
-            "version": "0.2.0",
+            "version": "0.3.1",
             "source": {
                 "type": "git",
                 "url": "https://codeberg.org/northrook/php-filesystem.git",
-                "reference": "b3c3c6d8e76e2b432bdb02849864e6d77489053e173a8494dc35bb7a39c41a3b"
+                "reference": "03945608bbd3c9f903e527a69e00cc3b89a52d9fae59f07514f6072d99ae9828"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://codeberg.org/api/v1/repos/northrook/php-filesystem/archive/b3c3c6d8e76e2b432bdb02849864e6d77489053e173a8494dc35bb7a39c41a3b.zip",
-                "reference": "b3c3c6d8e76e2b432bdb02849864e6d77489053e173a8494dc35bb7a39c41a3b",
+                "url": "https://codeberg.org/api/v1/repos/northrook/php-filesystem/archive/03945608bbd3c9f903e527a69e00cc3b89a52d9fae59f07514f6072d99ae9828.zip",
+                "reference": "03945608bbd3c9f903e527a69e00cc3b89a52d9fae59f07514f6072d99ae9828",
                 "shasum": ""
             },
             "require": {
-                "northrook/core-contracts": "dev-main",
+                "northrook/core-contracts": "@dev",
                 "php": ">=8.4"
             },
             "require-dev": {
                 "ext-posix": "*",
-                "northrook/php-cs": "dev-main",
+                "northrook/php-cs": "@dev",
                 "phpstan/extension-installer": "^1.4",
                 "phpstan/phpstan": "^2.2",
                 "phpunit/phpunit": "^12"
@@ -367,9 +370,9 @@
             "description": "Filesystem operations with typed exceptions, atomic writes, and directory sync",
             "support": {
                 "issues": "https://codeberg.org/northrook/php-filesystem/issues",
-                "source": "https://codeberg.org/northrook/php-filesystem/tag/0.2.0"
+                "source": "https://codeberg.org/northrook/php-filesystem/tag/0.3.1"
             },
-            "time": "2026-07-02T14:59:57+00:00"
+            "time": "2026-07-21T13:11:03+00:00"
         },
         {
             "name": "psr/cache",
@@ -1035,12 +1038,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/northrook/php-cs.git",
-                "reference": "89993c721451dad987338382e79de3590b0c3fb2"
+                "reference": "1559e56361f8e431ae9b412bd627f41acb6ac4b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/northrook/php-cs/zipball/89993c721451dad987338382e79de3590b0c3fb2",
-                "reference": "89993c721451dad987338382e79de3590b0c3fb2",
+                "url": "https://api.github.com/repos/northrook/php-cs/zipball/1559e56361f8e431ae9b412bd627f41acb6ac4b5",
+                "reference": "1559e56361f8e431ae9b412bd627f41acb6ac4b5",
                 "shasum": ""
             },
             "require": {
@@ -1052,8 +1055,8 @@
             },
             "default-branch": true,
             "bin": [
-                "bin/php-cs-config.php",
-                "bin/collision-check.php"
+                "bin/php-cs-config",
+                "bin/collision-check"
             ],
             "type": "library",
             "autoload": {
@@ -1079,7 +1082,7 @@
                 "issues": "https://github.com/northrook/php-cs/issues",
                 "source": "https://github.com/northrook/php-cs/tree/main"
             },
-            "time": "2026-07-02T12:11:23+00:00"
+            "time": "2026-07-17T09:44:35+00:00"
         },
         {
             "name": "northrook/var-dump",
@@ -2883,6 +2886,7 @@
         "northrook/error-handler": 20,
         "northrook/hasher": 20,
         "northrook/php-cs": 20,
+        "northrook/php-filesystem": 20,
         "northrook/var-dump": 20
     },
     "prefer-stable": true,

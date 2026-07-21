@@ -4,69 +4,71 @@
   "type": "library",
   "license": "BSD-3-Clause",
   "authors": [
-    {
-      "name": "Martin Nielsen",
-      "email": "mn@northrook.com"
-    }
+      {
+          "name": "Martin Nielsen",
+          "email": "mn@northrook.com"
+      }
   ],
   "autoload": {
-    "psr-4": {
-      "Northrook\\": "src"
-    },
-    "files": [
-      "src/functions.php"
-    ]
+      "psr-4": {
+          "Northrook\\": "src"
+      },
+      "files": [
+          "src/functions.php"
+      ]
   },
   "autoload-dev": {
-    "psr-4": {
-      "Northrook\\Tests\\": "tests"
-    }
+      "psr-4": {
+          "Northrook\\Tests\\": "tests"
+      }
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.4",
-    "ext-mbstring": "*",
-    "ext-hash": "*",
-    "ext-intl": "*",
-    "northrook/core-contracts": "dev-main",
-    "symfony/http-client": "^8.1",
-    "northrook/php-filesystem": "^0.2.0",
-    "northrook/ansi-formatter": "dev-main",
-    "northrook/hasher": "dev-main",
-    "northrook/error-handler": "dev-main"
+      "php": ">=8.4",
+      "ext-mbstring": "*",
+      "ext-hash": "*",
+      "ext-intl": "*",
+      "symfony/http-client": "^8.1",
+      "northrook/core-contracts": "@dev",
+      "northrook/php-filesystem": "@dev",
+      "northrook/ansi-formatter": "@dev",
+      "northrook/hasher": "@dev",
+      "northrook/error-handler": "@dev"
   },
   "suggest": {
-    "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
+      "northrook/var-dump": "Attach var-dump output to error reports in the dev/debug suite."
   },
   "repositories": [
-    {
-      "type": "path",
-      "url": "../contracts"
-    },
-    {
-      "type": "path",
-      "url": "../../framework/error-handler"
-    },
-    {
-      "type": "path",
-      "url": "../var-dump"
-    }
+      {
+          "type": "path",
+          "url": "../contracts"
+      },
+      {
+          "type": "path",
+          "url": "../../framework/error-handler"
+      },
+      {
+          "type": "path",
+          "url": "../var-dump"
+      }
   ],
   "require-dev": {
-    "northrook/php-cs": "dev-main",
-    "northrook/var-dump": "@dev",
-    "phpstan/phpstan": "^2.2",
-    "phpstan/extension-installer": "^1.4",
-    "phpunit/phpunit": "^11.0"
+      "northrook/php-cs": "dev-main",
+      "northrook/var-dump": "@dev",
+      "phpstan/phpstan": "^2.2",
+      "phpstan/extension-installer": "^1.4",
+      "phpunit/phpunit": "^11.0"
   },
   "config": {
-    "allow-plugins": {
-      "phpstan/extension-installer": true
-    }
+      "allow-plugins": {
+          "phpstan/extension-installer": true
+      }
   },
   "scripts": {
-    "phpstan": "vendor/bin/phpstan analyse",
-    "test": "vendor/bin/phpunit"
+      "phpstan": "vendor/bin/phpstan analyse",
+      "test": "vendor/bin/phpunit",
+      "php-cs-config": "vendor/bin/php-cs-config",
+      "collision": "vendor/bin/collision-check"
   }
 }
